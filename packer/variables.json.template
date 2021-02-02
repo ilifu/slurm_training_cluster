@@ -1,0 +1,14 @@
+{
+    "image_name_prefix": "yourname",
+    "image_name_suffix": "dev",
+    "flavor": "ilifu-A",
+    "base_image_name": "base-ubuntu18.04.2",
+    "galaxy_image_name": "galaxy-frontend",
+    "slurm_controller_image_name": "slurm-controller",
+    "slurm_worker_image_name": "slurm-worker",
+    "database_image_name": "database",
+    "source_image": "someubuntu1804imagesID",
+    "networks": "somenetworkID",
+    "floating_ip_network": "somefloatingipnetworkID",
+    "security_groups": "somesecuritygroupID"
+}

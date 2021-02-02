@@ -1,0 +1,67 @@
+- name: Configure slurmd
+  block:
+    - name: copy cgroup conf file
+      copy:
+        src: "~{{ ansible_user }}/src/slurm/etc/cgroup.conf.example"
+        dest: "/opt/slurm/{{ slurm_version }}/etc/cgroup.conf"
+        remote_src: yes
+        owner: slurm
+        group: slurm
+        mode: "u=rw,go=r"
+    - name: copy slurmd systemd file
+      copy:
+        src: "~{{ ansible_user }}/src/slurm/etc/slurmd.service"
+        dest: /etc/systemd/system/
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "u=rw,go=r"
+    - name: Reload daemon
+      systemd:
+        daemon_reload: yes
+    - name: Enable slurmd service
+      systemd:
+        name: slurmd
+        enabled: yes
+        state: restarted
+  tags: "slurmd,systemd"
+
+- name: Ensure grub has correct options for kernel
+  block:
+    - name: Update /etc/default/grub
+      lineinfile:
+        path: /etc/default/grub
+        regexp: 'GRUB_CMDLINE_LINUX=.*'
+        line: 'GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"'
+    - name: Run update-grub
+      command: /usr/sbin/update-grub
+      become: yes
+  tags: "grub"
+
+# - name: Update firewall
+#   block:
+#     - name: Firewall rule -- Ensure slurm ctld port is open
+#       iptables:
+#         action: insert
+#         chain: INPUT
+#         destination_port: "{{ slurm_conf.slurmd.port }}"
+#         src_range: 192.168.101.100-192.168.101.255
+#         jump: ACCEPT
+#         protocol: tcp
+#   tags:
+#     - "iptables"
+
+- name: Disable motd
+  block:
+    - name: remove executable bit from all
+      file:
+        path: /etc/update-motd.d
+        mode: "ugo-x"
+        recurse: yes
+    - name: give directory back its executable bit
+      file:
+        path: /etc/update-motd.d
+        mode: "ugo+x"
+        recurse: no
+  tags:
+    - "motd"

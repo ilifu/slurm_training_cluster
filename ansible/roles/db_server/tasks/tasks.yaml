@@ -1,0 +1,85 @@
+- name: Install mariadb and configure
+  vars:
+    db_password: "{{ lookup('env', slurm_conf.database.password_env_variable) }}"
+  block:
+    - name: database password not defined
+      debug:
+        msg: "You need to define the environmental variable '{{ slurm_conf.database.password_env_variable }}' for database configuration"
+      when: db_password==''
+    - name: Install and configure mariadb
+      when: db_password != ''
+      block:
+        - name: Required packages
+          apt:
+            name:
+              - software-properties-common
+            state: latest
+            update_cache: yes
+          register: apt_res
+          retries: 3
+          delay: 15
+          until: apt_res is success
+
+        - name: Add MariaDB apt key
+          apt_key:
+            keyserver: keyserver.ubuntu.com
+            id: '0xF1656F24C74CD1D8'
+
+        - name: Add MariaDB repository
+          apt_repository:
+            repo: deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.5/ubuntu bionic main
+            state: present
+            filename: mariadb
+            update_cache: yes
+
+        - name: Install MariaDB and related packages
+          apt:
+            name:
+              - mariadb-server
+              - libmariadb-dev
+              - python3-pymysql
+              - python-pymysql
+            state: latest
+            update_cache: yes
+          register: apt_res
+          retries: 3
+          delay: 15
+          until: apt_res is success
+
+        - name: Create mysql_config symbolic link
+          file:
+            src: /usr/bin/mariadb_config
+            dest: /usr/bin/mysql_config
+            owner: root
+            group: root
+            state: link
+
+        - name: Configure MariaDB buffer pool size
+          lineinfile:
+            path: /etc/mysql/my.cnf
+            regexp: '.*(innodb_buffer_pool_size *=).*'
+            line: '\1 1024M'
+            backrefs: yes
+          notify: restart MariaDB service
+
+        # - name: Configure MariaDB log file size
+        #   lineinfile:
+        #     path: /etc/mysql/my.cnf
+        #     regexp: '.*(innodb_log_file_size).*'
+        #     line: '\1 = 64M'
+
+        - name: Ensure Slurm DB present
+          mysql_db:
+            name: "{{ slurm_conf.database.name }}"
+            state: present
+            login_unix_socket: /var/run/mysqld/mysqld.sock
+          become: yes
+
+        - name: Ensure Slurm DB user present
+          mysql_user:
+            name: "{{ slurm_conf.database.user }}"
+            password: "{{ db_password }}"
+            priv: "{{ slurm_conf.database.name }}.*:ALL"
+            state: present
+            login_unix_socket: /var/run/mysqld/mysqld.sock
+          become: yes

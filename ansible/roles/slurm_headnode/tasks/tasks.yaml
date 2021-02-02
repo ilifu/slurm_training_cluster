@@ -1,0 +1,35 @@
+- name: Ensure ssh agent forwarding is allowed
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: ".*AllowAgentForwarding.*"
+    line: "AllowAgentForwarding yes"
+
+- name: Update MOTD
+  block:
+    - name: Remove default motds
+      ignore_errors: yes
+      file:
+          path: "/etc/update-motd.d/{{ item }}"
+          mode: "ugo-x"
+      with_items:
+          - "51-cloudguest"
+          - "91-release-upgrade"
+          - "98-reboot-required"
+          - "10-help-text"
+          - "80-esm"
+          - "95-hwe-eol"
+          - "50-landscape-sysinfo"
+          - "80-livepatch"
+          - "97-overlayroot"
+          - "50-motd-news"
+          - "90-updates-available"
+          - "98-fsck-at-reboot"
+    - name: Add cbio ilifu slurm message
+      template:
+        src: 50-cbio-slurm.j2
+        dest: /etc/update-motd.d/50-cbio-slurm
+        owner: root
+        group: root
+        mode: "ug=rwx,o=rx"
+  tags:
+    - "motd"

@@ -1,0 +1,10 @@
+files.tar
+.venv
+.vscode
+__pycache__
+.coverage
+build
+dist
+.openstack_history.*
+.idea
+*openrc.sh

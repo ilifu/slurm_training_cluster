@@ -1,0 +1,8 @@
+dn: uid=USERNAME,ou=People,dc=cbio,dc=ilifu,dc=ac,dc=za
+changeType: modify
+add: objectClass
+objectClass: ldapPublicKey
+-
+add: sshPublicKey
+sshPublicKey: PUBLIC_KEY
+

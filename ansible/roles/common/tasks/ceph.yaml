@@ -1,0 +1,50 @@
+---
+
+- name: Configure ceph
+  tags: ['ceph', 'cephfs']
+  vars:
+    mount_location: "{{ item.mount_location }}"
+    key_env_var: "{{ item.key_environmental_variable }}"
+    ip_ports: "{{ ','.join(item.ip_ports) }}"
+    volume_id: "{{ item.volume_id }}"
+    ceph_key: "{{ lookup('env', key_env_var) }}"
+    ceph_volume: "{{ item.ceph_volume }}"
+    secret_file: "/etc/cephfs/{{ volume_id }}.secret"
+    fstab_line: "{{ ip_ports }}:{{ ceph_volume }} {{ mount_location }} ceph name={{ volume_id }},secretfile={{ secret_file }},noatime,_netdev 0 0"
+  block:
+    - name: Key {{ key_env_var }} is not set
+      debug:
+        msg: "Remember to export the environmental variable {{ key_env_var }} for the {{ mount_location }} cephfs mount"
+      when: ceph_key==""
+    - name: Configuring {{ mount_location }} for cephfs
+      when: ceph_key!=""
+      block:
+        - name: Ensure /etc/cephfs dir exists
+          file:
+            path: /etc/cephfs
+            owner: root
+            group: root
+            mode: 'u=rw,g=,o='
+            state: directory
+        - name: Set secret in {{ secret_file }}
+          copy:
+            dest: "{{ secret_file }}"
+            content: "{{ ceph_key }}\n"
+            force: yes
+            owner: root
+            group: root
+            mode: 'u=rwx,g=,o='
+        - name: Ensure mount directory {{ mount_location }} exists
+          file:
+            path: "{{ mount_location }}"
+            owner: root
+            group: root
+            mode: 'u=rwx,g=rx,o=rx'
+            state: directory
+        - name: Mount {{ mount_location }} and update fstab
+          mount:
+            path: "{{ mount_location }}"
+            src: "{{ ip_ports }}:{{ ceph_volume }}"
+            fstype: ceph
+            opts: "name={{ volume_id }},secretfile={{ secret_file }},noatime,_netdev 0 0"
+            state: mounted

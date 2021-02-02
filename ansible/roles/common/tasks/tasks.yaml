@@ -1,0 +1,129 @@
+---
+# tasks file for roles/common
+
+- name: apt upgrade existing packages
+  apt:
+    upgrade: safe
+
+- name: apt Install Common Packages
+  apt:
+    name:
+      - 'autoconf'
+      - 'autofs'
+      - 'build-essential'
+      - 'ceph-common'
+      - 'cgroup-bin'
+      - 'cgroup-lite'
+      - 'cgroup-tools'
+      - 'cgroupfs-mount'
+      - 'cmake'
+      - 'curl'
+      - 'debootstrap'
+      - 'dhcpcd5'
+      - 'fail2ban'
+      - 'gfortran'
+      - 'git'
+      - 'gnutls-bin'
+      - 'hwloc'
+#      - 'iptables-persistent'
+      - 'ldap-utils'
+      - 'libbz2-dev'
+      - 'libcairo2-dev'
+      - 'libcephfs2'
+      - 'libcgroup1'
+      - 'libcrypto++-dev'
+      - 'libcurl4-openssl-dev'
+      - 'libdb-dev'
+      - 'libelf-dev'
+      - 'libffi-dev'
+      - 'libglib2.0-dev'
+      - 'libgsl-dev'
+      - 'libhdf5-dev'
+      - 'libhwloc-dev'
+      - 'libjson-c-dev'
+      - 'liblzma-dev'
+      - 'libmariadb-dev'
+      - 'libmunge-dev'
+      - 'libncurses5-dev'
+      - 'libnetcdf-dev'
+      - 'libnuma-dev'
+      - 'libnuma1'
+      - 'libpam0g-dev'
+      - 'libpcre2-dev'
+      - 'libperl-dev'
+      - 'libpng-dev'
+      - 'libnss-ldap'
+      - 'libpam-sss'
+      - 'libnss-sss'
+      - 'libreadline-dev'
+      - 'libsqlite3-dev'
+      - 'libssh2-1'
+      - 'libssl-dev'
+      - 'libtiff-dev'
+      - 'libxml2-dev'
+      - 'libxmlsec1-dev'
+      - 'libxt-dev'
+      - 'llvm'
+      - 'make'
+      - 'munge'
+      - 'nano'
+      - 'netcdf-bin'
+      - 'ntp'
+      - 'parallel'
+      - 'pkg-config'
+      - 'python3-dev'
+      - 'sshfs'
+      - 'sssd'
+      - 'sssd-ldap'
+      - 'ssl-cert'
+      - 'tcl-dev'
+      - 'tk-dev'
+      - 'unzip'
+      - 'virtualenv'
+      - 'wget'
+      - 'x11-common'
+      - 'xauth'
+      - 'xorg-dev'
+      - 'xz-utils'
+      - 'zip'
+      - 'zlib1g-dev'
+      - 'zsh'
+    state: latest
+    update_cache: yes
+  register: apt_res
+  retries: 3
+  delay: 15
+  until: apt_res is success
+
+- name: apt remove unattended-upgrades
+  apt:
+    name:
+      - 'unattended-upgrades'
+    state: absent
+    update_cache: yes
+  register: apt_res
+  retries: 3
+  delay: 15
+  until: apt_res is success
+
+- name: apt autoremove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
+- name: Make sure cephfs network interface is registered with netplan
+  copy:
+     src: 'extra_interfaces.yaml'
+     dest: '/etc/netplan/'
+
+- name: Include ceph tasks
+  when: ceph_mounts is defined
+  tags: ['ceph', 'cephfs']
+  include_tasks:
+    file: ceph.yaml
+  loop: "{{ ceph_mounts }}"
+
+#- name: Ensure all the IPs are up
+#  command: dhcpcd5 --reconfigure
+#  become: yes
+#  tags: ['ceph', 'cephfs']
+

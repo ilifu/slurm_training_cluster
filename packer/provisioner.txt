@@ -1,0 +1,47 @@
+    {
+      "type": "file",
+      "source": "../etc",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo cp /tmp/etc/apt/sources.list.d/* /etc/apt/sources.list.d/"
+      ]
+    },    
+    {
+      "type": "shell",
+      "inline": [
+        "wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -",
+        "wget --quiet -O - https://nginx.org/keys/nginx_signing.key | sudo apt-key add -",
+        "sudo apt-get install software-properties-common",
+        "sudo apt-add-repository universe",
+        "sudo apt-get update",
+        "sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFFNEW=YES apt-get dist-upgrade -y",
+        "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential fail2ban curl git libbz2-dev libffi-dev liblzma-dev libncurses5-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxmlsec1-dev llvm make postgresql-11 python3-dev python3-pip python3-setuptools python3-virtualenv tk-dev wget xz-utils zlib1g-dev zsh",
+        "sudo apt-get autoremove -y",
+        "sudo apt-get clean -y"
+      ]
+    }
+
+
+
+    {
+      "type": "shell",
+      "expect_disconnect": true,
+      "inline": [
+        "sudo apt-get update",
+        "sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFFNEW=YES apt-get dist-upgrade -y",
+        "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential fail2ban curl git libbz2-dev libffi-dev liblzma-dev libncurses5-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxmlsec1-dev llvm make postgresql-11 python3-dev python3-pip python3-setuptools python3-virtualenv tk-dev wget xz-utils zlib1g-dev zsh",
+        "sudo apt-get autoremove -y",
+        "sudo apt-get clean -y",
+        "sudo reboot"
+      ]
+    },
+    {
+      "type": "shell",
+      "pause_before": "10s",
+      "inline": [
+        "echo 'hello world! Machine ready :-)'"
+      ]
+    },

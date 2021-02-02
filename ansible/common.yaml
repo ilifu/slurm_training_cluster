@@ -1,0 +1,4 @@
+---
+- hosts: base, slurm
+  roles:
+    - common

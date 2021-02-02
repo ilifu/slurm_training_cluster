@@ -1,0 +1,29 @@
+- name: Update /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    regexp: "{{ item.key }}.*"
+    line: "{{ item.key }}    {{ item.value }}"
+  with_dict:
+    - "{{ hosts }}"
+
+- name: Set hostname
+  hostname:
+    name: "{{ hosts[ansible_default_ipv4.address] }}" 
+#    debug:
+#      msg: "HOSTS BE LIKE: {{ hosts }}"
+#     msg: "{{ hosts[ansible_default_ipv4.address] }}"
+  # with_items:  
+  #   - "{{ hosts }}"
+  tags: "hostname"
+
+# user:
+#     name: "{{ item.username }}"
+#     state: present
+#     uid: "{{ item.uid }}"
+#     group: slurm_user
+#     groups: "{{ item.username }}"
+#     home: "/cbio/home/{{ item.username }}"
+#     skeleton: /etc/skel
+#     generate_ssh_key: yes
+#     ssh_key_type: ed25519
+#     shell: /bin/bash

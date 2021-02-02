@@ -1,0 +1,51 @@
+- name: install NextFlow
+  when: software_dir is defined and home_dir is defined
+  block:
+    - name: Make sure cbio software dir exists
+      file:
+        path: "{{software_dir}}/src"
+        owner: ubuntu
+        group: ubuntu
+        mode: "ug+wrx,o+rx"
+        recurse: yes
+        state: directory
+    - name: Download NextFlow
+      get_url:
+        url: https://get.nextflow.io
+        dest: "{{software_dir}}/src/nextflow.bash"
+        mode: "ugo=rx"
+        owner: ubuntu
+        group: ubuntu
+    - name: Ensure each user has a bin directory
+      file:
+        path: "{{ home_dir }}/{{ item.username }}/bin"
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: "ug=rwx,o="
+        state: directory
+      with_items:
+        - "{{ users }}"
+    - name: Copy nextflow.bash to user's bin dir
+      copy:
+        src: "{{ software_dir }}/src/nextflow.bash"
+        dest: "{{ home_dir }}/{{ item.username }}/bin/nextflow"
+        remote_src: yes
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: "ug=rx,o="
+      with_items:
+        - "{{ users }}"
+    - name: Install NextFlow in users' homes
+      command: "{{ home_dir }}/{{ item.username }}/bin/nextflow"
+      args:
+        chdir: "{{ home_dir }}/{{ item.username }}"
+        creates: "{{ home_dir }}/{{ item.username }}/.nextflow"
+      become: yes
+      become_user: "{{ item.username }}"
+      with_items:
+        - "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+  run_once: yes
+  
+      

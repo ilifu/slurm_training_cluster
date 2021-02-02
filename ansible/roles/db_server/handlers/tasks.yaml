@@ -1,0 +1,4 @@
+- name: restart MariaDB service
+  service:
+    name: mariadb
+    state: restarted

@@ -1,0 +1,29 @@
+---
+- hosts: base_image
+  name: Add postgres repo and install
+  become: yes
+  become_user: root
+  tasks:
+    - name: Add postgres Key
+      retries: 3
+      delay: 5
+      apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+
+    - name: Add postgres Repository
+      retries: 3
+      delay: 5
+      apt_repository:
+        repo: "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main"
+        state: present
+        filename: pgdg
+        update_cache: yes
+
+    - name: Install Postgres 11
+      retries: 3
+      delay: 5
+      apt:
+        name: postgresql-11
+        state: latest
+        update_cache: yes

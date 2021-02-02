@@ -1,0 +1,44 @@
+---
+- hosts: common
+  name: Update and upgrade the VM
+  become: yes
+  become_user: root
+  vars:
+    timezone: Africa/Johannesburg
+  tasks:
+    - name: Update timezone
+      file: src=/usr/share/zoneinfo/{{ timezone }} dest=/etc/localtime state=link
+      notify: update tzdata
+
+    - name: Update package update_cache
+      apt:
+        update_cache: yes
+    
+    - name: Upgrade all existing packages
+      retries: 3
+      delay: 5
+      apt:
+        upgrade: dist
+
+    - name: Reboot the machine
+      reboot:
+        post_reboot_delay: 120
+
+  handlers:
+    - name: update tzdata
+      command: /usr/sbin/dpkg-reconfigure --frontend noninteractive tzdata
+
+- hosts: common
+  name: Install common software
+  become: yes
+  become_user: root
+  vars:
+    timezone: Africa/Johannesburg
+  tasks:
+    - name: Install Packages
+      retries: 3
+      delay: 15
+      apt:
+        name: ['curl', 'iptables', 'munge', 'ntp', 'wget', 'zsh']
+        state: latest
+        update_cache: yes

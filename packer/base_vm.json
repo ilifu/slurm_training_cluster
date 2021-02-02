@@ -1,0 +1,47 @@
+{
+  "builders": [
+    {
+      "type": "openstack",
+      "flavor": "{{user `flavor`}}",
+      "domain_name": "Default",
+      "ssh_username": "ubuntu",
+      "image_name": "{{user `image_name_prefix`}}-{{user `base_image_name`}}-{{user `image_name_suffix`}}",
+      "source_image": "{{user `source_image`}}",
+      "networks": "{{user `networks`}}",
+      "floating_ip_network": "{{user `floating_ip_network`}}",
+      "security_groups": "{{user `security_groups`}}",
+      "metadata":
+        {
+          "hw_disk_bus": "scsi",
+          "hw_qemu_guest_agent": "yes",
+          "hw_rng_model": "virtio",
+          "hw_scsi_model": "virtio-scsi",
+          "hw_vif_model": "virtio"
+        }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo DEBIAN_FRONTEND=noninteractive apt-get update",
+        "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python3",
+        "sudo ln -s /usr/bin/python3 /usr/bin/python || true"
+      ]
+    },
+    {
+      "type": "ansible",
+      "groups": ["base"],
+      "user": "ubuntu",
+      "playbook_file": "ansible/site.yaml",
+      "ansible_env_vars": [
+        "ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes'"
+      ],
+      "extra_arguments": [
+         "-e",
+        "'ansible_python_interpreter=/usr/bin/python3'"
+      ]
+    }
+  ]
+}
+

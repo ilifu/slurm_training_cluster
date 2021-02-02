@@ -1,0 +1,7 @@
+{ 
+  "name_suffix": "dev",
+  "slurm_compute_node_count" : 2,
+  "slurm_head_node_flavor" : "ilifu-A",
+  "slurm_compute_node_flavor" : "ilifu-A",
+  "galaxy_node_flavor" : "ilifu-B"
+}

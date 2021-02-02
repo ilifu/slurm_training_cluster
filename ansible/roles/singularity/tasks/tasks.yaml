@@ -1,0 +1,86 @@
+- name: Check go version
+  command: /opt/go/bin/go version
+  register: go_version
+  ignore_errors: yes
+
+- name: Get singularity version
+  command: /usr/local/bin/singularity version
+  register: singularity_version
+  ignore_errors: yes
+
+- name: apt Install Packages to build go and singularity
+  apt:
+    name:
+      - build-essential
+      - libssl-dev
+      - uuid-dev
+      - libgpgme11-dev
+      - squashfs-tools
+      - libseccomp-dev
+      - pkg-config
+    state: latest
+    update_cache: yes
+  register: apt_res
+  retries: 3
+  delay: 15
+  until: apt_res is success
+  when: go_version.failed or go_version.stdout != 'go version go1.15.1 linux/amd64' or singularity_version.failed or singularity_version.stdout != "3.6.2"
+
+- name: Install go things
+  when: go_version.failed or go_version.stdout != 'go version go1.15.1 linux/amd64'
+  block:
+    - name: Untar go to /opt
+      unarchive:
+        src: https://golang.org/dl/go1.15.1.linux-amd64.tar.gz
+        remote_src: yes
+        dest: /opt
+      when:
+    - name: Setup GOPATH
+      lineinfile:
+        path: /etc/bash.bashrc
+        regexp: '^export GOPATH=.*'
+        line: export GOPATH=${HOME}/go
+    - name: Update path for GO
+      lineinfile:
+        path: /etc/bash.bashrc
+        regexp: '^export PATH..opt.go.bin...PATH....GOPATH..bin$'
+        line: 'export PATH=/opt/go/bin:${PATH}:${GOPATH}/bin'
+
+- name: Install singularity things
+  when: singularity_version.failed or singularity_version.stdout != "3.6.2"
+  block:
+    - name: Untar singularity to /tmp
+      unarchive:
+        src: https://github.com/hpcng/singularity/releases/download/v3.6.2/singularity-3.6.2.tar.gz
+        remote_src: yes
+        dest: /tmp
+        creates: /tmp/singularity
+      become: yes
+      become_user: ubuntu
+    - name: Configure Singularity
+      command: ./mconfig
+      args:
+        chdir: /tmp/singularity
+        creates: /tmp/singularity/builddir
+      become: yes
+      become_user: ubuntu
+      environment:
+        PATH: '/opt/go/bin:{{ ansible_env.PATH }}'
+    - name: Compile Singularity
+      command: make
+      args:
+        chdir: /tmp/singularity/builddir
+        creates: /tmp/singularity/builddir/singularity
+      become: yes
+      become_user: ubuntu
+      environment:
+        PATH: '/opt/go/bin:{{ ansible_env.PATH }}'
+    - name: Install Singularity
+      command: make install
+      args:
+        chdir: /tmp/singularity/builddir
+        creates: /usr/local/bin/singularity
+      become: yes
+      environment:
+        PATH: '/opt/go/bin:{{ ansible_env.PATH }}'
+

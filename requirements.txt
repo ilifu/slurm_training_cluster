@@ -1,0 +1,2 @@
+ansible==2.8.4
+python-openstackclient==3.19.0

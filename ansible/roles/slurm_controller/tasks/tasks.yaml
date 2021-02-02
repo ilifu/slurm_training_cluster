@@ -1,0 +1,133 @@
+- name: Ensure StateSave dir exists and is owned by slurm
+  file:
+    path: /var/spool/slurm_state
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: "ug=rwx,o="
+
+# - name: Update firewall
+#   block:
+#     - name: Firewall rule -- Ensure slurm ctld port is open
+#       iptables:
+#         action: insert
+#         chain: INPUT
+#         destination_port: "{{ slurm_conf.ctld.port }}"
+#         src_range: 192.168.101.100-192.168.101.255
+#         jump: ACCEPT
+#         protocol: tcp
+#     - name: Firewall rule -- Ensure dbd port is open
+#       iptables:
+#         action: insert
+#         chain: INPUT
+#         destination_port: "{{ slurm_conf.dbd.port }}"
+#         src_range: 192.168.101.100-192.168.101.255
+#         jump: ACCEPT
+#         protocol: tcp
+#   tags:
+#     - "iptables"
+
+- name: Ensure slurmdbd configured
+  vars:
+    db_password: "{{ lookup('env', slurm_conf.database.password_env_variable) }}"
+  block:
+    - name: database password not defined
+      debug:
+        msg: "You need to define the environmental variable '{{ slurm_conf.database.password_env_variable }}' for database configuration"
+      when: db_password==''
+    - name: configure slurmdbd
+      when: db_password != ''
+      block:
+        - name: Ensure slurmdbd.conf present and configured
+          template:
+            src: slurmdbd.conf.template
+            dest: /opt/slurm/{{ slurm_version }}/etc/slurmdbd.conf
+            owner: slurm
+            group: slurm
+            mode: "u=rw,go="
+  tags: "slurmdbd"
+
+- name: Copy systemd configure and enable systemd
+  block:
+    - name: Copy slurmdbd systemd file
+      copy:
+        src: "~{{ ansible_user }}/src/slurm/etc/slurmdbd.service"
+        dest: /etc/systemd/system/
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "u=rw,go=r"
+      tags: "slurmdbd"
+    - name: Reload daemon
+      systemd:
+        daemon_reload: yes
+    - name: Enable slurmdbd service
+      systemd:
+        name: slurmdbd
+        daemon_reload: yes
+        enabled: yes
+        state: restarted
+      tags: "slurmdbd"
+    - name: copy slurmctl systemd file
+      copy:
+        src: "~{{ ansible_user }}/src/slurm/etc/slurmctld.service"
+        dest: /etc/systemd/system/
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "u=rw,go=r"
+      tags: "slurmctl"
+    - name: Reload daemon
+      systemd:
+        daemon_reload: yes
+    - name: Enable slurmctl service
+      systemd:
+        name: slurmctld
+        daemon_reload: yes
+        enabled: yes
+        state: restarted
+      tags: "slurmctl"
+  tags: "systemd"
+
+- name: Create cluster and initial account
+  block:
+    - name: Create cluster
+      command:
+        argv:
+          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
+          - add
+          - cluster
+          - "{{ slurm_conf.cluster_name }}"
+      ignore_errors: yes
+    - name: Add accounts
+      command:
+        argv:
+          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
+          - "--immediate"
+          - add
+          - account
+          - "{{ item.key }}"
+          - description="{{ item.value }}"
+      ignore_errors: yes
+      with_dict:
+      - "{{ slurm_conf.accounts }}"
+      
+    - name: Add users to accounts
+      command:
+        argv:
+          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
+          - "--immediate"
+          - create
+          - user
+          - "{{ item.username }}"
+          - account="{{ item.account }}"
+          - adminlevel=None
+      with_items:
+        - "{{ users }}"
+      loop_control:
+        label: "{{ item.username }} [account: {{ item.account }}]"
+
+  become: yes
+  become_user: slurm
+  tags: "accounting"
+        

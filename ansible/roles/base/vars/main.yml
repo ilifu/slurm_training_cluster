@@ -1,0 +1,4 @@
+---
+# vars file for roles/base
+timezone: Africa/Johannesburg
+reboot_after_update: "yes"

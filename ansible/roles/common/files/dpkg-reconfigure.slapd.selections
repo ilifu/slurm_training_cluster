@@ -1,0 +1,16 @@
+slapd	slapd/password1	password	abcd1234
+slapd	slapd/password2	password	abcd1234
+
+slapd	slapd/purge_database	boolean	true
+slapd	slapd/backend	select	MDB
+slapd	shared/organization	string	cbio
+slapd	slapd/dump_database_destdir	string	/var/backups/slapd-VERSION
+slapd	slapd/ppolicy_schema_needs_update	select	abort installation
+slapd	slapd/invalid_config	boolean	true
+slapd	slapd/domain	string	cbio.ilifu.ac.za
+
+slapd	slapd/unsafe_selfwrite_acl	note	
+slapd	slapd/move_old_database	boolean	true
+slapd	slapd/no_configuration	boolean	false
+slapd	slapd/password_mismatch	note	
+slapd	slapd/dump_database	select	when needed

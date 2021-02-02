@@ -1,0 +1,4 @@
+---
+- hosts: galaxy
+  roles:
+    - galaxy_server

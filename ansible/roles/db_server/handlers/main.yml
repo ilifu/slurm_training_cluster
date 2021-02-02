@@ -1,0 +1,3 @@
+---
+# handlers file for roles/db-server
+- { include: tasks.yaml, become: yes }

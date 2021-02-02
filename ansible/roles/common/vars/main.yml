@@ -1,0 +1,9 @@
+---
+# vars file for roles/common
+timezone: Africa/Johannesburg
+reboot_after_update: "no"
+
+ldap_domain: "dc=cbio,dc=ilifu,dc=ac,dc=za"
+
+
+# - set_fact: env_var="{{ lookup('env','ENV_VAR') }}"

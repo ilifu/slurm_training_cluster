@@ -1,0 +1,96 @@
+---
+# tasks file for roles/manage_users
+- name: Add general users group
+  group:
+    name: "slurm_user"
+    state: present
+    gid: "5000"
+
+- name: Add admin group
+  group:
+    name: "slurm_admin"
+    state: present
+    gid: "5001"
+
+- name: Add groups
+  group:
+    name: "{{ item.username }}"
+    state: present
+    gid: "{{ item.uid }}"
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    label: "{{ item.username }} [GID: {{ item.uid }}]"
+  retries: 5
+  delay: 30
+
+- name: Cannot do users
+  fail:
+    msg: "Cannot create users, please ensure the home_dir variable is set"
+  when: home_dir is undefined
+
+- name: Add users
+  user:
+    name: "{{ item.username }}"
+    comment: "{{item.first_name}} {{item.last_name}}"
+    state: present
+    uid: "{{ item.uid }}"
+    group: "{{ item.username }}"
+    groups: "slurm_user,{{ item.username }}"
+    append: yes
+    home: "{{ home_dir }}/{{ item.username }}"
+    skeleton: /etc/skel
+    generate_ssh_key: yes
+    ssh_key_type: ed25519
+    shell: /bin/bash
+  when: home_dir != ""
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    label: "{{ item.username }} [UID: {{ item.uid }}]"
+  retries: 5
+  delay: 30
+
+- name: Set ssh authorized keys
+  authorized_key:
+    user: "{{ item.username }}"
+    state: present
+    key: "{{ item.ssh_public_key }}"
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"
+  tags: "ssh_keys"
+  run_once: true
+
+- name: Ensure homes are secure by default
+  file:
+    path: "{{ home_dir }}/{{ item.username }}"
+    mode: "u=rwx,g=,o="
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    label: "{{ home_dir }}/{{ item.username }}"
+  tags: "homes"
+  run_once: true
+
+- name: Maintain sudoers
+  tags: sudoers
+  block:
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: /usr/sbin/visudo -cf %s
+    - name: Add sudoers users to wheel group
+      user:
+        name: "{{ item }}"
+        groups: wheel
+        append: yes
+      with_items: "{{ sudoers }}"

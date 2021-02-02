@@ -1,0 +1,29 @@
+---
+- hosts: slurm
+  roles:
+    - slurm_common
+    - hosts
+    - manage_users
+
+- hosts: slurm_headnode
+  roles:
+    - slurm_headnode
+    - singularity
+  tags:
+    - slurm
+
+- hosts: slurm_controller
+  roles:
+    - slurm_controller
+    - db_server
+  tags:
+    - slurm
+
+- hosts: slurm_worker
+  roles:
+    - slurm_worker
+    - singularity
+    - nextflow
+  tags:
+    - slurm
+    
