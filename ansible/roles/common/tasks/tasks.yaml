@@ -110,10 +110,10 @@
   apt:
     autoremove: yes
 
-- name: Make sure cephfs network interface is registered with netplan
-  copy:
-     src: 'extra_interfaces.yaml'
-     dest: '/etc/netplan/'
+#- name: Make sure cephfs network interface is registered with netplan
+#  copy:
+#     src: 'extra_interfaces.yaml'
+#     dest: '/etc/netplan/'
 
 - name: Include ceph tasks
   when: ceph_mounts is defined

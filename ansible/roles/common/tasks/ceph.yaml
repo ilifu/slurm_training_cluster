@@ -1,5 +1,10 @@
 ---
 
+- name: Ensure ceph software is installed
+  apt:
+    name: ceph-common
+  tags: ['ceph', 'cephfs']
+
 - name: Configure ceph
   tags: ['ceph', 'cephfs']
   vars:
@@ -41,7 +46,8 @@
             group: root
             mode: 'u=rwx,g=rx,o=rx'
             state: directory
-        - name: Mount {{ mount_location }} and update fstab
+        - name: Mount  ({{ ip_ports }}:{{ ceph_volume }} {{ mount_location }} ceph name={{ volume_id }},secretfile={{ secret_file }},noatime,_netdev 0 0) and update fstab
+#          debugger: on_failed
           mount:
             path: "{{ mount_location }}"
             src: "{{ ip_ports }}:{{ ceph_volume }}"

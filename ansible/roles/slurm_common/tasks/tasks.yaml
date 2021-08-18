@@ -4,7 +4,6 @@
   apt:
     name: 
     - 'build-essential'
-    - 'cgroup-bin'
     - 'cgroup-lite'
     - 'cgroup-tools'
     - 'cgroupfs-mount'
@@ -67,9 +66,9 @@
 
 - name: Install golang
   vars:
-    go_version: 1.15.2
-    go_url: https://golang.org/dl/go1.15.2.linux-amd64.tar.gz
-    go_checksum: sha256:b49fda1ca29a1946d6bb2a5a6982cf07ccd2aba849289508ee0f9918f6bb4552
+    go_version: 1.16.5
+    go_url: https://golang.org/dl/go1.16.5.linux-amd64.tar.gz
+    go_checksum: sha256:b12c23023b68de22f74c0524f10b753e7b08b1504cb7e417eccebdd3fae49061
   become: yes
   tags:
     - golang
@@ -124,9 +123,9 @@
 - name: Install Singularity
   become: no
   vars:
-    singularity_version: 3.6.2
-    singularity_url: https://github.com/hpcng/singularity/releases/download/v3.6.2/singularity-3.6.2.tar.gz
-    singularity_checksum: sha256:dfd7ec7376ca0321c47787388fb3e781034edf99068f66efc36109e516024d9b
+    singularity_version: 3.8.0
+    singularity_url: https://github.com/sylabs/singularity/releases/download/v3.8.0/singularity-ce-3.8.0.tar.gz
+    singularity_checksum: sha256:5fa2c0e7ef2b814d8aa170826b833f91e5031a85d85cd1292a234e6c55da1be1
   environment:  # necessary because go only added after facts were gathered
     PATH: "{{ ansible_env.PATH }}:/opt/go/bin"
   tags:
@@ -147,24 +146,24 @@
       unarchive:
         src: "~/src/singularity-{{ singularity_version }}.tar.gz"
         dest: ~/go/src/github.com/sylabs
-        creates: ~/go/src/github.com/sylabs/singularity
+        creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}"
         remote_src: yes
     - name: run mconfig
       command:
         argv:
           - ./mconfig
 #          - --prefix=/opt/singularity
-        creates: ~/go/src/github.com/sylabs/singularity/builddir/Makefile
+        creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}/builddir/Makefile"
       args:
-        chdir: ~/go/src/github.com/sylabs/singularity
+        chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}"
     - name: Make singularity
       make:
-        chdir: ~/go/src/github.com/sylabs/singularity/builddir
+        chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}/builddir"
         params:
           NUM_THREADS: "{{ ansible_processor_vcpus }}"
-    - name: Install singularity
+    - name: "Install singularity"
       make:
-        chdir: "~{{ ansible_user }}/go/src/github.com/sylabs/singularity/builddir"
+        chdir: "~{{ ansible_user }}/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}/builddir"
         target: install
       become: yes
     - name: Add singularity to the PATH
@@ -181,9 +180,9 @@
 
 - name: Install OpenUCX
   vars:
-    ucx_version: 1.8.1
-    ucx_url: https://github.com/openucx/ucx/archive/v1.8.1.tar.gz
-    ucx_checksum: sha256:34fabacd08d61d35b5dd37f46f8287bf68f4371118d162efb16147b416d000e5
+    ucx_version: 1.10.1
+    ucx_url: https://github.com/openucx/ucx/releases/download/v1.10.1/ucx-1.10.1.tar.gz
+    ucx_checksum: sha256:ae9a108af6842ca135e7ec9b6131469adf9f1e50f899349fafcc69a215368bc9
     ucx_dir: /opt/ucx
   become: no
   tags:
@@ -199,10 +198,10 @@
         src: "~/src/openucx-{{ ucx_version }}.tar.gz"
         dest: /dev/shm
         remote_src: yes
-    - name: Create configure script for OpenUCX {{ ucx_version }}
-      command: ./autogen.sh
-      args:
-        chdir: "/dev/shm/ucx-{{ ucx_version }}"
+#    - name: Create configure script for OpenUCX {{ ucx_version }}
+#      command: ./autogen.sh
+#      args:
+#        chdir: "/dev/shm/ucx-{{ ucx_version }}"
     - name: Run release configure for OpenUCX {{ ucx_version }}
       command: ./contrib/configure-release --prefix={{ ucx_dir }}
       args:
@@ -220,9 +219,9 @@
 
 - name: Install OpenMPI
   vars:
-    mpi_version: 4.0.5
-    mpi_url: https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.5.tar.bz2
-    mpi_checksum: sha256:c58f3863b61d944231077f344fe6b4b8fbb83f3d1bc93ab74640bf3e5acac009
+    mpi_version: 4.1.1
+    mpi_url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
+    mpi_checksum: sha256:e24f7a778bd11a71ad0c14587a7f5b00e68a71aa5623e2157bafee3d44c07cda
     ucx_dir: /opt/ucx
     mpi_dir: /opt/openmpi
     uncompress_dir: "~{{ ansible_user }}/compile"
@@ -325,8 +324,8 @@
 - name: Set slurm version info
   when: slurm_version is not defined
   set_fact:
-    slurm_version: 20.02.5
-    slurm_version_git: 20-02-5-1
+    slurm_version: 20.11.7
+    slurm_version_git: 20-11-7-1
 
 - name: Check Slurm Version
   become: no

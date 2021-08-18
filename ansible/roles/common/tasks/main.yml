@@ -1,2 +1,2 @@
 ---
-- { include: tasks.yaml, become: yes }
+- { include: tasks.yaml, become: yes, tags: common }

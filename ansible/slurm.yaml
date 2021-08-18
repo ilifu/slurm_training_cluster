@@ -8,7 +8,6 @@
 - hosts: slurm_headnode
   roles:
     - slurm_headnode
-    - singularity
   tags:
     - slurm
 
@@ -22,7 +21,6 @@
 - hosts: slurm_worker
   roles:
     - slurm_worker
-    - singularity
     - nextflow
   tags:
     - slurm
