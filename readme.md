@@ -2,9 +2,7 @@
 
 ## What is this?
 
-This is a series of packer, terraform and ansible recipes/playbooks that will aid in creating a galaxy instance that contains:
-  1) A galaxy frontend
-  2) A slurm cluster
+This is a series of packer, terraform and ansible recipes/playbooks that will aid in creating a slurm cluster suitable for training events.
 ## How do I use it?
 First you will need to download and install some pre-requisites including [Packer]() and [Terraform](). You will also need ansible running -- the recommended way for this is either installing your OS's ansible (e.g. `sudo apt install ansible`) or setting up a virtual environment and installing with pip, e.g.
 ```console
