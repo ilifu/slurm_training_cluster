@@ -24,13 +24,13 @@ Sign into the OpenStack Dashboard, make sure you're working the correct project 
 Create a project directory with a `.project` suffix (mainly so that it can be ignored by git), say `CBIO_16s_2021.project`. Change to this directory and the rest of the setup will be executed from there.
 
 ### Create your base image
-Create your `packer_variables.json` file using the template file found in `templates/packer_variables.json`), i.e. `cp ../templates/packer_variables.json ./`. Edit this file so that you have the appropriate IDs in place. Note if you installed the CLI client, then the commands you might use are:
+Create your `variables.json` file using the template file found in `templates/variables.json`), i.e. `cp ../templates/variables.json ./`. Edit this file so that you have the appropriate IDs in place. Note if you installed the CLI client, then the commands you might use are:
 `openstack flavor list`, `openstack image list`, `openstack network list` and `openstack security group list`. Note that the security group should allow ssh/port 22 inbound traffic as this is how we connect to the machine.
 
-Once the variables file has been created, you can run packer with: `packer build --var-file=packer_variables.json ../packer/base_vm.json`. Assuming this runs successfully you will have a new image to work with in the rest of the process (all this initial step does is make sure your base image is up-to-date).
+Once the variables file has been created, you can run packer with: `packer build --var-file=variables.json ../packer/base_vm.json`. Assuming this runs successfully you will have a new image to work with in the rest of the process (all this initial step does is make sure your base image is up-to-date).
 
 ### Create the slurm image
-This step creates an image that the slurm database, controller and worker images will use. Simply run `packer build --var-file=packer_variables.json ../packer/slurm_base.json`
+This step creates an image that the slurm database, controller and worker images will use. Simply run `packer build --var-file=variables.json ../packer/slurm_base.json`
 
 ### Create the infrastrucure
 
@@ -45,5 +45,14 @@ First copy the terraform `main.tf` file from the templates, i.e. `cp ../template
 
 Then run `terraform init`, followed by `terraform plan` (to check the work to be performed) and finally `terraform apply` to create the servers. Note that the created of the shared cephfs disk can fail — this step requires a different port to be opened between your machine and the infrastructure (8786) — this may be possible if you can connect via a VPN.
 
+You will want to note down the following information:
+* the IP addresses for each of your servers (including both for the login node)
+* the shared disk 
+
+### setup the cephfs shared access rules
+Go to the OpenStack Dashboard / Shares section. Find the newly created shares and in the dropdown menu click "Manage Rules". The "Add rule". Create a cephx type rule and give the "Access To" parameter a meaningful name, e.g. `cbio_training-rw`
+
 ### Configure your services with ansible
 Finally we use ansible to ensure everything is configured correctly.
+
+Now modify the `variables.json` to reflect the appropriate information in terms of host names and ceph information. And update the `inventory.yaml` to properly reflect host information.

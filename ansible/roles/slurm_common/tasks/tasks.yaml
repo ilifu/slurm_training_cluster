@@ -42,27 +42,35 @@
 - name: configure basic user and group
   tags: slurmconf
   block:
+    - name: Debug slurm config thingy
+      debug:
+        msg: "slurm_config var is: {{ slurm_config }}"
     - name: Add slurm group
       group:
-        name: "{{ slurm_conf.group.name }}"
+        name: "{{ slurm_config.group.name }}"
         state: present
-        gid: "{{ slurm_conf.group.gid }}"
+        gid: "{{ slurm_config.group.gid }}"
 
     - name: Add slurm user
       user:
-        name: "{{ slurm_conf.user.name }}"
+        name: "{{ slurm_config.user.name }}"
         state: present
         shell: /bin/bash
-        uid: "{{ slurm_conf.user.uid }}"
-        group: "{{ slurm_conf.group.name }}"
+        uid: "{{ slurm_config.user.uid }}"
+        group: "{{ slurm_config.group.name }}"
         skeleton: /etc/skel
-  when: slurm_conf is defined
+  when: slurm_config is defined
 
 - name: Ensure ~/src exists
   file:
     path: ~/src
     state: directory
   become: no
+
+- name: Get golang version
+  command: /opt/go/bin/go version
+  register: current_golang_version
+  ignore_errors: yes
 
 - name: Install golang
   vars:
@@ -72,6 +80,7 @@
   become: yes
   tags:
     - golang
+  when: 'go_version not in current_golang_version.stdout'
   block:
     - name: Download go {{ go_version }} tarball
       become: no
@@ -120,6 +129,11 @@
   debug:
     msg: "PATH is: {{ ansible_env.PATH }}"
 
+- name: Get singularity version
+  command: /usr/local/bin/singularity --version
+  register: current_singularity_version
+  ignore_errors: yes
+
 - name: Install Singularity
   become: no
   vars:
@@ -130,6 +144,7 @@
     PATH: "{{ ansible_env.PATH }}:/opt/go/bin"
   tags:
     - singularity
+  when: 'singularity_version not in current_singularity_version.stdout'
   block:
     - name: Download singularity {{ singularity_version }}
       get_url:
@@ -178,6 +193,11 @@
         - /etc/zsh/zshenv
         - /etc/profile.d/singularity.sh
 
+- name: Get OpenUCX version
+  command: /opt/ucx/bin/ucx_info  -v
+  register: current_ucx_version
+  ignore_errors: yes
+
 - name: Install OpenUCX
   vars:
     ucx_version: 1.11.1
@@ -187,6 +207,7 @@
   become: no
   tags:
     - ucx
+  when: 'ucx_version not in current_ucx_version.stdout'
   block:
     - name: Download OpenUCX {{ ucx_version }}
       get_url:
@@ -217,11 +238,23 @@
         target: install
       become: yes
 
-- name: Install OpenMPI
-  vars:
+- name: Set OpenMPI version info
+  set_fact:
     mpi_version: 4.1.1
     mpi_url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
     mpi_checksum: sha256:e24f7a778bd11a71ad0c14587a7f5b00e68a71aa5623e2157bafee3d44c07cda
+  tags:
+    - OpenMPI
+
+- name: Get OpenMPI version
+  command: "/opt/openmpi/{{ mpi_version }}/bin/ompi_info --version"
+  register: current_mpi_version
+  ignore_errors: yes
+  tags:
+    - OpenMPI
+
+- name: Install OpenMPI
+  vars:
     ucx_dir: /opt/ucx
     mpi_dir: /opt/openmpi
     uncompress_dir: "~{{ ansible_user }}/compile"
@@ -229,6 +262,7 @@
   tags:
     - OpenMPI
   become: no
+  when: 'mpi_version not in current_mpi_version.stdout'
   block:
     - name: Download OpenMPI {{ mpi_version }}
       get_url:
@@ -326,6 +360,9 @@
   set_fact:
     slurm_version: 21.08.1
     slurm_version_git: 21-08-1-1
+  tags:
+    - slurm
+    - slurmconf
 
 - name: Check Slurm Version
   become: no
@@ -336,12 +373,13 @@
     - name: Set desired slurm version to {{ slurm_version }}
       set_fact:
         desired_slurm_version: "slurm {{ slurm_version }}"
-    - name: Get slurm version
-      command: /opt/slurm/{{ slurm_version }}/bin/sinfo --version
-      register: current_slurm_version
+    - name: Check slurm directory
+      stat:
+        path: /opt/slurm/{{ slurm_version }}
+      register: current_slurm_version_dir_exists
     - name: Slurm version is incorrect
       command: /bin/false
-      when: current_slurm_version.stdout != desired_slurm_version
+      when: (not current_slurm_version_dir_exists.stat.exists) or (not current_slurm_version_dir_exists.stat.isdir)
   rescue:
     - name: Fetch slurm repo
       git:
@@ -451,15 +489,15 @@
 #     owner: slurm
 
 - name: Configure slurm
-  when: slurm_conf is defined
+  when: slurm_config is defined
   become: yes
   block:
     - name: Ensure SlurmSpoolDir exists
       file:
         path: /var/spool/slurmd
         state: directory
-        owner: "{{ slurm_conf.user.name }}"
-        group: "{{ slurm_conf.group.name }}"
+        owner: "{{ slurm_config.user.name }}"
+        group: "{{ slurm_config.group.name }}"
         mode: "ug=rwx,o=rx"
       tags: "slurmd"
 
@@ -467,30 +505,30 @@
       file:
         path: /var/log/slurm
         state: directory
-        owner: "{{ slurm_conf.user.name }}"
-        group: "{{ slurm_conf.group.name }}"
+        owner: "{{ slurm_config.user.name }}"
+        group: "{{ slurm_config.group.name }}"
         mode: "ug=rwx,o=rx"
 
     - name: Ensure slurm etc dir exists
       file:
         path: /opt/slurm/{{ slurm_version }}/etc
         state: directory
-        owner: "{{ slurm_conf.user.name }}"
-        group: "{{ slurm_conf.group.name }}"
+        owner: "{{ slurm_config.user.name }}"
+        group: "{{ slurm_config.group.name }}"
         recurse: yes
     - name: Create slurm.conf
       template:
         src: slurm.conf.j2
         dest: /opt/slurm/{{ slurm_version }}/etc/slurm.conf
-        owner: "{{ slurm_conf.user.name }}"
-        group: "{{ slurm_conf.group.name }}"
+        owner: "{{ slurm_config.user.name }}"
+        group: "{{ slurm_config.group.name }}"
         mode: "ug=rw,o=r"
     - name: Create cgroup.conf
       template:
         src: cgroup.conf
         dest: /opt/slurm/{{ slurm_version }}/etc/cgroup.conf
-        owner: "{{ slurm_conf.user.name }}"
-        group: "{{ slurm_conf.group.name }}"
+        owner: "{{ slurm_config.user.name }}"
+        group: "{{ slurm_config.group.name }}"
         mode: "u=rw,g=r,o=r"
   tags: "slurmconf"
 

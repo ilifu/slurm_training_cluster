@@ -29,6 +29,9 @@ resource "openstack_compute_instance_v2" "slurm_worker" {
   network {
     name = "cbio-net"
   }
+  network {
+    name = "Ceph-net"
+  }
 }
 
 resource "openstack_compute_instance_v2" "ldap_server" {
@@ -54,6 +57,9 @@ resource "openstack_compute_instance_v2" "database_server" {
   network {
     name = "cbio-net"
   }
+  network {
+    name = "Ceph-net"
+  }
   depends_on = [openstack_compute_instance_v2.slurm_worker]
 }
 
@@ -67,6 +73,9 @@ resource "openstack_compute_instance_v2" "slurm_controller" {
   network {
     name = "cbio-net"
   }
+  network {
+    name = "Ceph-net"
+  }
   depends_on = [openstack_compute_instance_v2.slurm_worker]
 }
 
@@ -79,6 +88,9 @@ resource "openstack_compute_instance_v2" "slurm_login" {
 
   network {
     name = "cbio-net"
+  }
+  network {
+    name = "Ceph-net"
   }
   depends_on = [openstack_compute_instance_v2.slurm_worker]
 }

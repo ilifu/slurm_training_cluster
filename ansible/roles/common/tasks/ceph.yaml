@@ -47,10 +47,11 @@
             mode: 'u=rwx,g=rx,o=rx'
             state: directory
         - name: Mount  ({{ ip_ports }}:{{ ceph_volume }} {{ mount_location }} ceph name={{ volume_id }},secretfile={{ secret_file }},noatime,_netdev 0 0) and update fstab
-#          debugger: on_failed
           mount:
             path: "{{ mount_location }}"
             src: "{{ ip_ports }}:{{ ceph_volume }}"
             fstype: ceph
-            opts: "name={{ volume_id }},secretfile={{ secret_file }},noatime,_netdev 0 0"
+            opts: "name={{ volume_id }},secretfile={{ secret_file }},noatime,_netdev"
+            dump: 0
+            passno: 0
             state: mounted

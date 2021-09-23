@@ -1,3 +1,4 @@
+---
 - name: Ensure StateSave dir exists and is owned by slurm
   file:
     path: /var/spool/slurm_state
@@ -5,27 +6,6 @@
     owner: slurm
     group: slurm
     mode: "ug=rwx,o="
-
-# - name: Update firewall
-#   block:
-#     - name: Firewall rule -- Ensure slurm ctld port is open
-#       iptables:
-#         action: insert
-#         chain: INPUT
-#         destination_port: "{{ slurm_conf.ctld.port }}"
-#         src_range: 192.168.101.100-192.168.101.255
-#         jump: ACCEPT
-#         protocol: tcp
-#     - name: Firewall rule -- Ensure dbd port is open
-#       iptables:
-#         action: insert
-#         chain: INPUT
-#         destination_port: "{{ slurm_conf.dbd.port }}"
-#         src_range: 192.168.101.100-192.168.101.255
-#         jump: ACCEPT
-#         protocol: tcp
-#   tags:
-#     - "iptables"
 
 - name: Ensure slurmdbd configured
   vars:
