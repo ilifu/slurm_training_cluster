@@ -120,7 +120,8 @@ AccountingStorageHost={{ slurm_config.database_host }}
 AccountingStoragePort={{ slurm_config.dbd.port }}
 AccountingStorageType=accounting_storage/slurmdbd
 AccountingStorageUser=slurm
-AccountingStoreJobComment=YES
+#AccountingStoreJobComment=YES
+AccountingStoreFlags=job_comment
 
 #DebugFlags= 
 JobCompHost=training_controller

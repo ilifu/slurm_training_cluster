@@ -21,9 +21,9 @@
 - hosts: slurm_controller
   roles:
     - slurm_controller
-    - db_server
   tags:
     - slurm
+    - controller
 
 - hosts: slurm_worker
   roles:

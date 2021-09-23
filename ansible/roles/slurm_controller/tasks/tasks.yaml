@@ -32,10 +32,10 @@
     - name: Create cluster
       command:
         argv:
-          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
+          - /opt/slurm/{{ slurm_config.slurm_version }}/bin/sacctmgr
           - add
           - cluster
-          - "{{ slurm_conf.cluster_name }}"
+          - "{{ slurm_config.cluster_name }}"
       ignore_errors: yes
     - name: Add accounts
       command:
