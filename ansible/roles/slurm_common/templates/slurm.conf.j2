@@ -1,6 +1,6 @@
 ClusterName={{ slurm_config.cluster_name }}
 
-SlurmctldHost={{ slurm_config.controller_host }}
+SlurmctldHost={{ slurm_config.controller_host | replace('_','-') }}
 #SlurmctldHost=
 # 
 #DisableRootJobs=NO 
@@ -114,7 +114,7 @@ SelectTypeParameters=CR_CPU_Memory
 # 
 # LOGGING AND ACCOUNTING 
 AccountingStorageEnforce=limits,qos
-AccountingStorageHost={{ slurm_config.database_host }}
+AccountingStorageHost={{ slurm_config.database_host | replace('_','-') }}
 #AccountingStorageLoc=
 #AccountingStoragePass=
 AccountingStoragePort={{ slurm_config.dbd.port }}

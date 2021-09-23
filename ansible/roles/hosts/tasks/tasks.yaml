@@ -1,7 +1,7 @@
 - name: Update /etc/hosts
   lineinfile:
     path: /etc/hosts
-    regexp: "{{ item.key }}.*"
+    regexp: ".*\\s{{ item.value }}"
     line: "{{ item.key }}    {{ item.value }}"
   with_dict:
     - "{{ hosts }}"

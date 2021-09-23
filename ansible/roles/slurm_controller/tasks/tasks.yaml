@@ -24,7 +24,7 @@
     name: slurmctld
     daemon_reload: yes
     enabled: yes
-    state: restarted
+    state: started
   tags: "slurmctl"
 
 - name: Create cluster and initial account
@@ -36,34 +36,38 @@
           - add
           - cluster
           - "{{ slurm_config.cluster_name }}"
-      ignore_errors: yes
+      register: create_cluster_result
+      failed_when: create_cluster_result.rc != 0 and "already exists" not in create_cluster_result.stdout
+      changed_when: create_cluster_result.rc == 0
     - name: Add accounts
       command:
         argv:
-          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
+          - /opt/slurm/{{ slurm_config.slurm_version }}/bin/sacctmgr
           - "--immediate"
           - add
           - account
           - "{{ item.key }}"
           - description="{{ item.value }}"
-      ignore_errors: yes
+      register: add_accounts_result
+      failed_when: add_accounts_result.rc != 0 and "Nothing new added" not in add_accounts_result.stdout
+      changed_when: add_accounts_result.rc == 0
       with_dict:
-      - "{{ slurm_conf.accounts }}"
+      - "{{ slurm_config.accounts }}"
       
-    - name: Add users to accounts
-      command:
-        argv:
-          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
-          - "--immediate"
-          - create
-          - user
-          - "{{ item.username }}"
-          - account="{{ item.account }}"
-          - adminlevel=None
-      with_items:
-        - "{{ users }}"
-      loop_control:
-        label: "{{ item.username }} [account: {{ item.account }}]"
+#    - name: Add users to accounts
+#      command:
+#        argv:
+#          - /opt/slurm/{{ slurm_version }}/bin/sacctmgr
+#          - "--immediate"
+#          - create
+#          - user
+#          - "{{ item.username }}"
+#          - account="{{ item.account }}"
+#          - adminlevel=None
+#      with_items:
+#        - "{{ users }}"
+#      loop_control:
+#        label: "{{ item.username }} [account: {{ item.account }}]"
 
   become: yes
   #become_user: slurm
