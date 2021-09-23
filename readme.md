@@ -43,11 +43,7 @@ n × worker nodes
 
 First copy the terraform `main.tf` file from the templates, i.e. `cp ../templates/main.tf`. This needs to be modified to match the infrastructure you desire — specifically you will also need to update the `image_name` to match the images you created above, you will need to set appropriate flavors for each of the servers and identify the key you would like associated with the machines (`openstack keypair list` if you can't remember the name).
 
-Then run `terraform init`, followed by `terraform plan` (to check the work to be performed) and finally `terraform apply` to create the servers.
-
-### Create a cephfs shared disk
-
-Go to the OpenStack interface and create a cephfs share — this 
+Then run `terraform init`, followed by `terraform plan` (to check the work to be performed) and finally `terraform apply` to create the servers. Note that the created of the shared cephfs disk can fail — this step requires a different port to be opened between your machine and the infrastructure (8786) — this may be possible if you can connect via a VPN.
 
 ### Configure your services with ansible
 Finally we use ansible to ensure everything is configured correctly.
