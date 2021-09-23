@@ -1,1 +1,0 @@
-This terraform description borrows heavily from https://github.com/SANBI-SA/ilifu-demo-nov18

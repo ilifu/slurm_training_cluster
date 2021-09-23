@@ -8,3 +8,4 @@ dist
 .openstack_history.*
 .idea
 *openrc.sh
+*.project
