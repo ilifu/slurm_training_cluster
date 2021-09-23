@@ -1,14 +1,14 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
 ansible = "*"
-python-openstackclient = "*"
 ansible-lint = "*"
+python-openstackclient = "*"
+
+[dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
