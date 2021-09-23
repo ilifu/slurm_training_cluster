@@ -66,9 +66,9 @@
 
 - name: Install golang
   vars:
-    go_version: 1.16.5
-    go_url: https://golang.org/dl/go1.16.5.linux-amd64.tar.gz
-    go_checksum: sha256:b12c23023b68de22f74c0524f10b753e7b08b1504cb7e417eccebdd3fae49061
+    go_version: 1.17.1
+    go_url: https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
+    go_checksum: sha256:dab7d9c34361dc21ec237d584590d72500652e7c909bf082758fb63064fca0ef
   become: yes
   tags:
     - golang
@@ -123,9 +123,9 @@
 - name: Install Singularity
   become: no
   vars:
-    singularity_version: 3.8.0
-    singularity_url: https://github.com/sylabs/singularity/releases/download/v3.8.0/singularity-ce-3.8.0.tar.gz
-    singularity_checksum: sha256:5fa2c0e7ef2b814d8aa170826b833f91e5031a85d85cd1292a234e6c55da1be1
+    singularity_version: 3.8.3
+    singularity_url: https://github.com/sylabs/singularity/releases/download/v3.8.3/singularity-ce-3.8.3.tar.gz
+    singularity_checksum: sha256:9ecb6f01f1a3f2cd8d0f73d9806201ec1b25b23c9722d374a6430eeba0785981
   environment:  # necessary because go only added after facts were gathered
     PATH: "{{ ansible_env.PATH }}:/opt/go/bin"
   tags:
@@ -180,9 +180,9 @@
 
 - name: Install OpenUCX
   vars:
-    ucx_version: 1.10.1
-    ucx_url: https://github.com/openucx/ucx/releases/download/v1.10.1/ucx-1.10.1.tar.gz
-    ucx_checksum: sha256:ae9a108af6842ca135e7ec9b6131469adf9f1e50f899349fafcc69a215368bc9
+    ucx_version: 1.11.1
+    ucx_url: https://github.com/openucx/ucx/releases/download/v1.11.1/ucx-1.11.1.tar.gz
+    ucx_checksum: sha256:29338cad18858517f96b46ff83bdd259a5899e274792cebd269717c660aa86fd
     ucx_dir: /opt/ucx
   become: no
   tags:
@@ -324,8 +324,8 @@
 - name: Set slurm version info
   when: slurm_version is not defined
   set_fact:
-    slurm_version: 20.11.7
-    slurm_version_git: 20-11-7-1
+    slurm_version: 21.08.1
+    slurm_version_git: 21-08-1-1
 
 - name: Check Slurm Version
   become: no

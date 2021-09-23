@@ -2,4 +2,4 @@
 - import_playbook: base.yaml
 - import_playbook: common.yaml
 - import_playbook: slurm.yaml
-
+- import_playbook: ldap.yaml
