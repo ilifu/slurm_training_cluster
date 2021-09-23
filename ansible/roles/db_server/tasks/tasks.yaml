@@ -1,6 +1,6 @@
 - name: Install mariadb and configure
   vars:
-    db_password: "{{ lookup('env', slurm_conf.database.password_env_variable) }}"
+    db_password: "{{ lookup('env', slurm_config.database.password_env_variable) }}"
   block:
     - name: database password not defined
       debug:
@@ -27,7 +27,7 @@
 
         - name: Add MariaDB repository
           apt_repository:
-            repo: deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.5/ubuntu focal main
+            repo: deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.6/ubuntu focal main
             state: present
             filename: mariadb
             update_cache: yes
@@ -69,16 +69,60 @@
 
         - name: Ensure Slurm DB present
           mysql_db:
-            name: "{{ slurm_conf.database.name }}"
+            name: "{{ slurm_config.database.name }}"
             state: present
             login_unix_socket: /var/run/mysqld/mysqld.sock
           become: yes
 
         - name: Ensure Slurm DB user present
           mysql_user:
-            name: "{{ slurm_conf.database.user }}"
+            name: "{{ slurm_config.database.user }}"
             password: "{{ db_password }}"
-            priv: "{{ slurm_conf.database.name }}.*:ALL"
+            priv: "{{ slurm_config.database.name }}.*:ALL"
             state: present
             login_unix_socket: /var/run/mysqld/mysqld.sock
           become: yes
+
+    - name: Ensure slurmdbd configured
+      vars:
+        db_password: "{{ lookup('env', slurm_config.database.password_env_variable) }}"
+      block:
+        - name: database password not defined
+          debug:
+            msg: "You need to define the environmental variable '{{ slurm_config.database.password_env_variable }}' for database configuration"
+          when: db_password==''
+        - name: configure slurmdbd
+          when: db_password != ''
+          block:
+            - name: Ensure slurmdbd.conf present and configured
+              template:
+                src: slurmdbd.conf.template
+                dest: /opt/slurm/{{ slurm_config.slurm_version }}/etc/slurmdbd.conf
+                owner: slurm
+                group: slurm
+                mode: "u=rw,go="
+      tags: "slurmdbd"
+
+    - name: Copy systemd configure and enable systemd
+      block:
+        - name: Copy slurmdbd systemd file
+          copy:
+            src: "~{{ ansible_user }}/src/slurm/etc/slurmdbd.service"
+            dest: /etc/systemd/system/
+            remote_src: yes
+            owner: root
+            group: root
+            mode: "u=rw,go=r"
+          tags: "slurmdbd"
+        - name: Reload daemon
+          systemd:
+            daemon_reload: yes
+        - name: Enable slurmdbd service
+          systemd:
+            name: slurmdbd
+            daemon_reload: yes
+            enabled: yes
+            state: restarted
+          tags: "slurmdbd"
+
+      tags: "systemd"

@@ -7,67 +7,25 @@
     group: slurm
     mode: "ug=rwx,o="
 
-- name: Ensure slurmdbd configured
-  vars:
-    db_password: "{{ lookup('env', slurm_conf.database.password_env_variable) }}"
-  block:
-    - name: database password not defined
-      debug:
-        msg: "You need to define the environmental variable '{{ slurm_conf.database.password_env_variable }}' for database configuration"
-      when: db_password==''
-    - name: configure slurmdbd
-      when: db_password != ''
-      block:
-        - name: Ensure slurmdbd.conf present and configured
-          template:
-            src: slurmdbd.conf.template
-            dest: /opt/slurm/{{ slurm_version }}/etc/slurmdbd.conf
-            owner: slurm
-            group: slurm
-            mode: "u=rw,go="
-  tags: "slurmdbd"
-
-- name: Copy systemd configure and enable systemd
-  block:
-    - name: Copy slurmdbd systemd file
-      copy:
-        src: "~{{ ansible_user }}/src/slurm/etc/slurmdbd.service"
-        dest: /etc/systemd/system/
-        remote_src: yes
-        owner: root
-        group: root
-        mode: "u=rw,go=r"
-      tags: "slurmdbd"
-    - name: Reload daemon
-      systemd:
-        daemon_reload: yes
-    - name: Enable slurmdbd service
-      systemd:
-        name: slurmdbd
-        daemon_reload: yes
-        enabled: yes
-        state: restarted
-      tags: "slurmdbd"
-    - name: copy slurmctl systemd file
-      copy:
-        src: "~{{ ansible_user }}/src/slurm/etc/slurmctld.service"
-        dest: /etc/systemd/system/
-        remote_src: yes
-        owner: root
-        group: root
-        mode: "u=rw,go=r"
-      tags: "slurmctl"
-    - name: Reload daemon
-      systemd:
-        daemon_reload: yes
-    - name: Enable slurmctl service
-      systemd:
-        name: slurmctld
-        daemon_reload: yes
-        enabled: yes
-        state: restarted
-      tags: "slurmctl"
-  tags: "systemd"
+- name: copy slurmctl systemd file
+  copy:
+    src: "~{{ ansible_user }}/src/slurm/etc/slurmctld.service"
+    dest: /etc/systemd/system/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: "u=rw,go=r"
+  tags: "slurmctl"
+- name: Reload daemon
+  systemd:
+    daemon_reload: yes
+- name: Enable slurmctl service
+  systemd:
+    name: slurmctld
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+  tags: "slurmctl"
 
 - name: Create cluster and initial account
   block:

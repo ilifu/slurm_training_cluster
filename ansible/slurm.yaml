@@ -11,6 +11,13 @@
   tags:
     - slurm
 
+- hosts: slurm_database
+  roles:
+    - db_server
+  tags:
+    - slurm
+    - database
+
 - hosts: slurm_controller
   roles:
     - slurm_controller

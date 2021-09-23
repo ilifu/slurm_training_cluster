@@ -158,11 +158,11 @@ SlurmSchedLogFile=/var/log/slurm/slurmsched.log
 # COMPUTE NODES
 # NodeName=slurm_worker-00[01-10] CPUs=32 RealMemory=229376 Sockets=2 CoresPerSocket=16 ThreadsPerCore=1 State=UNKNOWN 
 {% for worker in slurm_config.workers %}{% if "worker" in worker.node_name %}
-NodeName={{ worker.node_name }} NodeAddr={{ worker.ip_address }} CPUs=32 RealMemory=237568 Sockets=32 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
+NodeName={{ worker.node_name | replace('_','-') }} NodeAddr={{ worker.ip_address }} CPUs=32 RealMemory=237568 Sockets=32 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
 {% endif %}{% endfor %}
 
 
-PartitionName=training Nodes={% for worker in slurm_config.workers %}{% if "worker" in worker.node_name %}{{ worker.node_name }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=6144 State=UP
+PartitionName=training Nodes={% for worker in slurm_config.workers %}{% if "worker" in worker.node_name %}{{ worker.node_name | replace('_','-') }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=6144 State=UP
 # Add X11 Forwarding for Slurm as per https://slurm.schedmd.com/faq.html#x11
 #PrologFlags=x11
 #X11Parameters=local_xauthority

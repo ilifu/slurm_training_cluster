@@ -358,8 +358,8 @@
 - name: Set slurm version info
   when: slurm_version is not defined
   set_fact:
-    slurm_version: 21.08.1
-    slurm_version_git: 21-08-1-1
+    slurm_version: "{{ slurm_config.slurm_version }}"
+    slurm_version_git: "{{ slurm_config.slurm_version_git }}"
   tags:
     - slurm
     - slurmconf
