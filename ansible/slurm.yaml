@@ -8,6 +8,7 @@
 - hosts: slurm_headnode
   roles:
     - slurm_headnode
+    - nextflow
   tags:
     - slurm
 
@@ -28,7 +29,7 @@
 - hosts: slurm_worker
   roles:
     - slurm_worker
-    - nextflow
+#    - nextflow
   tags:
     - slurm
     
