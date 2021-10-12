@@ -594,3 +594,14 @@
     state: absent
     purge: yes
   tags: lmod
+
+- name: configure ldap.conf
+  tags:
+   - ldap
+   - ldap.conf
+  block:
+    - name: Set BASE for {{ ldap_config.ldap_dns_domain_name}}
+      lineinfile:
+        path: /etc/ldap/ldap.conf
+        regexp: "^BASE.*"
+        line: "BASE dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"

@@ -54,6 +54,24 @@
   failed_when: add_sshkey_schema.rc != 0 and "Duplicate attributeType" not in add_sshkey_schema.stderr
   changed_when: add_sshkey_schema.rc == 0
 
+- name: Set rootDN passwd
+  tags: ldap_passwd
+  vars:
+    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
+  when: rootdn_passwd != ''
+  block:
+    - name: get SSHA of ldap passwd
+      command: slappasswd -s "{{ rootdn_passwd }}"
+      register: slappasswd_output
+    - name: Create changeroot ldif
+      template:
+        src: changerootpw.ldif
+        dest: /tmp/
+    - name: Update rootDN ldap password
+      command: ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/changerootpw.ldif
+      become: yes
+
+
 
 # - name: Firewall rule -- allow port 389/LDAP traffic
 #   iptables:
