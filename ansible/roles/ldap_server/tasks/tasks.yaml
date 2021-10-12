@@ -1,6 +1,5 @@
 ---
 # tasks file for roles/ldap_server
-
 - name: Install Packages
   apt:
     name:
@@ -17,6 +16,43 @@
   retries: 3
   delay: 15
   until: apt_res is success
+
+- name: update debconf selections
+  block:
+    - name: Configure slapd organisation
+      debconf:
+        name: slapd
+        question: shared/organization
+        vtype: 'string'
+        value: "{{ ldap_config.organisation }}"
+      register: ldap_org
+    - name: Configure slapd domain
+      debconf:
+        name: slapd
+        question: slapd/domain
+        vtype: 'string'
+        value: "{{ ldap_config.ldap_dns_domain_name }}"
+      register: ldap_domain
+
+- name: Reconfigure slapd
+  when: ldap_org.changed or ldap_domain.changed
+  command: dpkg-reconfigure -f noninteractive slapd
+  become: yes
+
+- name: Copy ldap ssh key schema
+  copy:
+    src: openssh-lpk.ldif
+    dest: /etc/ldap/schema/
+  become: yes
+
+- name: Add ssh key schema
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f openssh-lpk.ldif
+  args:
+    chdir: /etc/ldap/schema/
+  become: yes
+  register: add_sshkey_schema
+  failed_when: add_sshkey_schema.rc != 0 and "Duplicate attributeType" not in add_sshkey_schema.stderr
+  changed_when: add_sshkey_schema.rc == 0
 
 
 # - name: Firewall rule -- allow port 389/LDAP traffic
