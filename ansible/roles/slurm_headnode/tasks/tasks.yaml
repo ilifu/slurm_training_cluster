@@ -33,3 +33,16 @@
         mode: "ug=rwx,o=rx"
   tags:
     - "motd"
+
+- name: Copy user-management scripts to headnode
+  tags:
+    - user_management
+  become: no
+  copy:
+    src: "{{ item }}"
+    dest: "~/bin/"
+    mode: "ugo=rx"
+  loop:
+    - add_user.py
+    - check_ssh_key.py
+    - csv_to_yaml.py
