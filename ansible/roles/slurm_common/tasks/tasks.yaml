@@ -610,3 +610,11 @@
         path: /etc/ldap/ldap.conf
         regexp: "^URI.*"
         line:  "URI    ldap://{{ ldap_config.ldap_host }}"
+
+- name: Copy ldap key querying script
+  tags: ldap_ssh_key
+  copy:
+    src: get_ssh_key_from_ldap.sh
+    dest: /usr/local/bin/get_ssh_key_from_ldap.sh
+    mode: ugo=rx
+
