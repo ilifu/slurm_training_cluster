@@ -604,4 +604,9 @@
       lineinfile:
         path: /etc/ldap/ldap.conf
         regexp: "^BASE.*"
-        line: "BASE dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+        line: "BASE   dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+    - name: Set URI for ldap
+      lineinfile:
+        path: /etc/ldap/ldap.conf
+        regexp: "^URI.*"
+        line:  "URI    ldap://{{ ldap_config.ldap_host }}"
