@@ -8,6 +8,7 @@
       - 'libsasl2-dev'
       - 'libssl-dev'
       - 'python3-dev'
+      - 'python3-ldap'
       - 'slapd'
       - 'virtualenv'
     state: latest
@@ -70,6 +71,34 @@
     - name: Update rootDN ldap password
       command: ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/changerootpw.ldif
       become: yes
+
+- name: Ensure users OU exists
+  tags: ldap_ous
+  vars:
+    dcs: "dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
+  when: rootdn_passwd != ''
+  ldap_entry:
+    dn: "ou=users,{{ dcs }}"
+    objectClass: organizationalUnit
+    bind_dn: "cn=admin,{{ dcs }}"
+    bind_pw: "{{ rootdn_passwd }}"
+
+- name: Ensure default user group exists
+  tags: ldap_groups
+  vars:
+    dcs: "dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
+  when: rootdn_passwd != ''
+  ldap_entry:
+    dn: "cn=training,ou=users,{{ dcs }}"
+    objectClass:
+      - posixGroup
+      - top
+    attributes:
+      gidNumber: 20000
+    bind_dn: "cn=admin,{{ dcs }}"
+    bind_pw: "{{ rootdn_passwd }}"
 
 
 
