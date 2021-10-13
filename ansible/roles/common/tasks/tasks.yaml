@@ -51,7 +51,7 @@
       - 'libpcre2-dev'
       - 'libperl-dev'
       - 'libpng-dev'
-      - 'libnss-ldap'
+      - 'libnss-ldapd'
       - 'libpam-sss'
       - 'libnss-sss'
       - 'libreadline-dev'

@@ -1,6 +1,7 @@
 ---
 # tasks file for roles/slurm_common
 - name: Install Packages
+  tags: apt
   apt:
     name: 
     - 'build-essential'
@@ -16,6 +17,7 @@
     - 'libjson-c-dev'
     - 'libmariadb-dev'
     - 'libmunge-dev'
+    - 'libnss-ldapd'
     - 'libnuma1'
     - 'libnuma-dev'
     - 'libpam0g-dev'
@@ -610,6 +612,23 @@
         path: /etc/ldap/ldap.conf
         regexp: "^URI.*"
         line:  "URI    ldap://{{ ldap_config.ldap_host }}"
+    - name: Set VERSION for ldap
+      lineinfile:
+        path: /etc/ldap/ldap.conf
+        regexp: "^VERSION.*"
+        line: "VERSION 3"
+
+- name: Setup ldap secret file
+  tags: ldap.secret
+  vars:
+    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
+  when: rootdn_passwd != ''
+  lineinfile:
+    create: yes
+    path: /etc/ldap.secret
+    regexp: '.*'
+    line: "{{ rootdn_passwd }}"
+    mode: u=r,go=
 
 - name: Copy ldap key querying script
   tags: ldap_ssh_key
@@ -617,4 +636,32 @@
     src: get_ssh_key_from_ldap.sh
     dest: /usr/local/bin/get_ssh_key_from_ldap.sh
     mode: ugo=rx
+
+- name: Make sure authorized_key_command is queried for ssh keys
+  tags: authorizedkeys
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "AuthorizedKeysCommand /usr/local/bin/get_ssh_key_from_ldap.sh"
+    regexp: "^AuthorizedKeysCommand .*"
+
+- name: Make sure the authorized_keys_command_user is nobody
+  tags: authorizedkeys
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "AuthorizedKeysCommandUser nobody"
+    regexp: "^AuthorizedKeysCommandUser.*"
+
+- name: Make sure /etc/nsswitch.conf is up-to-date
+  tags: nsswitch
+  block:
+    - name: Update passwd line in nsswitch.conf
+      lineinfile:
+        path: /etc/nsswitch.conf
+        regexp: "passwd: .*"
+        line: "passwd:         files systemd sss ldap"
+    - name: Update group line in nsswitch.conf
+      lineinfile:
+        path: /etc/nsswitch.conf
+        regexp: "group: .*"
+        line: "group:          files systemd sss ldap"
 
