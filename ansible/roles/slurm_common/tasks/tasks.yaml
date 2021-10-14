@@ -657,11 +657,11 @@
     - name: Update passwd line in nsswitch.conf
       lineinfile:
         path: /etc/nsswitch.conf
-        regexp: "passwd: .*"
+        regexp: "^passwd: .*"
         line: "passwd:         files systemd sss ldap"
     - name: Update group line in nsswitch.conf
       lineinfile:
         path: /etc/nsswitch.conf
-        regexp: "group: .*"
+        regexp: "^group: .*"
         line: "group:          files systemd sss ldap"
 
