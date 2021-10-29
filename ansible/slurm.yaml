@@ -9,6 +9,7 @@
   roles:
     - slurm_headnode
     - nextflow
+    - software
   tags:
     - slurm
 
