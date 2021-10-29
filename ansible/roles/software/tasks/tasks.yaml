@@ -54,6 +54,4 @@
         dest: /etc/profile.d/valencia.sh
         create: yes
         regex: ".*PATH=.*"
-        line: "export PATH={{ software_directory.path }}/valencia/:${PATH}"
-
-
+        line: "export PATH={{ software_directory.path }}/valencia:${PATH}"
