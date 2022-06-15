@@ -23,6 +23,7 @@
   "provisioners": [
     {
       "type": "ansible",
+      "use_proxy": false,
       "groups": ["base_image"],
       "user": "ubuntu",
       "playbook_file": "../ansible/dbserver-install.yaml",

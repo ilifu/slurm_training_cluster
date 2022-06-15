@@ -23,6 +23,7 @@
   "provisioners": [
     {
       "type": "ansible",
+      "use_proxy": false,
       "groups": ["slurm_controller"],
       "user": "ubuntu",
       "playbook_file": "../ansible/site.yaml",
