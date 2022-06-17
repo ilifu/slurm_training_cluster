@@ -1,0 +1,8 @@
+{
+    "software_directory": {
+        "path": "/software",
+        "owner": "ubuntu",
+        "group": "ubuntu",
+        "mode": "u=rwx,go=rx"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "hosts": {
+        "this.is.wrong.1": "slurm-login",
+        "this.is.wrong.2": "slurm-controller",
+        "this.is.wrong.3": "slurm-database",
+        "this.is.wrong.4": "slurm-worker-0001",
+        "this.is.wrong.5": "ldap"
+    }
+}

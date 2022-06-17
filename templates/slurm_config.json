@@ -1,0 +1,44 @@
+{
+  "slurm_config": {
+    "slurm_version": "20.11.8",
+        "slurm_version_git": "20-11-8-1",
+        "cluster_name": "tinus_testing",
+        "organisation": "ilifu",
+        "controller_host": "slurm_controller",
+        "database_host": "slurm_database",
+        "accounts": {
+            "training": "Basic account for testing"
+        },
+        "user": {
+            "name": "slurm"
+        },
+        "group": {
+            "name": "slurm"
+        },
+        "database": {
+            "name": "slurm_db",
+            "user": "slurm",
+            "password_env_variable": "DB_PASSWD"
+        },
+        "dbd": {
+            "port": "7031"
+        },
+        "ctld": {
+            "port": "6817"
+        },
+        "slurmd": {
+            "port": "6818",
+            "spool_dir": "/var/spool/slurmd"
+        },
+        "workers": [
+            {
+                "node_name": "slurm_worker-0001",
+                "ip_address": "192.168.101.104"
+            },
+            {
+                "node_name": "slurm_worker-0002",
+                "ip_address": "192.168.101.174"
+            }
+        ]
+    }
+}

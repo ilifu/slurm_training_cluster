@@ -1,0 +1,13 @@
+{
+    "ceph_mounts": [
+        {
+            "volume_id": "some_id-rw",
+            "mount_location": "/some_mount",
+            "key_environmental_variable": "CEPH_KEY",
+            "ip_ports": [
+                "put.a.real.ip:port"
+            ],
+            "ceph_volume": "/volumes/_nogroup/whatstehvolumeid"
+        }
+    ]
+}
