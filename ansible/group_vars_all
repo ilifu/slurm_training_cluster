@@ -554,16 +554,4 @@ users:
     username: user05
 
 
-hosts:
-  192.168.101.113: slurm_controller
-  192.168.101.104: slurm_login
-  192.168.101.108: slurm_worker-0001
-  192.168.101.105: slurm_worker-0002
-  192.168.101.122: slurm_worker-0003
-  192.168.101.115: slurm_worker-0004
-  192.168.101.117: slurm_worker-0005
-  192.168.101.103: slurm_worker-0006
-  192.168.101.118: slurm_worker-0007
-  192.168.101.119: slurm_worker-0008
-  192.168.101.110: slurm_worker-0009
-  192.168.101.116: slurm_worker-0010
+

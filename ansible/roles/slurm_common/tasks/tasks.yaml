@@ -76,9 +76,10 @@
 
 - name: Install golang
   vars:
-    go_version: 1.17.1
-    go_url: https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
-    go_checksum: sha256:dab7d9c34361dc21ec237d584590d72500652e7c909bf082758fb63064fca0ef
+    go_version: 1.18.3
+    go_url: https://go.dev/dl/go1.18.3.linux-amd64.tar.gz
+    go_checksum: sha256:956f8507b302ab0bb747613695cdae10af99bbd39a90cae522b7c0302cc27245
+
   become: yes
   tags:
     - golang
@@ -139,9 +140,9 @@
 - name: Install Singularity
   become: no
   vars:
-    singularity_version: 3.8.3
-    singularity_url: https://github.com/sylabs/singularity/releases/download/v3.8.3/singularity-ce-3.8.3.tar.gz
-    singularity_checksum: sha256:9ecb6f01f1a3f2cd8d0f73d9806201ec1b25b23c9722d374a6430eeba0785981
+    singularity_version: 3.10.0
+    singularity_url: https://github.com/sylabs/singularity/releases/download/v3.10.0/singularity-ce-3.10.0.tar.gz
+    singularity_checksum: sha256:5e22e6cdad66c331668f6cff4544c83917bb3db90da3cf92403a394c5bf8cc8f
   environment:  # necessary because go only added after facts were gathered
     PATH: "{{ ansible_env.PATH }}:/opt/go/bin"
   tags:
@@ -494,6 +495,21 @@
   when: slurm_config is defined
   become: yes
   block:
+    - name: Ensure slurm group exists
+      group:
+        name: "{{ slurm_config.group }}"
+        state: present
+        system: yes
+    - name: Ensure slurm user exists
+      user:
+        name: "{{ slurm_config.user }}"
+        comment: "System user for slurm"
+        state: present
+        system: yes
+        group: "{{ slurm_config.group }}"
+#        home: "/home/slurm"
+        skeleton: /etc/skel
+        shell: /bin/bash
     - name: Ensure SlurmSpoolDir exists
       file:
         path: /var/spool/slurmd
@@ -518,6 +534,7 @@
         owner: "{{ slurm_config.user.name }}"
         group: "{{ slurm_config.group.name }}"
         recurse: yes
+
     - name: Create slurm.conf
       template:
         src: slurm.conf.j2
