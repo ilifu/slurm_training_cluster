@@ -2,7 +2,7 @@
   "builders": [
     {
       "type": "openstack",
-      "flavor": "{{user `flavor`}}",
+      "flavor": "{{user `build_flavor`}}",
       "domain_name": "Default",
       "ssh_username": "ubuntu",
       "image_name": "{{user `image_name_prefix`}}-{{user `slurm_controller_image_name`}}-{{user `image_name_suffix`}}",
