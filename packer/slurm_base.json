@@ -31,8 +31,12 @@
         "ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes'"
       ],
       "extra_arguments": [
-         "-e", "'ansible_python_interpreter=/usr/bin/python3'",
-        "--extra-vars", "\"@slurm_config.json @ldap_config.json\""
+        "--extra-vars", "ansible_python_interpreter=/usr/bin/python3",
+        "--extra-vars", "@{{user `slurm_config_file`}}",
+        "--extra-vars", "@{{ user `ldap_config_file` }}",
+        "--extra-vars", "@{{ user `hosts_config_file` }}",
+        "--extra-vars", "@{{ user `ceph_config_file` }}",
+        "--extra-vars", "@{{ user `software_config_file` }}"
       ]
     }
   ]
