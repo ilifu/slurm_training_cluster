@@ -1,5 +1,9 @@
 ---
 # tasks file for roles/slurm_common
+- name: Check slurm_config is defined
+  debug:
+    msg: "slurm_config: {{ slurm_config }}"
+
 - name: Install Packages
   tags: apt
   apt:
@@ -39,29 +43,9 @@
   delay: 15
   until: apt_res is success
 
-# , "libcgroup1"
-
-- name: configure basic user and group
-  tags: slurmconf
-  block:
-    - name: Debug slurm config thingy
-      debug:
-        msg: "slurm_config var is: {{ slurm_config }}"
-    - name: Add slurm group
-      group:
-        name: "{{ slurm_config.group.name }}"
-        state: present
-        gid: "{{ slurm_config.group.gid }}"
-
-    - name: Add slurm user
-      user:
-        name: "{{ slurm_config.user.name }}"
-        state: present
-        shell: /bin/bash
-        uid: "{{ slurm_config.user.uid }}"
-        group: "{{ slurm_config.group.name }}"
-        skeleton: /etc/skel
-  when: slurm_config is defined
+#- name: "Ansible | List all known variables and facts"
+#  debug:
+#    var: hostvars[inventory_hostname]
 
 - name: Ensure ~/src exists
   file:
@@ -497,16 +481,16 @@
   block:
     - name: Ensure slurm group exists
       group:
-        name: "{{ slurm_config.group }}"
+        name: "{{ slurm_config.group.name }}"
         state: present
         system: yes
     - name: Ensure slurm user exists
       user:
-        name: "{{ slurm_config.user }}"
+        name: "{{ slurm_config.user.name }}"
         comment: "System user for slurm"
         state: present
         system: yes
-        group: "{{ slurm_config.group }}"
+        group: "{{ slurm_config.group.name }}"
 #        home: "/home/slurm"
         skeleton: /etc/skel
         shell: /bin/bash
