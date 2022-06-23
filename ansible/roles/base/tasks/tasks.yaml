@@ -1,6 +1,5 @@
 ---
 # tasks file for roles/base
-
 - name: Update timezone
   file:
     src: /usr/share/zoneinfo/{{ timezone }}
