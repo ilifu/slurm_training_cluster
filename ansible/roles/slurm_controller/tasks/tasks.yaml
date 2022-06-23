@@ -28,6 +28,12 @@
   tags: "slurmctl"
 
 - name: Create cluster and initial account
+  tags:
+    - never
+    - deploy_cluster
+    - accounting
+  become: yes
+  #become_user: slurm
   block:
     - name: Create cluster
       command:
@@ -69,7 +75,5 @@
 #      loop_control:
 #        label: "{{ item.username }} [account: {{ item.account }}]"
 
-  become: yes
-  #become_user: slurm
-  tags: "accounting"
+
         

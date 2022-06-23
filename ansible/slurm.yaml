@@ -14,7 +14,6 @@
 
 - hosts: slurm_database
   roles:
-    - slurm_common
     - db_server
   tags:
     - slurm

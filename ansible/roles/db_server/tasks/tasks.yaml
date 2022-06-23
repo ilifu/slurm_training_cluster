@@ -4,7 +4,7 @@
   block:
     - name: database password not defined
       debug:
-        msg: "You need to define the environmental variable '{{ slurm_conf.database.password_env_variable }}' for database configuration"
+        msg: "You need to define the environmental variable '{{ slurm_config.database.password_env_variable }}' for database configuration"
       when: db_password==''
     - name: Install and configure mariadb
       when: db_password != ''
@@ -13,6 +13,9 @@
           apt:
             name:
               - software-properties-common
+              - curl
+              - ca-certificates
+              - apt-transport-https
             state: latest
             update_cache: yes
           register: apt_res
@@ -20,17 +23,26 @@
           delay: 15
           until: apt_res is success
 
-        - name: Add MariaDB apt key
-          apt_key:
-            keyserver: keyserver.ubuntu.com
-            id: '0xF1656F24C74CD1D8'
+        - name: Get MariaDB repo setup script
+          get_url:
+            url: https://r.mariadb.com/downloads/mariadb_repo_setup
+            dest: /tmp/mariadb_repo_setup
+            mode: "ugo+rx"
 
-        - name: Add MariaDB repository
-          apt_repository:
-            repo: deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.6/ubuntu focal main
-            state: present
-            filename: mariadb
-            update_cache: yes
+        - name: Run repo setup script
+          command: "/tmp/mariadb_repo_setup"
+
+#        - name: Add MariaDB apt key
+#          apt_key:
+#            keyserver: keyserver.ubuntu.com
+#            id: '0xF1656F24C74CD1D8'
+#
+#        - name: Add MariaDB repository
+#          apt_repository:
+#            repo: deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.6/ubuntu focal main
+#            state: present
+#            filename: mariadb
+#            update_cache: yes
 
         - name: Install MariaDB and related packages
           apt:

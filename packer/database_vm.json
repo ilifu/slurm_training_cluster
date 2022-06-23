@@ -6,7 +6,7 @@
       "domain_name": "Default",
       "ssh_username": "ubuntu",
       "image_name": "{{user `image_name_prefix`}}-{{user `database_image_name`}}-{{user `image_name_suffix`}}",
-      "source_image_name": "{{user `image_name_prefix`}}-{{user `base_image_name`}}-{{user `image_name_suffix`}}",
+      "source_image_name": "{{user `image_name_prefix`}}-{{user `slurm_base_image_name`}}-{{user `image_name_suffix`}}",
       "networks": "{{user `networks`}}",
       "floating_ip_network": "{{user `floating_ip_network`}}",
       "security_groups": "{{user `security_groups`}}",
