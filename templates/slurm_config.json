@@ -1,6 +1,6 @@
 {
-  "slurm_config": {
-    "slurm_version": "20.11.8",
+    "slurm_config": {
+        "slurm_version": "20.11.8",
         "slurm_version_git": "20-11-8-1",
         "cluster_name": "tinus_testing",
         "organisation": "ilifu",
