@@ -5,7 +5,7 @@
 
 - hosts: slurm_headnode
   roles:
-    - slurm
+    - slurm_common
     - slurm_headnode
     - nextflow
     - software
@@ -14,6 +14,7 @@
 
 - hosts: slurm_database
   roles:
+    - slurm_common
     - db_server
   tags:
     - slurm
@@ -21,7 +22,7 @@
 
 - hosts: slurm_controller
   roles:
-    - slurm
+    - slurm_common
     - slurm_controller
   tags:
     - slurm
@@ -29,7 +30,7 @@
 
 - hosts: slurm_worker
   roles:
-    - slurm
+    - slurm_common
     - slurm_worker
 #    - nextflow
   tags:
