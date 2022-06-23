@@ -5,7 +5,10 @@
     msg: "slurm_config: {{ slurm_config }}"
 
 - name: Install Packages
-  tags: apt
+  tags:
+    - apt
+    - never
+    - build
   apt:
     name: 
     - 'build-essential'
@@ -54,6 +57,9 @@
   become: no
 
 - name: Get golang version
+  tags:
+    - never
+    - build
   command: /opt/go/bin/go version
   register: current_golang_version
   ignore_errors: yes
@@ -67,6 +73,8 @@
   become: yes
   tags:
     - golang
+    - never
+    - build
   when: 'go_version not in current_golang_version.stdout'
   block:
     - name: Download go {{ go_version }} tarball
@@ -112,11 +120,10 @@
             - /etc/zsh/zshenv
             - /etc/profile.d/golang.sh
 
-- name: Show PATH
-  debug:
-    msg: "PATH is: {{ ansible_env.PATH }}"
-
 - name: Get singularity version
+  tags:
+    - never
+    - build
   command: /usr/local/bin/singularity --version
   register: current_singularity_version
   ignore_errors: yes
@@ -131,6 +138,8 @@
     PATH: "{{ ansible_env.PATH }}:/opt/go/bin"
   tags:
     - singularity
+    - never
+    - build
   when: 'singularity_version not in current_singularity_version.stdout'
   block:
     - name: Download singularity {{ singularity_version }}
@@ -181,6 +190,9 @@
         - /etc/profile.d/singularity.sh
 
 - name: Get OpenUCX version
+  tags:
+    - never
+    - build
   command: /opt/ucx/bin/ucx_info  -v
   register: current_ucx_version
   ignore_errors: yes
@@ -194,6 +206,8 @@
   become: no
   tags:
     - ucx
+    - never
+    - build
   when: 'ucx_version not in current_ucx_version.stdout'
   block:
     - name: Download OpenUCX {{ ucx_version }}
@@ -232,6 +246,8 @@
     mpi_checksum: sha256:92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
   tags:
     - OpenMPI
+    - never
+    - build
 
 - name: Get OpenMPI version
   command: "/opt/openmpi/{{ mpi_version }}/bin/ompi_info --version"
@@ -239,6 +255,8 @@
   ignore_errors: yes
   tags:
     - OpenMPI
+    - never
+    - build
 
 - name: Install OpenMPI
   vars:
@@ -248,6 +266,8 @@
     install_dir: "{{ mpi_dir }}/{{ mpi_version }}"
   tags:
     - OpenMPI
+    - never
+    - build
   become: no
   when: 'mpi_version not in current_mpi_version.stdout'
   block:
@@ -350,12 +370,16 @@
   tags:
     - slurm
     - slurmconf
+    - never
+    - build
 
 - name: Check Slurm Version
   become: no
   tags:
     - install
     - slurm
+    - never
+    - build
   block:
     - name: Set desired slurm version to {{ slurm_version }}
       set_fact:
@@ -411,6 +435,11 @@
       become: yes
 
 - name: Configure paths and directories
+  tags:
+    - path
+    - install
+    - never
+    - build
   become: yes
   block:
     - name: Ensure slurm profile file exists
@@ -467,7 +496,7 @@
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
 
-  tags: "path,install"
+
 # - name: Copy Slurm Config
 #   copy:
 #     src: /home/slurm/src/slurm/etc/slurm.conf.example
@@ -476,6 +505,10 @@
 #     owner: slurm
 
 - name: Configure slurm
+  tags:
+    - slurmconf
+    - never
+    - build
   when: slurm_config is defined
   become: yes
   block:
@@ -533,7 +566,6 @@
         owner: "{{ slurm_config.user.name }}"
         group: "{{ slurm_config.group.name }}"
         mode: "u=rw,g=r,o=r"
-  tags: "slurmconf"
 
 - name: Ensure host has correct munge key
   vars:
@@ -541,6 +573,8 @@
   become: yes
   tags:
     - munge
+    - never
+    - build
   block:
     - name: Set munge password
       set_fact:
@@ -596,12 +630,17 @@
     name: lmod
     state: absent
     purge: yes
-  tags: lmod
+  tags:
+    - lmod
+    - never
+    - build
 
 - name: configure ldap.conf
   tags:
    - ldap
    - ldap.conf
+   - never
+    - build
   block:
     - name: Set BASE for {{ ldap_config.ldap_dns_domain_name}}
       lineinfile:
@@ -620,7 +659,10 @@
         line: "VERSION 3"
 
 - name: Setup ldap secret file
-  tags: ldap.secret
+  tags:
+    - ldap.secret
+    - never
+    - build
   vars:
     rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
   when: rootdn_passwd != ''
@@ -632,28 +674,40 @@
     mode: u=r,go=
 
 - name: Copy ldap key querying script
-  tags: ldap_ssh_key
+  tags:
+    - ldap_ssh_key
+    - never
+    - build
   copy:
     src: get_ssh_key_from_ldap.sh
     dest: /usr/local/bin/get_ssh_key_from_ldap.sh
     mode: ugo=rx
 
 - name: Make sure authorized_key_command is queried for ssh keys
-  tags: authorizedkeys
+  tags:
+    - authorizedkeys
+    - never
+    - build
   lineinfile:
     path: /etc/ssh/sshd_config
     line: "AuthorizedKeysCommand /usr/local/bin/get_ssh_key_from_ldap.sh"
     regexp: "^AuthorizedKeysCommand .*"
 
 - name: Make sure the authorized_keys_command_user is nobody
-  tags: authorizedkeys
+  tags:
+    - authorizedkeys
+    - never
+    - build
   lineinfile:
     path: /etc/ssh/sshd_config
     line: "AuthorizedKeysCommandUser nobody"
     regexp: "^AuthorizedKeysCommandUser.*"
 
 - name: Make sure /etc/nsswitch.conf is up-to-date
-  tags: nsswitch
+  tags:
+    - nsswitch
+    - never
+    - build
   block:
     - name: Update passwd line in nsswitch.conf
       lineinfile:
