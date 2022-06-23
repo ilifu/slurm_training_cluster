@@ -9,7 +9,7 @@
     "slurm_controller_image_name": "slurm-controller",
     "slurm_worker_image_name": "slurm-worker",
     "database_image_name": "database",
-    "source_image": "is_this_needed",
+    "source_image": "TODO: openstack image list",
     "training_base_image": "is_this_needed",
     "networks": ["TODO: openstack network list"],
     "floating_ip_network": "TODO: openstack network list",
