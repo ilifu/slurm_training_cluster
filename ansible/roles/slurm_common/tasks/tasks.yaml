@@ -51,6 +51,9 @@
 #    var: hostvars[inventory_hostname]
 
 - name: Ensure ~/src exists
+  tags:
+    - never
+    - build
   file:
     path: ~/src
     state: directory
