@@ -36,7 +36,8 @@
         "--extra-vars", "@{{ user `ldap_config_file` }}",
         "--extra-vars", "@{{ user `hosts_config_file` }}",
         "--extra-vars", "@{{ user `ceph_config_file` }}",
-        "--extra-vars", "@{{ user `software_config_file` }}"
+        "--extra-vars", "@{{ user `software_config_file` }}",
+        "--tags", "build"
       ]
     }
   ]
