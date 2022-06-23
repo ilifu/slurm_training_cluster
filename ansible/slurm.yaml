@@ -2,11 +2,10 @@
 - hosts: slurm
   roles:
     - slurm_common
-    - hosts
-    - manage_users
 
 - hosts: slurm_headnode
   roles:
+    - slurm
     - slurm_headnode
     - nextflow
     - software
@@ -22,6 +21,7 @@
 
 - hosts: slurm_controller
   roles:
+    - slurm
     - slurm_controller
   tags:
     - slurm
@@ -29,6 +29,7 @@
 
 - hosts: slurm_worker
   roles:
+    - slurm
     - slurm_worker
 #    - nextflow
   tags:
