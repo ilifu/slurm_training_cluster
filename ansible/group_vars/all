@@ -33,4 +33,4 @@ slurm:
   spool_dir: "/var/spool/slurmd"
 
 ldap:
-  password_env_variable = "LDAP_PASSWORD"
+  password_env_variable: "LDAP_PASSWORD"
