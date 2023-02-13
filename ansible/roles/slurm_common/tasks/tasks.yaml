@@ -67,27 +67,22 @@
   ignore_errors: yes
 
 - name: Install golang
-  vars:
-    go_version: 1.18.3
-    go_url: https://go.dev/dl/go1.18.3.linux-amd64.tar.gz
-    go_checksum: sha256:956f8507b302ab0bb747613695cdae10af99bbd39a90cae522b7c0302cc27245
-
   become: yes
   tags:
     - golang
     - never
     - build
-  when: 'go_version not in current_golang_version.stdout'
+  when: 'go.version not in current_golang_version.stdout'
   block:
-    - name: Download go {{ go_version }} tarball
+    - name: Download go {{ go.version }} tarball
       become: no
       get_url:
-        url: "{{ go_url }}"
-        dest: ~/src/go{{ go_version }}.linux-amd64.tar.gz
-        checksum: "{{ go_checksum }}"
+        url: "{{ go.url }}"
+        dest: ~/src/go{{ go.version }}.linux-amd64.tar.gz
+        checksum: "{{ go.checksum }}"
     - name: Extract go to /opt
       unarchive:
-        src: "~{{ ansible_user }}/src/go{{ go_version }}.linux-amd64.tar.gz"
+        src: "~{{ ansible_user }}/src/go{{ go.version }}.linux-amd64.tar.gz"
         dest: /opt/
         creates: /opt/go
         remote_src: yes
@@ -132,23 +127,19 @@
 
 - name: Install Singularity
   become: no
-  vars:
-    singularity_version: 3.10.0
-    singularity_url: https://github.com/sylabs/singularity/releases/download/v3.10.0/singularity-ce-3.10.0.tar.gz
-    singularity_checksum: sha256:5e22e6cdad66c331668f6cff4544c83917bb3db90da3cf92403a394c5bf8cc8f
   environment:  # necessary because go only added after facts were gathered
     PATH: "{{ ansible_env.PATH }}:/opt/go/bin"
   tags:
     - singularity
     - never
     - build
-  when: 'singularity_version not in current_singularity_version.stdout'
+  when: 'singularity.version not in current_singularity_version.stdout'
   block:
-    - name: Download singularity {{ singularity_version }}
+    - name: Download singularity {{ singularity.version }}
       get_url:
-        url: "{{ singularity_url }}"
-        dest: "~/src/singularity-{{ singularity_version }}.tar.gz"
-        checksum: "{{ singularity_checksum }}"
+        url: "{{ singularity.url }}"
+        dest: "~/src/singularity-{{ singularity.version }}.tar.gz"
+        checksum: "{{ singularity.checksum }}"
     - name: Ensure singularity exists in GOPATH
       file:
         path: ~/go/src/github.com/sylabs
@@ -157,28 +148,32 @@
         recurse: yes
     - name: Extract singularity to GOPATH
       unarchive:
-        src: "~/src/singularity-{{ singularity_version }}.tar.gz"
+        src: "~/src/singularity-{{ singularity.version }}.tar.gz"
         dest: ~/go/src/github.com/sylabs
-        creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}"
+        creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}"
         remote_src: yes
     - name: run mconfig
       command:
         argv:
           - ./mconfig
 #          - --prefix=/opt/singularity
-        creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}/builddir/Makefile"
+        creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}/builddir/Makefile"
       args:
-        chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}"
+        chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}"
     - name: Make singularity
       make:
-        chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}/builddir"
+        chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}/builddir"
         params:
           NUM_THREADS: "{{ ansible_processor_vcpus }}"
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
     - name: "Install singularity"
       make:
-        chdir: "~{{ ansible_user }}/go/src/github.com/sylabs/singularity-ce-{{ singularity_version }}/builddir"
+        chdir: "~{{ ansible_user }}/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}/builddir"
         target: install
       become: yes
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
     - name: Add singularity to the PATH
       lineinfile:
         path: "{{ item }}"
@@ -200,59 +195,48 @@
   ignore_errors: yes
 
 - name: Install OpenUCX
-  vars:
-    ucx_version: 1.11.1
-    ucx_url: https://github.com/openucx/ucx/releases/download/v1.11.1/ucx-1.11.1.tar.gz
-    ucx_checksum: sha256:29338cad18858517f96b46ff83bdd259a5899e274792cebd269717c660aa86fd
-    ucx_dir: /opt/ucx
   become: no
   tags:
     - ucx
     - never
     - build
-  when: 'ucx_version not in current_ucx_version.stdout'
+  when: 'ucx.version not in current_ucx_version.stdout'
   block:
-    - name: Download OpenUCX {{ ucx_version }}
+    - name: Download OpenUCX {{ ucx.version }}
       get_url:
-        url: "{{ ucx_url }}"
-        dest: "~/src/openucx-{{ ucx_version }}.tar.gz"
-        checksum: "{{ ucx_checksum }}"
-    - name: Uncompress OpenUCX {{ ucx_version }}
+        url: "{{ ucx.url }}"
+        dest: "~/src/openucx-{{ ucx.version }}.tar.gz"
+        checksum: "{{ ucx.checksum }}"
+    - name: Uncompress OpenUCX {{ ucx.version }}
       unarchive:
-        src: "~/src/openucx-{{ ucx_version }}.tar.gz"
+        src: "~/src/openucx-{{ ucx.version }}.tar.gz"
         dest: /dev/shm
         remote_src: yes
-#    - name: Create configure script for OpenUCX {{ ucx_version }}
+#    - name: Create configure script for OpenUCX {{ ucx.version }}
 #      command: ./autogen.sh
 #      args:
-#        chdir: "/dev/shm/ucx-{{ ucx_version }}"
-    - name: Run release configure for OpenUCX {{ ucx_version }}
-      command: ./contrib/configure-release --prefix={{ ucx_dir }}
+#        chdir: "/dev/shm/ucx-{{ ucx.version }}"
+    - name: Run release configure for OpenUCX {{ ucx.version }}
+      command: ./contrib/configure-release --prefix={{ ucx.dir }}
       args:
-        chdir: "/dev/shm/ucx-{{ ucx_version }}"
-    - name: Compile OpenUCX {{ ucx_version }}
+        chdir: "/dev/shm/ucx-{{ ucx.version }}"
+    - name: Compile OpenUCX {{ ucx.version }}
       make:
-        chdir: "/dev/shm/ucx-{{ ucx_version }}"
+        chdir: "/dev/shm/ucx-{{ ucx.version }}"
         params:
           NUM_THREADS: "{{ ansible_processor_vcpus }}"
-    - name: Install OpenUCX {{ ucx_version }} to {{ ucx_dir }}
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
+    - name: Install OpenUCX {{ ucx.version }} to {{ ucx.dir }}
       make:
-        chdir: "/dev/shm/ucx-{{ ucx_version }}"
+        chdir: "/dev/shm/ucx-{{ ucx.version }}"
         target: install
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
       become: yes
 
-- name: Set OpenMPI version info
-  set_fact:
-    mpi_version: 4.1.4
-    mpi_url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2
-    mpi_checksum: sha256:92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
-  tags:
-    - OpenMPI
-    - never
-    - build
-
 - name: Get OpenMPI version
-  command: "/opt/openmpi/{{ mpi_version }}/bin/ompi_info --version"
+  command: "/opt/openmpi/{{ mpi.version }}/bin/ompi_info --version"
   register: current_mpi_version
   ignore_errors: yes
   tags:
@@ -262,50 +246,53 @@
 
 - name: Install OpenMPI
   vars:
-    ucx_dir: /opt/ucx
     mpi_dir: /opt/openmpi
     uncompress_dir: "~{{ ansible_user }}/compile"
-    install_dir: "{{ mpi_dir }}/{{ mpi_version }}"
+    install_dir: "{{ mpi_dir }}/{{ mpi.version }}"
   tags:
     - OpenMPI
     - never
     - build
   become: no
-  when: 'mpi_version not in current_mpi_version.stdout'
+  when: 'mpi.version not in current_mpi_version.stdout'
   block:
-    - name: Download OpenMPI {{ mpi_version }}
+    - name: Download OpenMPI {{ mpi.version }}
       get_url:
-        url: "{{ mpi_url }}"
-        dest: "~/src/openmpi-{{ mpi_version }}.tar.bz2"
-        checksum: "{{ mpi_checksum }}"
+        url: "{{ mpi.url }}"
+        dest: "~/src/openmpi-{{ mpi.version }}.tar.bz2"
+        checksum: "{{ mpi.checksum }}"
     - name: Ensure {{ uncompress_dir }} exists
       file:
         path: "{{ uncompress_dir }}"
         state: directory
     - name: Uncompress OpenMPI to {{ uncompress_dir }}
       unarchive:
-        src: "~/src/openmpi-{{ mpi_version }}.tar.bz2"
+        src: "~/src/openmpi-{{ mpi.version }}.tar.bz2"
         dest: "{{ uncompress_dir }}"
-        creates: "{{ uncompress_dir }}/openmpi-{{ mpi_version }}"
+        creates: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}"
         remote_src: yes
     - name: Check OpenMPI build dir
       file:
-        path: "{{ uncompress_dir }}/openmpi-{{ mpi_version }}/build"
+        path: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         state: directory
     - name: Configure OpenMPI
-      command: "../configure --enable-static --with-singularity --with-ucx={{ ucx_dir }} --prefix={{ install_dir }}"
+      command: "../configure --enable-static --with-singularity --with-ucx={{ ucx.dir }} --prefix={{ install_dir }}"
       args:
-        chdir: "{{ uncompress_dir }}/openmpi-{{ mpi_version }}/build"
-        creates: "{{ uncompress_dir }}/openmpi-{{ mpi_version }}/build/Makefile"
+        chdir: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
+        creates: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build/Makefile"
     - name: Compile OpenMPI
       make:
-        chdir: "{{ uncompress_dir }}/openmpi-{{ mpi_version }}/build"
+        chdir: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         params:
           NUM_THREADS: "{{ ansible_processor_vcpus }}"
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
     - name: Install OpenMPI
       make:
-        chdir: "{{ uncompress_dir }}/openmpi-{{ mpi_version }}/build"
+        chdir: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         target: install
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
       become: yes
     - name: Configure paths and directories
       become: yes
@@ -364,16 +351,16 @@
             - /etc/zsh/zshenv
             - /etc/profile.d/openmpi.sh
 
-- name: Set slurm version info
-  when: slurm_version is not defined
-  set_fact:
-    slurm_version: "{{ slurm_config.slurm_version }}"
-    slurm_version_git: "{{ slurm_config.slurm_version_git }}"
-  tags:
-    - slurm
-    - slurmconf
-    - never
-    - build
+#- name: Set slurm version info
+#  when: slurm.version is not defined
+#  set_fact:
+#    slurm.version: "{{ slurm.version }}"
+#    slurm.version_git: "{{ slurm.version_git }}"
+#  tags:
+#    - slurm
+#    - slurmconf
+#    - never
+#    - build
 
 - name: Check Slurm Version
   become: no
@@ -383,12 +370,12 @@
     - never
     - build
   block:
-    - name: Set desired slurm version to {{ slurm_version }}
-      set_fact:
-        desired_slurm_version: "slurm {{ slurm_version }}"
+#    - name: Set desired slurm version to {{ slurm.version }}
+#      set_fact:
+#        desired_slurm_version: "slurm {{ slurm.version }}"
     - name: Check slurm directory
       stat:
-        path: /opt/slurm/{{ slurm_version }}
+        path: /opt/slurm/{{ slurm.version }}
       register: current_slurm_version_dir_exists
     - name: Slurm version is incorrect
       command: /bin/false
@@ -398,10 +385,10 @@
       git:
         repo: 'https://github.com/SchedMD/slurm.git'
         dest: ~/src/slurm
-        version: "slurm-{{ slurm_version_git }}"
+        version: "slurm-{{ slurm.version_git }}"
 
     - name: ./configure slurm build
-      command: ./configure --prefix=/opt/slurm/{{ slurm_version }} --enable-pam --with-json
+      command: ./configure --prefix=/opt/slurm/{{ slurm.version }} --enable-pam --with-json
       args:
         chdir: ~/src/slurm
 
@@ -410,6 +397,8 @@
         chdir: ~/src/slurm
         params:
           NUM_THREADS: "{{ ansible_processor_vcpus }}"
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
 
     - name: Make slurm contrib
       make:
@@ -417,11 +406,13 @@
         target: contrib
         params:
           NUM_THREADS: "{{ ansible_processor_vcpus }}"
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
 
     - name: Make sure install destination exists
       become: yes
       file:
-        path: /opt/slurm/{{ slurm_version }}/etc
+        path: /opt/slurm/{{ slurm.version }}/etc
         state: directory
         recurse: yes
         
@@ -457,7 +448,7 @@
         path: "{{ item }}"
         create: yes
         regexp: '^.*PATH..opt.slurm.*[^s]bin...PATH.*'
-        line: 'export PATH=/opt/slurm/{{ slurm_version }}/bin:${PATH}'
+        line: 'export PATH=/opt/slurm/{{ slurm.version }}/bin:${PATH}'
       loop:
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
@@ -466,7 +457,7 @@
       lineinfile:
         path: "{{ item }}"
         regexp: '^.*PATH..opt.slurm.*sbin...PATH.*'
-        line: 'export PATH=/opt/slurm/{{ slurm_version }}/sbin:${PATH}'
+        line: 'export PATH=/opt/slurm/{{ slurm.version }}/sbin:${PATH}'
       loop:
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
@@ -475,7 +466,7 @@
       lineinfile:
         path: "{{ item }}"
         regexp: '^.*MANPATH..opt.slurm.*share.man...MANPATH.*'
-        line: 'export MANPATH=/opt/slurm/{{ slurm_version }}/share/man:${MANPATH}'
+        line: 'export MANPATH=/opt/slurm/{{ slurm.version }}/share/man:${MANPATH}'
       loop:
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
@@ -484,7 +475,7 @@
       lineinfile:
         path: "{{ item }}"
         regexp: '^.*INCLUDE..opt.slurm.*include...INCLUDE.*'
-        line: 'export INCLUDE=/opt/slurm/{{ slurm_version }}/include:${INCLUDE}'
+        line: 'export INCLUDE=/opt/slurm/{{ slurm.version }}/include:${INCLUDE}'
       loop:
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
@@ -493,7 +484,7 @@
       lineinfile:
         path: "{{ item }}"
         regexp: '^.*LD_LIBRARY_PATH..opt.slurm.*lib...LD_LIBRARY_PATH.*'
-        line: 'export LD_LIBRARY_PATH=/opt/slurm/{{ slurm_version }}/lib:${LD_LIBRARY_PATH}'
+        line: 'export LD_LIBRARY_PATH=/opt/slurm/{{ slurm.version }}/lib:${LD_LIBRARY_PATH}'
       loop:
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
@@ -502,7 +493,7 @@
 # - name: Copy Slurm Config
 #   copy:
 #     src: /home/slurm/src/slurm/etc/slurm.conf.example
-#     dest: /opt/slurm/{{ slurm_version }}/etc/slurm.conf
+#     dest: /opt/slurm/{{ slurm.version }}/etc/slurm.conf
 #     remote_src: yes
 #     owner: slurm
 
@@ -516,16 +507,16 @@
   block:
     - name: Ensure slurm group exists
       group:
-        name: "{{ slurm_config.group.name }}"
+        name: "{{ slurm.group_name }}"
         state: present
         system: yes
     - name: Ensure slurm user exists
       user:
-        name: "{{ slurm_config.user.name }}"
+        name: "{{ slurm.user_name }}"
         comment: "System user for slurm"
         state: present
         system: yes
-        group: "{{ slurm_config.group.name }}"
+        group: "{{ slurm.group_name }}"
 #        home: "/home/slurm"
         skeleton: /etc/skel
         shell: /bin/bash
@@ -533,8 +524,8 @@
       file:
         path: /var/spool/slurmd
         state: directory
-        owner: "{{ slurm_config.user.name }}"
-        group: "{{ slurm_config.group.name }}"
+        owner: "{{ slurm.user_name }}"
+        group: "{{ slurm.group_name }}"
         mode: "ug=rwx,o=rx"
       tags: "slurmd"
 
@@ -542,31 +533,31 @@
       file:
         path: /var/log/slurm
         state: directory
-        owner: "{{ slurm_config.user.name }}"
-        group: "{{ slurm_config.group.name }}"
+        owner: "{{ slurm.user_name }}"
+        group: "{{ slurm.group_name }}"
         mode: "ug=rwx,o=rx"
 
     - name: Ensure slurm etc dir exists
       file:
-        path: /opt/slurm/{{ slurm_version }}/etc
+        path: /opt/slurm/{{ slurm.version }}/etc
         state: directory
-        owner: "{{ slurm_config.user.name }}"
-        group: "{{ slurm_config.group.name }}"
+        owner: "{{ slurm.user_name }}"
+        group: "{{ slurm.group_name }}"
         recurse: yes
 
     - name: Create slurm.conf
       template:
         src: slurm.conf.j2
-        dest: /opt/slurm/{{ slurm_version }}/etc/slurm.conf
-        owner: "{{ slurm_config.user.name }}"
-        group: "{{ slurm_config.group.name }}"
+        dest: /opt/slurm/{{ slurm.version }}/etc/slurm.conf
+        owner: "{{ slurm.user_name }}"
+        group: "{{ slurm.group_name }}"
         mode: "ug=rw,o=r"
     - name: Create cgroup.conf
       template:
         src: cgroup.conf
-        dest: /opt/slurm/{{ slurm_version }}/etc/cgroup.conf
-        owner: "{{ slurm_config.user.name }}"
-        group: "{{ slurm_config.group.name }}"
+        dest: /opt/slurm/{{ slurm.version }}/etc/cgroup.conf
+        owner: "{{ slurm.user_name }}"
+        group: "{{ slurm.group_name }}"
         mode: "u=rw,g=r,o=r"
 
 - name: Ensure host has correct munge key
@@ -639,21 +630,23 @@
 
 - name: configure ldap.conf
   tags:
-   - ldap
-   - ldap.conf
-   - never
+    - ldap
+    - ldap.conf
+    - never
     - build
   block:
-    - name: Set BASE for {{ ldap_config.ldap_dns_domain_name}}
+    - name: Set BASE for {{ ldap_dns_domain_name }}
+      when: ldap_dns_domain_name is defined
       lineinfile:
         path: /etc/ldap/ldap.conf
         regexp: "^BASE.*"
-        line: "BASE   dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+        line: "BASE   dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
     - name: Set URI for ldap
+      when: ldap_host is defined
       lineinfile:
         path: /etc/ldap/ldap.conf
         regexp: "^URI.*"
-        line:  "URI    ldap://{{ ldap_config.ldap_host }}"
+        line:  "URI    ldap://{{ ldap_host }}"
     - name: Set VERSION for ldap
       lineinfile:
         path: /etc/ldap/ldap.conf
@@ -666,7 +659,7 @@
     - never
     - build
   vars:
-    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
+    rootdn_passwd: "{{ lookup('env', ldap.password_env_variable) }}"
   when: rootdn_passwd != ''
   lineinfile:
     create: yes
