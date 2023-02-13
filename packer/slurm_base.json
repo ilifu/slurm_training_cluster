@@ -32,11 +32,6 @@
       ],
       "extra_arguments": [
         "--extra-vars", "ansible_python_interpreter=/usr/bin/python3",
-        "--extra-vars", "@{{user `slurm_config_file`}}",
-        "--extra-vars", "@{{ user `ldap_config_file` }}",
-        "--extra-vars", "@{{ user `hosts_config_file` }}",
-        "--extra-vars", "@{{ user `ceph_config_file` }}",
-        "--extra-vars", "@{{ user `software_config_file` }}",
         "--tags", "build"
       ]
     }
