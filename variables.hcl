@@ -19,20 +19,20 @@ variable "build_flavor" {
   default = "ilifu-B"
 }
 
-variable "base_image_name" {
-  type = string
-  description = "The name of the base image"
-}
+#variable "base_image_name" {
+#  type = string
+#  description = "The name of the base image"
+#}
 
 variable "ldap_image_name" {
   type = string
   description = "The name of the ldap image"
 }
 
-variable "slurm_base_image_name" {
-  type = string
-  description = "The name of the slurm base image"
-}
+#variable "slurm_base_image_name" {
+#  type = string
+#  description = "The name of the slurm base image"
+#}
 
 variable "database_image_name" {
   type = string

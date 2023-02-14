@@ -1,6 +1,11 @@
+locals {
+  base_image_name = "${var.image_name_prefix}-base-${var.image_name_suffix}"
+  slurm_base_image_name = "${var.image_name_prefix}-slurm-base-${var.image_name_suffix}"
+}
+
 source "openstack" "base_image" {
   flavor       = "${var.build_flavor}"
-  image_name   = "${var.image_name_prefix}-${var.base_image_name}-${var.image_name_suffix}"
+  image_name   = "${local.base_image_name}"
   source_image = "${var.source_image_id}"
 #  external_source_image_format = "qcow2"
   ssh_username = "ubuntu"
@@ -18,8 +23,8 @@ source "openstack" "base_image" {
 
 source "openstack" "slurm_image" {
   flavor       = "${var.build_flavor}"
-  image_name   = "${var.image_name_prefix}-${var.slurm_base_image_name}-${var.image_name_suffix}"
-  source_image_name = "${var.image_name_prefix}-${var.base_image_name}-${var.image_name_suffix}"
+  image_name   = "${local.slurm_base_image_name}"
+  source_image_name = "${local.base_image_name}"
 #  external_source_image_format = "qcow2"
   ssh_username = "ubuntu"
   networks = "${var.network_ids}"
