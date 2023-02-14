@@ -3,7 +3,7 @@
 - name: Ensure ceph software is installed
   apt:
     name: ceph-common
-  tags: ['ceph', 'cephfs']
+  tags: ['ceph', 'cephfs', 'build']
 
 - name: Configure ceph
   tags: ['ceph', 'cephfs']
