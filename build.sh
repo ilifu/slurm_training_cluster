@@ -26,14 +26,10 @@ if grep -q "TODO:CONFIGURE_ME" $VARIABLES_FILE; then
   exit 1
 fi
 
-echo "inspecting packer…"
-
 BASE_IMAGE_NAME=$(packer inspect . | grep 'local.base_image_name' | sed 's/.*: "\(.*\)"$/\1/')
 SLURM_BASE_IMAGE_NAME=$(packer inspect . | grep 'local.slurm_base_image_name' | sed 's/.*: "\(.*\)"$/\1/')
 LDAP_IMAGE_NAME=$(packer inspect . | grep 'local.ldap_image_name' | sed 's/.*: "\(.*\)"$/\1/')
 DATABASE_IMAGE_NAME=$(packer inspect . | grep 'local.database_image_name' | sed 's/.*: "\(.*\)"$/\1/')
-
-echo "Done inspecting packer."
 
 echo "" | openstack -q image list &> /dev/null || { echo -e "${RED}Openstack seemingly not connected. Remember to source your '?-openrc.sh' file.\nAborting build.${NC}"; exit 1; }
 
