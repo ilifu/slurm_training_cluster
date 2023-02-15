@@ -26,7 +26,7 @@ slurm:
   group_name: "slurm"
   db_name: "slurm_db"
   db_user: "slurm"
-  slurm_db_password_env_var: "SLURM_DB_PASSWORD"
+  slurm_db_password_env_variable: "SLURM_DB_PASSWORD"
   dbd_port: "7031"
   ctld_port: "6817"
   slurmd_port: "6818"
@@ -34,3 +34,5 @@ slurm:
 
 ldap:
   password_env_variable: "LDAP_PASSWORD"
+  organisation_env_variable: "LDAP_ORGANISATION"
+  dns_domain_name_env_variable: "LDAP_DOMAIN"

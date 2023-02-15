@@ -1,6 +1,6 @@
 - name: Install mariadb and configure
   vars:
-    db_password: "{{ lookup('env', slurm.db_password_env_variable) }}"
+    db_password: "{{ lookup('env', slurm.slurm_db_password_env_variable) }}"
   block:
     - name: Required packages
       apt:
@@ -57,7 +57,7 @@
 
     - name: database password not defined
       debug:
-        msg: "You need to define the environmental variable '{{ slurm.db_password_env_variable }}' for database configuration"
+        msg: "You need to define the environmental variable '{{ slurm.slurm_db_password_env_variable }}' for database configuration"
       when: db_password==''
     - name: Install and configure mariadb
       when: db_password != ''
@@ -75,7 +75,7 @@
       block:
         - name: database password not defined
           debug:
-            msg: "You need to define the environmental variable '{{ slurm.db_password_env_variable }}' for database configuration"
+            msg: "You need to define the environmental variable '{{ slurm.slurm_db_password_env_variable }}' for database configuration"
           when: db_password==''
         - name: configure slurmdbd
           when: db_password != ''
