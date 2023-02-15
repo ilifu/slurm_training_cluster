@@ -7,7 +7,7 @@
 - hosts: slurm_headnode
   roles:
     - slurm_headnode
-    - nextflow
+#    - nextflow
     - software
   tags:
     - slurm
@@ -32,4 +32,4 @@
 #    - nextflow
   tags:
     - slurm
-    
+
