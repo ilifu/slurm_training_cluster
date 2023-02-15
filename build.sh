@@ -34,6 +34,8 @@ DATABASE_IMAGE_NAME=$(packer inspect . | grep 'local.database_image_name' | sed 
 
 echo "" | openstack -q image list &> /dev/null || { echo -e "${RED}Openstack seemingly not connected. Remember to source your '?-openrc.sh' file.\nAborting build.${NC}"; exit 1; }
 
+echo -e "Checking for existing images and building them if necessary…"
+
 if openstack image show "${BASE_IMAGE_NAME}" &> /dev/null
 then
   echo -e "Openstack image '${GREEN}${BASE_IMAGE_NAME}${NC}' found. Not rebuilding."
@@ -60,7 +62,7 @@ else
   TO_BUILD+=("step3.openstack.ldap_image")
 fi
 
-if [[ ! " ${TO_BUILD[*]} " =~ " step2.openstack.slurm_image " ]]; then  # only build DB is slurm image already exists
+if [[ ! " ${TO_BUILD[*]} " =~ " step2.openstack.slurm_image " ]]; then  # only build DB if slurm image already exists
   if openstack image show "${DATABASE_IMAGE_NAME}" &> /dev/null
   then
     echo -e "Openstack image '${GREEN}${DATABASE_IMAGE_NAME}${NC}' found. Not rebuilding."
@@ -70,9 +72,11 @@ if [[ ! " ${TO_BUILD[*]} " =~ " step2.openstack.slurm_image " ]]; then  # only b
   fi
 fi
 
-joined_steps=$(join_arr , "${TO_BUILD[@]}")
-echo -e "Building images: ${ORANGE}${joined_steps}${NC}"
-packer build -only="${joined_steps}" .
+if [ ! ${#join_arr[@]} -eq 0 ]; then
+  joined_steps=$(join_arr , "${TO_BUILD[@]}")
+  echo -e "Building images: ${ORANGE}${joined_steps}${NC}"
+  packer build -only="${joined_steps}" .
+fi
 
 if openstack image show "${DATABASE_IMAGE_NAME}" &> /dev/null
 then
@@ -81,6 +85,8 @@ else
   echo -e "Openstack image '${ORANGE}${DATABASE_IMAGE_NAME}${NC}' not found. Building."
   packer build -only="step4.openstack.database_image" .
 fi
+
+echo -e "Completed building images. Now launching terraform…"
 
 
 
