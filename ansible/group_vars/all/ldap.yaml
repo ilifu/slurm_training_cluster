@@ -1,0 +1,4 @@
+ldap:
+  password_env_variable: "LDAP_PASSWORD"
+  organisation_env_variable: "LDAP_ORGANISATION"
+  dns_domain_name_env_variable: "LDAP_DOMAIN"

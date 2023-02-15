@@ -1,0 +1,4 @@
+mpi:
+  version: "4.1.4"
+  url: "https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2"
+  checksum: "sha256:92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d"
