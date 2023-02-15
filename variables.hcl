@@ -19,20 +19,10 @@ variable "build_flavor" {
   default = "ilifu-B"
 }
 
-#variable "base_image_name" {
-#  type = string
-#  description = "The name of the base image"
-#}
-
 variable "ldap_image_name" {
   type = string
   description = "The name of the ldap image"
 }
-
-#variable "slurm_base_image_name" {
-#  type = string
-#  description = "The name of the slurm base image"
-#}
 
 variable "database_image_name" {
   type = string
@@ -59,16 +49,6 @@ variable "security_groups_ids" {
   description = "The security groups"
 }
 
-#variable "slurm_version" {
-#  type = string
-#  description = "The slurm version"
-#}
-#
-#variable "slurm_version_git" {
-#  type = string
-#  description = "The slurm version git"
-#}
-
 variable "cluster_name" {
   type = string
   description = "The cluster name"
@@ -88,51 +68,6 @@ variable "database_host" {
   type = string
   description = "The database host"
 }
-
-#variable "slurm_user" {
-#  type = string
-#  description = "The slurm user"
-#}
-#
-#variable "slurm_group" {
-#  type = string
-#  description = "The slurm group"
-#}
-#
-#variable "slurm_db_name" {
-#  type = string
-#  description = "The slurm db name"
-#}
-#
-#variable "slurm_db_user" {
-#  type = string
-#  description = "The slurm db user"
-#}
-#
-#variable "slurm_db_password_env_var" {
-#  type = string
-#  description = "The slurm db password"
-#}
-#
-#variable "slurm_dbd_port" {
-#  type = string
-#  description = "The slurm dbd port"
-#}
-#
-#variable "slurm_ctld_port" {
-#  type = string
-#  description = "The slurm ctld port"
-#}
-#
-#variable "slurm_slurmd_port" {
-#  type = string
-#  description = "The slurm slurmd port"
-#}
-#
-#variable "slurm_spool_dir" {
-#  type = string
-#  description = "The slurm spool dir"
-#}
 
 variable "slurm_worker_node_name_prefix" {
   type = string
