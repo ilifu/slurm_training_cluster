@@ -141,6 +141,6 @@ build {
     ]
     extra_arguments = ["--tags", "build"]
     user = "ubuntu"
-    groups = ["db_server"]
+    groups = ["slurm_database"]
   }
 }

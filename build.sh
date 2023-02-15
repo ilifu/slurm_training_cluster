@@ -31,6 +31,7 @@ SLURM_BASE_IMAGE_NAME=$(packer inspect . | grep 'local.slurm_base_image_name' | 
 LDAP_IMAGE_NAME=$(packer inspect . | grep 'local.ldap_image_name' | sed 's/.*: "\(.*\)"$/\1/')
 DATABASE_IMAGE_NAME=$(packer inspect . | grep 'local.database_image_name' | sed 's/.*: "\(.*\)"$/\1/')
 
+
 echo "" | openstack -q image list &> /dev/null || { echo -e "${RED}Openstack seemingly not connected. Remember to source your '?-openrc.sh' file.\nAborting build.${NC}"; exit 1; }
 
 if openstack image show "${BASE_IMAGE_NAME}" &> /dev/null
@@ -49,7 +50,6 @@ then
 else
   echo -e "Openstack image '${ORANGE}${SLURM_BASE_IMAGE_NAME}${NC}' not found. Adding to build list."
   TO_BUILD+=("step2.openstack.slurm_image")
-#  packer build -only="step2.openstack.slurm_image" .
 fi
 
 if openstack image show "${LDAP_IMAGE_NAME}" &> /dev/null
@@ -58,18 +58,29 @@ then
 else
   echo -e "Openstack image '${ORANGE}${LDAP_IMAGE_NAME}${NC}' not found. Adding to build list."
   TO_BUILD+=("step3.openstack.ldap_image")
-#  packer build -only="step2.openstack.slurm_image" .
 fi
 
-if openstack image show "${DATABASE_IMAGE_NAME}" &> /dev/null
-then
-  echo -e "Openstack image '${GREEN}${DATABASE_IMAGE_NAME}${NC}' found. Not rebuilding."
-else
-  echo -e "Openstack image '${ORANGE}${DATABASE_IMAGE_NAME}${NC}' not found. Adding to build list."
-  TO_BUILD+=("step4.openstack.database_image")
-#  packer build -only="step2.openstack.slurm_image" .
+if [[ ! " ${TO_BUILD[*]} " =~ " step2.openstack.slurm_image " ]]; then  # only build DB is slurm image already exists
+  if openstack image show "${DATABASE_IMAGE_NAME}" &> /dev/null
+  then
+    echo -e "Openstack image '${GREEN}${DATABASE_IMAGE_NAME}${NC}' found. Not rebuilding."
+  else
+    echo -e "Openstack image '${ORANGE}${DATABASE_IMAGE_NAME}${NC}' not found. Adding to build list."
+    TO_BUILD+=("step4.openstack.database_image")
+  fi
 fi
 
 joined_steps=$(join_arr , "${TO_BUILD[@]}")
 echo -e "Building images: ${ORANGE}${joined_steps}${NC}"
 packer build -only="${joined_steps}" .
+
+if openstack image show "${DATABASE_IMAGE_NAME}" &> /dev/null
+then
+  echo -e "Openstack image '${GREEN}${DATABASE_IMAGE_NAME}${NC}' found. Not rebuilding."
+else
+  echo -e "Openstack image '${ORANGE}${DATABASE_IMAGE_NAME}${NC}' not found. Building."
+  packer build -only="step4.openstack.database_image" .
+fi
+
+
+

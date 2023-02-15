@@ -18,87 +18,102 @@
   delay: 15
   until: apt_res is success
 
-- name: update debconf selections
-  block:
-    - name: Configure slapd organisation
-      debconf:
-        name: slapd
-        question: shared/organization
-        vtype: 'string'
-        value: "{{ ldap_config.organisation }}"
-      register: ldap_org
-    - name: Configure slapd domain
-      debconf:
-        name: slapd
-        question: slapd/domain
-        vtype: 'string'
-        value: "{{ ldap_config.ldap_dns_domain_name }}"
-      register: ldap_domain
-
-- name: Reconfigure slapd
-  when: ldap_org.changed or ldap_domain.changed
-  command: dpkg-reconfigure -f noninteractive slapd
-  become: yes
-
-- name: Copy ldap ssh key schema
-  copy:
-    src: openssh-lpk.ldif
-    dest: /etc/ldap/schema/
-  become: yes
-
-- name: Add ssh key schema
-  command: ldapadd -Y EXTERNAL -H ldapi:/// -f openssh-lpk.ldif
-  args:
-    chdir: /etc/ldap/schema/
-  become: yes
-  register: add_sshkey_schema
-  failed_when: add_sshkey_schema.rc != 0 and "Duplicate attributeType" not in add_sshkey_schema.stderr
-  changed_when: add_sshkey_schema.rc == 0
-
-- name: Set rootDN passwd
-  tags: ldap_passwd
+- name: Update and configure ldap
   vars:
-    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
-  when: rootdn_passwd != ''
+    ldap_organisation: "{{ lookup('env', ldap.organisation_env_variable) }}"
+    ldap_dns_domain_name: "{{ lookup('env', ldap.dns_domain_name_env_variable) }}"
+    rootdn_passwd: "{{ lookup('env', ldap.password_env_variable) }}"
   block:
-    - name: get SSHA of ldap passwd
-      command: slappasswd -s "{{ rootdn_passwd }}"
-      register: slappasswd_output
-    - name: Create changeroot ldif
-      template:
-        src: changerootpw.ldif
-        dest: /tmp/
-    - name: Update rootDN ldap password
-      command: ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/changerootpw.ldif
+    - name: We need those variables defined
+      when: ldap_organisation == '' or ldap_dns_domain_name == ''
+      debug:
+        msg: "You need to define the environmental variables '{{ ldap.organisation_env_variable }}' and '{{ ldap.dns_domain_name_env_variable }}' for ldap configuration"
+    - name: update debconf selections
+      when: ldap_organisation != '' and ldap_dns_domain_name != ''
+      block:
+        - name: Configure slapd organisation
+          debconf:
+            name: slapd
+            question: shared/organization
+            vtype: 'string'
+            value: "{{ ldap_organisation }}"
+          register: ldap_org
+        - name: Configure slapd domain
+          debconf:
+            name: slapd
+            question: slapd/domain
+            vtype: 'string'
+            value: "{{ ldap_dns_domain_name }}"
+          register: ldap_domain
+
+        - name: Reconfigure slapd
+          when: ldap_org.changed or ldap_domain.changed
+          command: dpkg-reconfigure -f noninteractive slapd
+          become: yes
+
+    - name: Copy ldap ssh key schema
+      copy:
+        src: openssh-lpk.ldif
+        dest: /etc/ldap/schema/
       become: yes
 
-- name: Ensure users OU exists
-  tags: ldap_ous
-  vars:
-    dcs: "dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
-    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
-  when: rootdn_passwd != ''
-  ldap_entry:
-    dn: "ou=users,{{ dcs }}"
-    objectClass: organizationalUnit
-    bind_dn: "cn=admin,{{ dcs }}"
-    bind_pw: "{{ rootdn_passwd }}"
+    - name: Add ssh key schema
+      command: ldapadd -Y EXTERNAL -H ldapi:/// -f openssh-lpk.ldif
+      args:
+        chdir: /etc/ldap/schema/
+      become: yes
+      register: add_sshkey_schema
+      failed_when: add_sshkey_schema.rc != 0 and "Duplicate attributeType" not in add_sshkey_schema.stderr
+      changed_when: add_sshkey_schema.rc == 0
 
-- name: Ensure default user group exists
-  tags: ldap_groups
-  vars:
-    dcs: "dc={% for element in ldap_config.ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
-    rootdn_passwd: "{{ lookup('env', ldap_config.password_env_variable) }}"
-  when: rootdn_passwd != ''
-  ldap_entry:
-    dn: "cn=training,ou=users,{{ dcs }}"
-    objectClass:
-      - posixGroup
-      - top
-    attributes:
-      gidNumber: 20000
-    bind_dn: "cn=admin,{{ dcs }}"
-    bind_pw: "{{ rootdn_passwd }}"
+    - name: passwd must be defined
+      when: rootdn_passwd == ''
+      debug:
+        msg: "You need to define the environmental variable '{{ ldap.password_env_variable }}' for ldap configuration"
+    - name: Set rootDN passwd
+      tags: ldap_passwd
+      when: rootdn_passwd != ''
+      block:
+        - name: get SSHA of ldap passwd
+          when: rootdn_passwd != ''
+          command: slappasswd -s "{{ rootdn_passwd }}"
+          register: slappasswd_output
+        - name: Create changeroot ldif
+          when: rootdn_passwd != ''
+          template:
+            src: changerootpw.ldif
+            dest: /tmp/
+        - name: Update rootDN ldap password
+          when: rootdn_passwd != ''
+          command: ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/changerootpw.ldif
+          become: yes
+
+    - name: Configure OUs and groups
+      vars:
+        dcs: "dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+      block:
+        - name: Ensure users OU exists
+          tags: ldap_ous
+
+          when: rootdn_passwd != '' and ldap_dns_domain_name != ''
+          ldap_entry:
+            dn: "ou=users,{{ dcs }}"
+            objectClass: organizationalUnit
+            bind_dn: "cn=admin,{{ dcs }}"
+            bind_pw: "{{ rootdn_passwd }}"
+
+        - name: Ensure default user group exists
+          tags: ldap_groups
+          when: rootdn_passwd != ''
+          ldap_entry:
+            dn: "cn=training,ou=users,{{ dcs }}"
+            objectClass:
+              - posixGroup
+              - top
+            attributes:
+              gidNumber: 20000
+            bind_dn: "cn=admin,{{ dcs }}"
+            bind_pw: "{{ rootdn_passwd }}"
 
 
 
