@@ -94,7 +94,6 @@
       block:
         - name: Ensure users OU exists
           tags: ldap_ous
-
           when: rootdn_passwd != '' and ldap_dns_domain_name != ''
           ldap_entry:
             dn: "ou=users,{{ dcs }}"
@@ -115,15 +114,3 @@
             bind_dn: "cn=admin,{{ dcs }}"
             bind_pw: "{{ rootdn_passwd }}"
 
-
-
-# - name: Firewall rule -- allow port 389/LDAP traffic
-#   iptables:
-#     action: insert
-#     chain: INPUT
-#     destination_port: '389'
-#     src_range: 192.168.101.100-192.168.101.255
-#     jump: ACCEPT
-#     protocol: tcp
-#   tags:
-#     - "iptables"  
