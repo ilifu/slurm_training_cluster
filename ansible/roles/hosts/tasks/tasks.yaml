@@ -4,11 +4,11 @@
     regexp: ".*\\s{{ item.value }}"
     line: "{{ item.key }}    {{ item.value }}"
   with_dict:
-    - "{{ hosts }}"
+    - "{{ cluster_hosts }}"
 
 - name: Set hostname
   hostname:
-    name: "{{ hosts[ansible_default_ipv4.address] }}" 
+    name: "{{ cluster_hosts[ansible_default_ipv4.address] }}"
 #    debug:
 #      msg: "HOSTS BE LIKE: {{ hosts }}"
 #     msg: "{{ hosts[ansible_default_ipv4.address] }}"
