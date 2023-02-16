@@ -59,6 +59,21 @@ variable "organisation" {
   description = "The organisation"
 }
 
+variable "database_flavor" {
+  type = string
+  description = "The database VM flavor"
+}
+
+variable "controller_flavor" {
+  type = string
+  description = "The controller VM flavor"
+}
+
+variable "ldap_flavor" {
+  type = string
+  description = "The ldap VM flavor"
+}
+
 variable "controller_host" {
   type = string
   description = "The controller host"
@@ -81,12 +96,22 @@ variable "slurm_worker_count" {
 
 variable "slurm_worker_flavor" {
   type = string
-  description = "The slurm worker flavor"
+  description = "The slurm worker VM flavor"
 }
 
 variable "ldap_host" {
   type = string
   description = "The ldap host"
+}
+
+variable "login_host" {
+  type = string
+  description = "The login host"
+}
+
+variable "login_flavor" {
+  type = string
+  description = "The login VM flavor"
 }
 
 variable "ldap_dns_domain_name" {
@@ -97,4 +122,24 @@ variable "ldap_dns_domain_name" {
 variable "ldap_password_env_variable" {
   type = string
   description = "The ldap password"
+}
+
+variable "ssh_public_key" {
+  type = string
+  description = "The ssh public key"
+}
+
+variable "cidr_prefix" {
+  type = string
+  description = "The cidr prefix"
+}
+
+variable "cidr_suffix" {
+  type = string
+  description = "The cidr suffix"
+}
+
+variable "floating_ip_pool_name" {
+  type = string
+  description = "The floating ip pool"
 }
