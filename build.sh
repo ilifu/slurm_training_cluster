@@ -88,5 +88,4 @@ fi
 
 echo -e "Completed building images. Now launching terraform…"
 
-
-
+terraform init
