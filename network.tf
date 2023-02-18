@@ -16,6 +16,21 @@ data "openstack_networking_network_v2" "public" {
   name = var.floating_ip_pool_name
 }
 
+data "openstack_networking_network_v2" "ceph_net" {
+  name = var.ceph_net_name
+}
+
+data "openstack_networking_subnet_v2" "ceph_subnet" {
+  name = var.ceph_subnet_name
+}
+
+resource "openstack_sharedfilesystem_sharenetwork_v2" "cephfs_sharenetwork" {
+  name              = "${var.image_name_prefix}_slurm_sharenetwork"
+  description       = "cephfs share network"
+  neutron_net_id    = data.openstack_networking_network_v2.ceph_net.id
+  neutron_subnet_id = data.openstack_networking_subnet_v2.ceph_subnet.id
+}
+
 resource "openstack_networking_floatingip_v2" "slurm_float_ip" {
   pool = var.floating_ip_pool_name
 }
@@ -25,7 +40,6 @@ resource "openstack_networking_router_v2" "slurm_router" {
   admin_state_up      = true
   external_network_id = data.openstack_networking_network_v2.public.id
 }
-
 
 resource "openstack_networking_router_interface_v2" "slurm_router_interface" {
   router_id = openstack_networking_router_v2.slurm_router.id

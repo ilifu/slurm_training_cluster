@@ -29,6 +29,9 @@ resource "openstack_compute_instance_v2" "login_node" {
   network {
     name = openstack_networking_network_v2.slurm_network.name
   }
+  network {
+    name = data.openstack_networking_network_v2.ceph_net.name
+  }
 }
 
 resource "openstack_compute_floatingip_associate_v2" "slurm_fip" {
@@ -45,5 +48,8 @@ resource "openstack_compute_instance_v2" "compute_nodes" {
   security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name]
   network {
     name = openstack_networking_network_v2.slurm_network.name
+  }
+  network {
+    name = data.openstack_networking_network_v2.ceph_net.name
   }
 }

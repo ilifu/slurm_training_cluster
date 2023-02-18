@@ -143,3 +143,13 @@ variable "floating_ip_pool_name" {
   type = string
   description = "The floating ip pool"
 }
+
+variable "ceph_net_name" {
+  type = string
+  description = "The ceph net name"
+}
+
+variable "ceph_subnet_name" {
+  type = string
+  description = "The ceph subnet name"
+}
