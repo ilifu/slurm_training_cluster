@@ -85,3 +85,18 @@ resource "openstack_networking_secgroup_rule_v2" "slurmd" {
   remote_ip_prefix = "${var.cidr_prefix}/${var.cidr_suffix}"
   security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
 }
+
+resource "openstack_networking_secgroup_v2" "ldap_server" {
+  name        = "${var.image_name_prefix}-ldap-server"
+  description = "ports that need to be open for ldap traffic to server"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "ldap_server" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 389
+  port_range_max    = 389
+  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
+  security_group_id = openstack_networking_secgroup_v2.ldap_server.id
+}

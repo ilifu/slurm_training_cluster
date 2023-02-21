@@ -6,7 +6,7 @@ ansible_ssh_private_key_file=${ssh_key_location}
 ansible_user=ubuntu
 
 [all:children]
-ldap
+ldap_server
 slurm
 
 [ldap_server]
