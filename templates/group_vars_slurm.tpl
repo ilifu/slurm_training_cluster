@@ -1,4 +1,8 @@
 ---
+cluster_name: "${cluster_name}"
+organisation: "${organisation}"
+controller_host: "${controller_host}"
+database_host: "${database_host}"
 ceph_mounts:
 %{ for mount in ceph_mounts ~}
   - ${ mount.name }:

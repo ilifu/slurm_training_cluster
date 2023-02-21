@@ -9,7 +9,7 @@ ansible_user=ubuntu
 ldap
 slurm
 
-[ldap]
+[ldap_server]
 ldap ansible_host=${ldap_node.access_ip_v4} private_ip=${ldap_node.access_ip_v4}
 
 [slurm]
