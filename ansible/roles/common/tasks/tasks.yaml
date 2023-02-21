@@ -120,12 +120,7 @@
 #     src: 'extra_interfaces.yaml'
 #     dest: '/etc/netplan/'
 
-- name: Include ceph tasks
-  when: ceph_mounts is defined
-  tags: ['ceph', 'cephfs']
-  include_tasks:
-    file: ceph.yaml
-  loop: "{{ ceph_mounts }}"
+
 
 #- name: Ensure all the IPs are up
 #  command: dhcpcd5 --reconfigure

@@ -6,6 +6,7 @@
 
 - hosts: slurm_headnode
   roles:
+    - ceph
     - slurm_headnode
 #    - nextflow
     - software
@@ -26,8 +27,9 @@
     - slurm
     - controller
 
-- hosts: slurm_worker
+- hosts: slurm_compute
   roles:
+    - ceph
     - slurm_worker
 #    - nextflow
   tags:

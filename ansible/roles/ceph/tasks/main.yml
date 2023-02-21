@@ -1,0 +1,14 @@
+---
+# tasks file for ceph
+
+- name: Ensure ceph software is installed
+  apt:
+    name: ceph-common
+  tags: ['ceph', 'cephfs', 'build']
+
+- name: Mount ceph filesystems
+  when: ceph_mounts is defined
+  tags: [ 'ceph', 'cephfs' ]
+  include_tasks:
+    file: mount.yaml
+  loop: "{{ ceph_mounts }}"
