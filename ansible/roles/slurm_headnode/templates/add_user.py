@@ -20,11 +20,11 @@ from ldap3 import (
 from ldap3.utils.hashed import hashed
 from sshpubkeys import InvalidKeyError, SSHKey
 
-LDAP_ADMIN = 'cn=admin,dc=training,dc=ilifu,dc=ac,dc=za'
+LDAP_ADMIN = 'cn=admin,{{ dcs }}'
 LDAP_PORT = 389
-LDAP_SEARCH_BASE = 'dc=training,dc=ilifu,dc=ac,dc=za'
-LDAP_SERVER_ADDRESS = 'ldap'
-LDAP_USER_BASE = 'cn={username},ou=users,dc=training,dc=ilifu,dc=ac,dc=za'
+LDAP_SEARCH_BASE = '{{ dcs }}'
+LDAP_SERVER_ADDRESS = '{{ ldap_host }}'
+LDAP_USER_BASE = 'cn={username},ou=users,{{ dcs }}'
 
 
 logger = getLogger()
@@ -123,7 +123,7 @@ def main():
         logger.debug(f'Creating user {args.username}')
         connection = get_ldap_connection()
         uid = get_next_uid()
-        create_user(connection, args.username, args.givenname, 20000, args.surname, uid, '/bin/bash', args.ssh_key, f'/cbio/users/{args.username}', 'OkayFixThisSoon')
+        create_user(connection, args.username, args.givenname, 20000, args.surname, uid, '/bin/bash', args.ssh_key, f'/users/{args.username}', 'OkayFixThisSoon')
     else:
         logger.warning('Not creating user. Specify --make-changes to get it done')
 

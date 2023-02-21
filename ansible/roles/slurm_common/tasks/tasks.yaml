@@ -713,3 +713,53 @@
         regexp: "^group: .*"
         line: "group:          files systemd sss ldap"
 
+
+- name: Disable caching of passwd, group and netgroup in /etc/nscd.conf
+  tags: [nscd, build, ldap]
+  lineinfile:
+    path: /etc/nscd.conf
+    regexp: '^(\s*)enable-cache(\s+){{ item }}(\s+)yes.*$'
+    line: '\1enable-cache\2{{ item }}\3no'
+    backrefs: yes
+  loop:
+    - passwd
+    - group
+    - netgroup
+  register: nscd_change
+
+- name: Restart nscd service
+  tags: [nscd, ldap]
+  service:
+    name: nscd
+    state: restarted
+  when: nscd_change.changed
+
+- name: Setup sssd.conf
+  tags: [sssd, build, ldap]
+  copy:
+    dest: /etc/sssd/sssd.conf
+    mode: u=rw,go=
+    content: |
+      [sssd]
+      config_file_version = 2
+      domains = cbio-training.ilifu.ac.za
+      
+      [domain/cbio-training.ilifu.ac.za]
+      autofs_provider = ldap
+      ldap_schema = rfc2307
+      ldap_search_base = dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}
+      
+      id_provider = ldap
+      auth_provider = ldap
+      chpass_provider = ldap
+      ldap_uri = ldap://{{ ldap_host }}:389
+      # ldap_id_use_start_tls = True
+      ldap_auth_disable_tls_never_use_in_production = true
+
+      cache_credentials = True
+      enumerate = True
+
+- name: Enable home directory creation on login
+  tags: pam, build, home, ldap
+  command: pam-auth-update --enable mkhomedir
+

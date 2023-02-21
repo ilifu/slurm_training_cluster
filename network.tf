@@ -100,3 +100,13 @@ resource "openstack_networking_secgroup_rule_v2" "ldap_server" {
   remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
   security_group_id = openstack_networking_secgroup_v2.ldap_server.id
 }
+
+resource "openstack_networking_secgroup_rule_v2" "ldap_tls" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 636
+  port_range_max    = 636
+  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
+  security_group_id = openstack_networking_secgroup_v2.ldap_server.id
+}
