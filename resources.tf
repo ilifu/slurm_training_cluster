@@ -13,6 +13,16 @@ resource "local_file" "ansible_inventory" {
       ldap_node = openstack_compute_instance_v2.ldap_node
       floating_ip = openstack_networking_floatingip_v2.slurm_float_ip
       ssh_key_location = var.ssh_key_location
+      ceph_mounts = {
+        home: {
+          export_locations: openstack_sharedfilesystem_share_v2.home_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.home_share_access_rw.access_key
+        }
+        software: {
+          export_locations: openstack_sharedfilesystem_share_v2.software_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.software_share_access_rw.access_key
+        }
+      }
     }
   )
   filename = "inventory.ini"
