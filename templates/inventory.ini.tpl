@@ -2,6 +2,7 @@
 ansible_connection=ssh
 ansible_ssh_extra_args="-o ControlPersist=15m -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes -v"
 ansible_ssh_private_key_file=~/.ssh/ilifu/id_rsa
+ansible_ssh_common_args='-o ProxyJump="ubuntu@${floating_ip.address}"'
 ansible_user=ubuntu
 
 [all:children]
