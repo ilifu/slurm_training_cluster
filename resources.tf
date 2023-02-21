@@ -22,9 +22,10 @@ resource "local_file" "ansible_inventory" {
 resource "local_file" "group_vars_all" {
   content = templatefile("templates/group_vars_all.tpl",
     {
-       ldap_host = var.ldap_host
-       ldap_dns_domain_name = var.ldap_dns_domain_name
-       ldap_password = var.ldap_password
+      ldap_host = var.ldap_host
+      ldap_dns_domain_name = var.ldap_dns_domain_name
+      ldap_password = var.ldap_password
+      ldap_organisation_name = var.ldap_organisation_name
     }
   )
   filename = "ansible/group_vars/all/terraform.yml"
@@ -33,10 +34,10 @@ resource "local_file" "group_vars_all" {
 resource "local_file" "group_vars_slurm" {
   content = templatefile("templates/group_vars_slurm.tpl",
     {
-       cluster_name = var.cluster_name
-       organisation = var.organisation
-       controller_host = var.controller_host
-       database_host = var.database_host
+      cluster_name = var.cluster_name
+      organisation = var.organisation
+      controller_host = var.controller_host
+      database_host = var.database_host
       ceph_mounts = {
         home: {
           name: "home"

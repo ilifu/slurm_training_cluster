@@ -119,6 +119,11 @@ variable "ldap_dns_domain_name" {
   description = "The ldap dns domain name"
 }
 
+variable "ldap_organisation_name" {
+  type = string
+  description = "The ldap organization name"
+}
+
 variable "ldap_password" {
   type = string
   description = "The ldap password"

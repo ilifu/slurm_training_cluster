@@ -2,7 +2,7 @@
 - hosts: slurm
   roles:
     - slurm_common
-    - hosts
+#    - hosts
 
 - hosts: slurm_headnode
   roles:

@@ -1,20 +1,18 @@
 - name: Update /etc/hosts
   lineinfile:
     path: /etc/hosts
-    regexp: ".*\\s{{ item.value }}"
-    line: "{{ item.key }}    {{ item.value }}"
-  with_dict:
-    - "{{ cluster_hosts }}"
+    regexp: ".*\\s{{ item }}"
+    line: "{{ hostvars[item].private_ip }}    {{ item }}"
+    state: present
+  with_items: "{{ groups['all'] }}"
 
 - name: Set hostname
   hostname:
-    name: "{{ cluster_hosts[ansible_default_ipv4.address] }}"
-#    debug:
-#      msg: "HOSTS BE LIKE: {{ hosts }}"
-#     msg: "{{ hosts[ansible_default_ipv4.address] }}"
-  # with_items:  
-  #   - "{{ hosts }}"
-  tags: "hostname"
+      name: "{{ inventory_hostname }}"
+  become: yes
+
+
+
 
 # user:
 #     name: "{{ item.username }}"

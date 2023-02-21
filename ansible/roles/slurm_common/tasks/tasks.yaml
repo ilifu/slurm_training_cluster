@@ -656,22 +656,20 @@
 - name: Setup ldap secret file
   tags:
     - ldap.secret
-    - never
+    - ldap
     - build
-  vars:
-    rootdn_passwd: "{{ lookup('env', ldap.password_env_variable) }}"
-  when: rootdn_passwd != ''
+  when: ldap_password != ''
   lineinfile:
     create: yes
     path: /etc/ldap.secret
     regexp: '.*'
-    line: "{{ rootdn_passwd }}"
+    line: "{{ ldap_password }}"
     mode: u=r,go=
 
 - name: Copy ldap key querying script
   tags:
     - ldap_ssh_key
-    - never
+    - ldap
     - build
   copy:
     src: get_ssh_key_from_ldap.sh
@@ -681,8 +679,8 @@
 - name: Make sure authorized_key_command is queried for ssh keys
   tags:
     - authorizedkeys
-    - never
     - build
+    - ldap
   lineinfile:
     path: /etc/ssh/sshd_config
     line: "AuthorizedKeysCommand /usr/local/bin/get_ssh_key_from_ldap.sh"
@@ -691,7 +689,6 @@
 - name: Make sure the authorized_keys_command_user is nobody
   tags:
     - authorizedkeys
-    - never
     - build
   lineinfile:
     path: /etc/ssh/sshd_config
@@ -703,6 +700,7 @@
     - nsswitch
     - never
     - build
+    - ldap
   block:
     - name: Update passwd line in nsswitch.conf
       lineinfile:
