@@ -19,14 +19,6 @@ slurm_controller
 slurm_headnode
 slurm_compute
 
-[slurm:vars]
-home_share=[%{ for i, location in ceph_mounts.home.export_locations ~}"${ location.path }"%{ if i < length(ceph_mounts.home.export_locations) -1 ~},  %{ endif ~} %{ endfor ~}]
-home_access_key=ceph_mounts.home.access_key
-software_share=[%{ for i, location in ceph_mounts.software.export_locations ~}"${ location.path }"%{ if i < length(ceph_mounts.software.export_locations) -1 ~},  %{ endif ~} %{ endfor ~}]
-software_access_key=ceph_mounts.software.access_key
-
-
-
 [slurm_database]
 database ansible_host=${database_node.access_ip_v4} private_ip=${database_node.access_ip_v4}
 
