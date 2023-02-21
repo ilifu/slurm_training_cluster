@@ -1,11 +1,8 @@
 [all:vars]
 ansible_connection=ssh
-#ansible_ssh_extra_args="-o ControlPersist=15m -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes -vvv"
 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ControlPersist=15m -i ${ssh_key_location}'
 ansible_ssh_extra_args="-o ProxyCommand='ssh -o StrictHostKeyChecking=no -o ControlPersist=15m -A -i ${ssh_key_location} ubuntu@${floating_ip.address} nc %h 22'"
 ansible_ssh_private_key_file=${ssh_key_location}
-#ansible_ssh_common_args='-o ProxyJump="ubuntu@${floating_ip.address}"'
-#ansible_ssh_common_args="-o ProxyCommand='ssh -o ControlPersist=15m -A -i ${ssh_key_location} ubuntu@${floating_ip.address} nc %h 22'"
 ansible_user=ubuntu
 
 [all:children]
