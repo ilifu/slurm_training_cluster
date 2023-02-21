@@ -12,6 +12,7 @@ resource "local_file" "ansible_inventory" {
       controller_node = openstack_compute_instance_v2.controller_node
       ldap_node = openstack_compute_instance_v2.ldap_node
       floating_ip = openstack_networking_floatingip_v2.slurm_float_ip
+      ssh_key_location = var.ssh_key_location
     }
   )
   filename = "inventory.ini"

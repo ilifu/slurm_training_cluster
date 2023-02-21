@@ -129,6 +129,11 @@ variable "ssh_public_key" {
   description = "The ssh public key"
 }
 
+variable "ssh_key_location" {
+  type = string
+  description = "The ssh key location"
+}
+
 variable "cidr_prefix" {
   type = string
   description = "The cidr prefix"
