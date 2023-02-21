@@ -11,17 +11,3 @@
       name: "{{ inventory_hostname }}"
   become: yes
 
-
-
-
-# user:
-#     name: "{{ item.username }}"
-#     state: present
-#     uid: "{{ item.uid }}"
-#     group: slurm_user
-#     groups: "{{ item.username }}"
-#     home: "/cbio/home/{{ item.username }}"
-#     skeleton: /etc/skel
-#     generate_ssh_key: yes
-#     ssh_key_type: ed25519
-#     shell: /bin/bash
