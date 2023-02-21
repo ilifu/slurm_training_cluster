@@ -8,7 +8,9 @@ resource "local_file" "ansible_inventory" {
     {
       compute_nodes = [for node in openstack_compute_instance_v2.compute_nodes.*: node ]
       database_node = openstack_compute_instance_v2.database_node
-
+      login_node = openstack_compute_instance_v2.login_node
+      controller_node = openstack_compute_instance_v2.controller_node
+      ldap_node = openstack_compute_instance_v2.ldap_node
     }
   )
   filename = "inventory.ini"

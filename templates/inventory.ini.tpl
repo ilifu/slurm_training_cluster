@@ -13,17 +13,24 @@ slurm_headnode
 slurm_compute
 
 [ldap]
+ldap ansible_host=${ldap_node.access_ip_v4} private_ip=${ldap_node.access_ip_v4}
 
 [slurm]
 %{ for node in compute_nodes ~}
 ${ node.name } ansible_host=${node.access_ip_v4} private_ip=${node.access_ip_v4}
 %{ endfor ~}
+login ansible_host=${login_node.access_ip_v4} private_ip=${login_node.access_ip_v4}
+controller ansible_host=${controller_node.access_ip_v4} private_ip=${controller_node.access_ip_v4}
+database ansible_host=${database_node.access_ip_v4} private_ip=${database_node.access_ip_v4}
 
 [slurm_database]
+database ansible_host=${database_node.access_ip_v4} private_ip=${database_node.access_ip_v4}
 
 [slurm_controller]
+controller ansible_host=${controller_node.access_ip_v4} private_ip=${controller_node.access_ip_v4}
 
 [slurm_headnode]
+login ansible_host=${login_node.access_ip_v4} private_ip=${login_node.access_ip_v4}
 
 [slurm_compute]
 %{ for node in compute_nodes ~}
