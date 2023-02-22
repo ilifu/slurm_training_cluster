@@ -38,7 +38,7 @@
     - name: Create cluster
       command:
         argv:
-          - /opt/slurm/{{ slurm_config.slurm_version }}/bin/sacctmgr
+          - /opt/slurm/{{ slurm.version }}/bin/sacctmgr
           - add
           - cluster
           - "{{ slurm_config.cluster_name }}"
@@ -48,7 +48,7 @@
     - name: Add accounts
       command:
         argv:
-          - /opt/slurm/{{ slurm_config.slurm_version }}/bin/sacctmgr
+          - /opt/slurm/{{ slurm.version }}/bin/sacctmgr
           - "--immediate"
           - add
           - account
@@ -58,7 +58,7 @@
       failed_when: add_accounts_result.rc != 0 and "Nothing new added" not in add_accounts_result.stdout
       changed_when: add_accounts_result.rc == 0
       with_dict:
-      - "{{ slurm_config.accounts }}"
+        "{{ slurm.accounts }}"
       
 #    - name: Add users to accounts
 #      command:
