@@ -3,15 +3,15 @@ config_file_version = 2
 domains = cbio-training.ilifu.ac.za
 
 [domain/cbio-training.ilifu.ac.za]
-autofs_provider = ldap
-ldap_schema = rfc2307
+# autofs_provider = ldap
+# ldap_schema = rfc2307
 ldap_search_base = dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}
 
 id_provider = ldap
 auth_provider = ldap
 chpass_provider = ldap
 ldap_uri = ldap://{{ ldap_host }}:389
-ldap_id_use_start_tls = True
+# ldap_id_use_start_tls = True
 # ldap_auth_disable_tls_never_use_in_production = true
 ldap_tls_cacertdir = /usr/local/share/ca-certificates
 

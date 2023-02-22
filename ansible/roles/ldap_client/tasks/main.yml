@@ -109,9 +109,10 @@
     - passwd
     - group
     - netgroup
-  notify: restart nscd service
+    - services
+  notify: Restart nscd service
 
-- name: Setup sssd.conf.j2
+- name: Setup sssd.conf
   tags: [sssd, build, ldap]
   become: yes
   register: sssd_conf
@@ -121,7 +122,17 @@
     mode: u=rw,go=
   notify: Restart sssd service
 
-- name:
+- name: Setup nslcd.conf
+  tags: [nslcd, ldap]
+  become: yes
+  register: nslcd_conf
+  template:
+      src: nslcd.conf.j2
+      dest: /etc/nslcd.conf
+      mode: u=rw,g=r,o=
+  notify: Restart nslcd service
+
+- name: Setup CA certs
   tags: [sssd, build, ldap, cert]
   block:
     - name: Fetch CA certificate from LDAP server
@@ -132,11 +143,6 @@
         dest: files/ldap_ca.crt
         flat: true
       delegate_to: "{{ ldap_host }}"
-#    - name: Remove stupid ca certificate directory
-#      become: yes
-#      file:
-#          path: /usr/local/share/ca-certificates/ldap_ca.crt
-#          state: absent
     - name: Copy ca certificate to final destination
       become: yes
       copy:

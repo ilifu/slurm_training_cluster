@@ -18,3 +18,10 @@
   become: yes
   tags: [cert, ldap]
   command: update-ca-certificates
+
+- name: Restart nslcd service
+  become: yes
+  tags: [nslcd, ldap]
+  service:
+      name: nslcd
+      state: restarted
