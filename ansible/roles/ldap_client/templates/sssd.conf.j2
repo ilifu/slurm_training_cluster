@@ -13,6 +13,7 @@ chpass_provider = ldap
 ldap_uri = ldap://{{ ldap_host }}:389
 ldap_id_use_start_tls = True
 # ldap_auth_disable_tls_never_use_in_production = true
+ldap_tls_cacertdir = /usr/local/share/ca-certificates
 
 cache_credentials = True
 enumerate = True
