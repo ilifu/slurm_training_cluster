@@ -110,6 +110,97 @@
 #  tags: [cert]
 #  command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/certinfo.ldif
 
+- name: Set up keys for openssl
+  become: yes
+  tags: [cert]
+  block:
+    - name: Generate OpenSSL private key
+      become: yes
+      openssl_privatekey:
+        path: /etc/ssl/private/ldap_server_key.pem
+        size: 4096
+        mode: 0640
+        group: openldap
+        owner: openldap
+        regenerate: never
+      register: openssl_privatekey
+      retries: 3
+      delay: 15
+      until: openssl_privatekey is success
+    - name: Generate csr
+      become: yes
+      openssl_csr:
+          path: /etc/ssl/certs/ldap_slapd_cert.csr
+          privatekey_path: /etc/ssl/private/ldap_server_key.pem
+          country_name: "ZA"
+          state_or_province_name: "Western Cape"
+          locality_name: "Cape Town"
+          organization_name: "{{ ldap_organisation }}"
+          organizational_unit_name: "{{ ldap_organisation }}"
+          common_name: "{{ ldap_dns_domain_name }}"
+          email_address: "admin@{{ ldap_dns_domain_name }}"
+      register: openssl_csr
+      retries: 0
+      delay: 15
+      until: openssl_csr is success
+    - name: create certificate
+      become: yes
+      openssl_certificate:
+          path: /etc/ssl/certs/ldap_slapd_cert.crt
+          privatekey_path: /etc/ssl/private/ldap_server_key.pem
+          csr_path: /etc/ssl/certs/ldap_slapd_cert.csr
+          provider: selfsigned
+      register: openssl_certificate
+      retries: 3
+      delay: 15
+      until: openssl_certificate is success
+    - name: Copy certificates and keys to ldap dir
+      become: yes
+      copy:
+          src: "{{ item }}"
+          dest: /etc/ldap/sasl2/
+          remote_src: yes
+          owner: openldap
+          group: openldap
+          mode: 0640
+      loop:
+        - /etc/ssl/private/ldap_server_key.pem
+        - /etc/ssl/certs/ldap_slapd_cert.crt
+        - /etc/ssl/certs/ca-certificates.crt
+      notify: restart slapd
+    - name: Create ldap config .ldif for certificates
+      become: yes
+      copy:
+          content: |
+              dn: cn=config
+              changetype: modify
+              add: olcTLSCACertificateFile
+              olcTLSCACertificateFile: /etc/ldap/sasl2/ca-certificates.crt
+              -
+              add: olcTLSCertificateFile
+              olcTLSCertificateFile: /etc/ldap/sasl2/ldap_slapd_cert.crt
+              -
+              add: olcTLSCertificateKeyFile
+              olcTLSCertificateKeyFile: /etc/ldap/sasl2/ldap_server_key.pem
+          dest: /etc/ldap/certinfo.ldif
+    - name: Run ldapmodify
+      become: yes
+      command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/certinfo.ldif
+      register: ldapmodify
+      failed_when: ldapmodify.rc != 0 and "no equality matching rule" not in ldapmodify.stderr
+    - name: Enable LDAPS in slapd
+      become: yes
+      lineinfile:
+          path: /etc/default/slapd
+          regexp: "^SLAPD_SERVICES"
+          line: "SLAPD_SERVICES=\"ldap:/// ldapi:/// ldaps:///\""
+          state: present
+          mode: 0644
+          owner: root
+          group: root
+      notify: restart slapd
+
+
 - name: Warning re variables
   when: ldap_organisation == '' or ldap_dns_domain_name == '' or ldap_password == ''
   debug:
