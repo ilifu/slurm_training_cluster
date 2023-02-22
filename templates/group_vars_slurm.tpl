@@ -15,3 +15,11 @@ ceph_mounts:
     access_to: "${ mount.access_to }"
     mount_point: "${ mount.mount_point }"
 %{ endfor ~}
+
+slurm_config:
+  cluster_name: "${cluster_name}"
+  organisation: "${organisation}"
+  controller_host: "${controller_host}"
+  database_host: "${database_host}"
+  slurm_db_password: "${slurm_db_password}"
+

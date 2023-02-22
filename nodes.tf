@@ -14,7 +14,7 @@ resource "openstack_compute_instance_v2" "database_node" {
   image_name      = local.database_image_name
   flavor_name     = var.database_flavor
   key_pair        = openstack_compute_keypair_v2.cluster_ssh_key.name
-  security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name]
+  security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name, openstack_networking_secgroup_v2.slurm_db.name ]
   network {
     name = openstack_networking_network_v2.slurm_network.name
   }

@@ -86,6 +86,22 @@ resource "openstack_networking_secgroup_rule_v2" "slurmd" {
   security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
 }
 
+resource "openstack_networking_secgroup_v2" "slurm_db" {
+  name        = "${var.image_name_prefix}-slurm-db"
+  description = "ports that need to be open for slurmdbd"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "slurmdbd" {
+  direction        = "ingress"
+  ethertype        = "IPv4"
+  protocol         = "tcp"
+  port_range_min   = 7031
+  port_range_max   = 7031
+  remote_ip_prefix = "${var.cidr_prefix}/${var.cidr_suffix}"
+  security_group_id = openstack_networking_secgroup_v2.slurm_db.id
+}
+
+
 resource "openstack_networking_secgroup_rule_v2" "icmp" {
   direction        = "ingress"
   ethertype        = "IPv4"

@@ -38,6 +38,7 @@ resource "local_file" "group_vars_slurm" {
       organisation = var.organisation
       controller_host = var.controller_host
       database_host = var.database_host
+      slurm_db_password = var.slurm_db_password
       ceph_mounts = {
         home: {
           name: "home"

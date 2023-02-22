@@ -127,6 +127,13 @@ variable "ldap_organisation_name" {
 variable "ldap_password" {
   type = string
   description = "The ldap password"
+  sensitive = true
+}
+
+variable "slurm_db_password" {
+  type = string
+  description = "The slurm db password"
+  sensitive = true
 }
 
 variable "ssh_public_key" {
