@@ -595,29 +595,6 @@
         enabled: yes
         state: restarted
 
-
-# - name: Allow internal traffic
-#   iptables:
-#     action: insert
-#     chain: INPUT
-#     destination_port: 0:65535
-#     src_range: 192.168.101.100-192.168.101.255
-#     jump: ACCEPT
-#     protocol: tcp
-#   tags: "iptables"
-
-#- name: remove ip-tables iptables
-#  apt:
-#    name:
-#      - 'iptables'
-#    state: absent
-#    update_cache: yes
-#  register: apt_res
-#  retries: 3
-#  delay: 15
-#  until: apt_res is success
-
-
 - name: Remove system lmod
   apt:
     name: lmod
@@ -627,6 +604,3 @@
     - lmod
     - never
     - build
-
-
-
