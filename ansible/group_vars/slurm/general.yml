@@ -5,8 +5,10 @@ slurm:
   group_name: "slurm"
   db_name: "slurm_db"
   db_user: "slurm"
-  slurm_db_password_env_variable: "SLURM_DB_PASSWORD"
   dbd_port: "7031"
   ctld_port: "6817"
   slurmd_port: "6818"
   spool_dir: "/var/spool/slurmd"
+  accounts: {
+      training: "Basic account for training",
+  }
