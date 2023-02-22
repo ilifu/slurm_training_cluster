@@ -1,8 +1,9 @@
 ---
 # tasks file for roles/slurm_common
 - name: Check slurm_config is defined
+  run_once: yes
   debug:
-    msg: "slurm_config: {{ slurm_config }}"
+    msg: "slurm: {{ slurm }} --- slurm_config: {{ slurm_config }}"
 
 - name: Install Packages
   tags:
@@ -370,9 +371,6 @@
     - never
     - build
   block:
-#    - name: Set desired slurm version to {{ slurm.version }}
-#      set_fact:
-#        desired_slurm_version: "slurm {{ slurm.version }}"
     - name: Check slurm directory
       stat:
         path: /opt/slurm/{{ slurm.version }}
@@ -441,7 +439,7 @@
         owner: root
         group: root
         mode: "ug=rw,o=r"
-        state: touch
+        state: file
 
     - name: Ensure slurm is available on PATH
       lineinfile:
@@ -502,15 +500,15 @@
     - slurmconf
     - never
     - build
-  when: slurm_config is defined
+  when: slurm_config is defined and slurm is defined
   become: yes
   block:
-    - name: Ensure slurm group exists
+    - name: Ensure slurm group "{{ slurm.group_name }}" exists
       group:
         name: "{{ slurm.group_name }}"
         state: present
         system: yes
-    - name: Ensure slurm user exists
+    - name: Ensure slurm user "{{ slurm.user_name }}" exists
       user:
         name: "{{ slurm.user_name }}"
         comment: "System user for slurm"
@@ -520,7 +518,7 @@
 #        home: "/home/slurm"
         skeleton: /etc/skel
         shell: /bin/bash
-    - name: Ensure SlurmSpoolDir exists
+    - name: Ensure SlurmSpoolDir /var/spool/slurmd exists
       file:
         path: /var/spool/slurmd
         state: directory
@@ -529,7 +527,7 @@
         mode: "ug=rwx,o=rx"
       tags: "slurmd"
 
-    - name: Ensure log dir exists
+    - name: Ensure log dir /var/log/slurm exists
       file:
         path: /var/log/slurm
         state: directory
@@ -537,7 +535,7 @@
         group: "{{ slurm.group_name }}"
         mode: "ug=rwx,o=rx"
 
-    - name: Ensure slurm etc dir exists
+    - name: Ensure slurm etc dir /opt/slurm/{{ slurm.version }}/etc exists
       file:
         path: /opt/slurm/{{ slurm.version }}/etc
         state: directory
@@ -546,6 +544,7 @@
         recurse: yes
 
     - name: Create slurm.conf
+      tags: slurm.conf
       template:
         src: slurm.conf.j2
         dest: /opt/slurm/{{ slurm.version }}/etc/slurm.conf
@@ -553,6 +552,7 @@
         group: "{{ slurm.group_name }}"
         mode: "ug=rw,o=r"
     - name: Create cgroup.conf
+      tags: cgroup.conf
       template:
         src: cgroup.conf
         dest: /opt/slurm/{{ slurm.version }}/etc/cgroup.conf
