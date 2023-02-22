@@ -10,7 +10,7 @@
     - ldap_client
     - slurm_headnode
 #    - nextflow
-    - software
+#    - software
   tags:
     - slurm
 
