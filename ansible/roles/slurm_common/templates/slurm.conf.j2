@@ -1,6 +1,6 @@
 ClusterName={{ slurm_config.cluster_name }}
 
-SlurmctldHost={{ slurm_config.controller_host | replace('_','-') }}
+SlurmctldHost={{ groups['slurm_controller'][0] | replace('_','-') }}({{ hostvars[groups['slurm_controller'][0]].private_ip }})
 #SlurmctldHost=
 # 
 #DisableRootJobs=NO 
@@ -18,7 +18,8 @@ SlurmctldHost={{ slurm_config.controller_host | replace('_','-') }}
 #KillOnBadExit=0 
 #LaunchType=launch/slurm 
 #Licenses=foo*4,bar 
-#MailProg=/bin/mail 
+#MailProg=/bin/mail
+MailProg=/usr/bin/true
 #MaxJobCount=5000 
 #MaxStepCount=40000 
 #MaxTasksPerNode=128 
@@ -41,11 +42,11 @@ RebootProgram="/sbin/reboot"
 ReturnToService=1
 #SallocDefaultCommand= 
 SlurmctldPidFile=/var/run/slurmctld.pid
-SlurmctldPort={{ slurm_config.ctld.port }}
+SlurmctldPort={{ slurm.ctld_port }}
 SlurmdPidFile=/var/run/slurmd.pid
-SlurmdPort={{ slurm_config.slurmd.port }}
-SlurmdSpoolDir={{ slurm_config.slurmd.spool_dir }}
-SlurmUser={{ slurm_config.user.name }}
+SlurmdPort={{ slurm.slurmd_port }}
+SlurmdSpoolDir={{ slurm.spool_dir }}
+SlurmUser={{ slurm.user_name }}
 #SlurmdUser=root 
 #SrunEpilog=
 #SrunProlog=
@@ -55,7 +56,7 @@ SwitchType=switch/none
 
 #TaskPlugin=task/cgroup
 #TaskPlugin=task/none
-TaskPlugin=task/affinity,task/cgroup
+TaskPlugin=task/cgroup
 
 #TaskPluginParam=
 #TaskProlog=
@@ -117,7 +118,7 @@ AccountingStorageEnforce=limits,qos
 AccountingStorageHost={{ slurm_config.database_host | replace('_','-') }}
 #AccountingStorageLoc=
 #AccountingStoragePass=
-AccountingStoragePort={{ slurm_config.dbd.port }}
+AccountingStoragePort={{ slurm.dbd_port }}
 AccountingStorageType=accounting_storage/slurmdbd
 AccountingStorageUser=slurm
 #AccountingStoreJobComment=YES
@@ -157,13 +158,12 @@ SlurmSchedLogFile=/var/log/slurm/slurmsched.log
 # 
 # 
 # COMPUTE NODES
-# NodeName=slurm_worker-00[01-10] CPUs=32 RealMemory=229376 Sockets=2 CoresPerSocket=16 ThreadsPerCore=1 State=UNKNOWN 
-{% for worker in slurm_config.workers %}
-NodeName={{ worker.node_name | replace('_','-') }} NodeAddr={{ worker.ip_address }} CPUs=32 RealMemory=237568 Sockets=32 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
+# NodeName=slurm_worker-00[01-10] CPUs=32 RealMemory=229376 Sockets=2 CoresPerSocket=16 ThreadsPerCore=1 State=UNKNOWN
+{% for host in groups['slurm_compute'] %}
+NodeName={{ host }} CPUs={{ hostvars[host].ansible_processor_vcpus }} RealMemory={{ hostvars[host].ansible_memory_mb.real.free }} Sockets=1 CoresPerSocket={{ hostvars[host].ansible_processor_vcpus }} ThreadsPerCore=1 State=UNKNOWN
 {% endfor %}
 
+PartitionName=training Nodes={% for host in groups['slurm_compute'] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=4096 State=UP
 
-PartitionName=training Nodes={% for worker in slurm_config.workers %}{{ worker.node_name | replace('_','-') }}{% if not loop.last %},{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=6144 State=UP
-# Add X11 Forwarding for Slurm as per https://slurm.schedmd.com/faq.html#x11
 #PrologFlags=x11
 #X11Parameters=local_xauthority
