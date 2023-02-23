@@ -24,13 +24,6 @@ data "openstack_networking_subnet_v2" "ceph_subnet" {
   name = var.ceph_subnet_name
 }
 
-# resource "openstack_sharedfilesystem_sharenetwork_v2" "cephfs_sharenetwork" {
-#   name              = "${var.image_name_prefix}_slurm_sharenetwork"
-#   description       = "cephfs share network"
-#   neutron_net_id    = data.openstack_networking_network_v2.ceph_net.id
-#   neutron_subnet_id = data.openstack_networking_subnet_v2.ceph_subnet.id
-# }
-
 resource "openstack_networking_floatingip_v2" "slurm_float_ip" {
   pool = var.floating_ip_pool_name
 }
@@ -66,41 +59,40 @@ resource "openstack_networking_secgroup_v2" "slurm_nodes" {
   description = "ports that need to be open for all internal slurm traffic"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "internal_ssh" {
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  protocol          = "tcp"
-  port_range_min    = 22
-  port_range_max    = 22
-  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
-  security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
-}
+#resource "openstack_networking_secgroup_rule_v2" "internal_ssh" {
+#  direction         = "ingress"
+#  ethertype         = "IPv4"
+#  protocol          = "tcp"
+#  port_range_min    = 22
+#  port_range_max    = 22
+#  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
+#  security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
+#}
 
-resource "openstack_networking_secgroup_rule_v2" "slurmd" {
+resource "openstack_networking_secgroup_rule_v2" "everything_internal_open" {
   direction        = "ingress"
   ethertype        = "IPv4"
   protocol         = "tcp"
-  port_range_min   = 6817
-  port_range_max   = 6819
+  port_range_min   = 1
+  port_range_max   = 65535
   remote_ip_prefix = "${var.cidr_prefix}/${var.cidr_suffix}"
   security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
 }
 
-resource "openstack_networking_secgroup_v2" "slurm_db" {
-  name        = "${var.image_name_prefix}-slurm-db"
-  description = "ports that need to be open for slurmdbd"
-}
+#resource "openstack_networking_secgroup_v2" "slurm_db" {
+#  name        = "${var.image_name_prefix}-slurm-db"
+#  description = "ports that need to be open for slurmdbd"
+#}
 
-resource "openstack_networking_secgroup_rule_v2" "slurmdbd" {
-  direction        = "ingress"
-  ethertype        = "IPv4"
-  protocol         = "tcp"
-  port_range_min   = 7031
-  port_range_max   = 7031
-  remote_ip_prefix = "${var.cidr_prefix}/${var.cidr_suffix}"
-  security_group_id = openstack_networking_secgroup_v2.slurm_db.id
-}
-
+#resource "openstack_networking_secgroup_rule_v2" "slurmdbd" {
+#  direction        = "ingress"
+#  ethertype        = "IPv4"
+#  protocol         = "tcp"
+#  port_range_min   = 7031
+#  port_range_max   = 7031
+#  remote_ip_prefix = "${var.cidr_prefix}/${var.cidr_suffix}"
+#  security_group_id = openstack_networking_secgroup_v2.slurm_db.id
+#}
 
 resource "openstack_networking_secgroup_rule_v2" "icmp" {
   direction        = "ingress"
@@ -110,27 +102,27 @@ resource "openstack_networking_secgroup_rule_v2" "icmp" {
   security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
 }
 
-resource "openstack_networking_secgroup_v2" "ldap_server" {
-  name        = "${var.image_name_prefix}-ldap-server"
-  description = "ports that need to be open for ldap traffic to server"
-}
+#resource "openstack_networking_secgroup_v2" "ldap_server" {
+#  name        = "${var.image_name_prefix}-ldap-server"
+#  description = "ports that need to be open for ldap traffic to server"
+#}
 
-resource "openstack_networking_secgroup_rule_v2" "ldap_server" {
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  protocol          = "tcp"
-  port_range_min    = 389
-  port_range_max    = 389
-  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
-  security_group_id = openstack_networking_secgroup_v2.ldap_server.id
-}
+#resource "openstack_networking_secgroup_rule_v2" "ldap_server" {
+#  direction         = "ingress"
+#  ethertype         = "IPv4"
+#  protocol          = "tcp"
+#  port_range_min    = 389
+#  port_range_max    = 389
+#  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
+#  security_group_id = openstack_networking_secgroup_v2.ldap_server.id
+#}
 
-resource "openstack_networking_secgroup_rule_v2" "ldap_tls" {
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  protocol          = "tcp"
-  port_range_min    = 636
-  port_range_max    = 636
-  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
-  security_group_id = openstack_networking_secgroup_v2.ldap_server.id
-}
+#resource "openstack_networking_secgroup_rule_v2" "ldap_tls" {
+#  direction         = "ingress"
+#  ethertype         = "IPv4"
+#  protocol          = "tcp"
+#  port_range_min    = 636
+#  port_range_max    = 636
+#  remote_ip_prefix  = "${var.cidr_prefix}/${var.cidr_suffix}"
+#  security_group_id = openstack_networking_secgroup_v2.ldap_server.id
+#}
