@@ -604,3 +604,65 @@
     - lmod
     - never
     - build
+
+- name: Install lmod and dependencies
+  tags:
+    - lmod
+    - never
+    - build
+  block:
+    - name: Install lmod dependencies
+      apt:
+        name:
+          - lua5.3
+          - lua-bit32:amd64
+          - lua-posix:amd64
+          - lua-posix-dev
+          - liblua5.3-0:amd64
+          - liblua5.3-dev:amd64
+          - tcl
+          - tcl-dev
+          - tcl8.6
+          - tcl8.6-dev:amd64
+          - libtcl8.6:amd64
+    - name: Fetch lmod source
+      become: no
+      get_url:
+        url: "https://downloads.sourceforge.net/project/lmod/Lmod-8.7.tar.bz2?ts=gAAAAABj9xbQcJjG_h7LaoBQtw0ElAzw2xMDX97zjmzwg4H6OnPAd-z6U3HriF4oTc3N_02tWECktM3ssUgk6vvXagl28v9zEg%3D%3D&r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Flmod%2Ffiles%2FLmod-8.7.tar.bz2%2Fdownload"
+        dest: ~/src/lmod.tar.bz2
+        checksum: "sha256:9eac5fa3345fe68eb5fa518517fffff3731a8816183b4f3cc4882786b484bf46"
+    - name: Extract lmod source
+      become: no
+      unarchive:
+        src: ~/src/lmod.tar.bz2
+        dest: ~/src
+        creates: ~/src/Lmod-8.7
+        remote_src: yes
+    - name: Configure lmod
+      become: no
+      command: ./configure --prefix=/opt/lmod/8.7
+      args:
+        chdir: ~/src/Lmod-8.7
+#        creates: ~/src/Lmod-8.7/makefile
+    - name: Build lmod
+      become: no
+      command: make
+      args:
+        chdir: ~/src/Lmod-8.7
+    - name: Install lmod
+      become: yes
+      command: make install
+      args:
+        chdir: "~{{ ansible_user }}/src/Lmod-8.7"
+    - name: Link profile.d lmod.sh
+      become: yes
+      file:
+        src: /opt/lmod/8.7/lmod/lmod/init/profile
+        dest: /etc/profile.d/lmod.sh
+        state: link
+    - name: Add software/modules to MODULEPATH
+      become: yes
+      lineinfile:
+          path: /etc/profile.d/lmod.sh
+          line: "export MODULEPATH=/software/modules:$MODULEPATH"
+          insertafter: EOF
