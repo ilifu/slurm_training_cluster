@@ -439,7 +439,7 @@
         owner: root
         group: root
         mode: "ug=rw,o=r"
-        state: file
+        state: touch
 
     - name: Ensure slurm is available on PATH
       lineinfile:
