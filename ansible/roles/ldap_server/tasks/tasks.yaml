@@ -1,6 +1,7 @@
 ---
 # tasks file for roles/ldap_server
 - name: Install Packages
+  tags: [ldap,build]
   apt:
     name:
       - 'gnutls-bin'
@@ -112,7 +113,7 @@
 
 - name: Set up keys for openssl
   become: yes
-  tags: [cert]
+  tags: [cert, ldap]
   block:
     - name: Generate OpenSSL private key
       become: yes
