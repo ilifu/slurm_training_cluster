@@ -72,7 +72,7 @@ if [[ ! " ${TO_BUILD[*]} " =~ " step2.openstack.slurm_image " ]]; then  # only b
   fi
 fi
 
-if [ ! ${#join_arr[@]} -eq 0 ]; then
+if [ ! ${#TO_BUILD[@]} -eq 0 ]; then
   joined_steps=$(join_arr , "${TO_BUILD[@]}")
   echo -e "Building images: ${ORANGE}${joined_steps}${NC}"
   packer build -only="${joined_steps}" .
