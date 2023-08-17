@@ -1,4 +1,5 @@
 - name: Install mariadb and configure
+  tags: [build]
   vars:
     db_password: "{{ slurm_db_password }}"
   block:
@@ -49,8 +50,9 @@
         backrefs: yes
       notify: restart MariaDB service
     - name: Ensure Slurm DB present
+      when: slurm_config is defined
       mysql_db:
-        name: "{{ slurm.db_name }}"
+        name: "{{ slurm_config.db_name }}"
         state: present
         login_unix_socket: /var/run/mysqld/mysqld.sock
       become: yes
@@ -60,7 +62,7 @@
         msg: "You need to define the variable 'slurm_config.slurm_db_password' for database configuration"
       when: slurm_config is not defined or slurm_config.slurm_db_password is not defined
     - name: Install and configure mariadb
-      when: slurm_config.slurm_db_password != ''
+      when: slurm_config is defined and slurm_config.slurm_db_password != ''
       block:
         - name: Ensure Slurm DB user present
           mysql_user:
@@ -78,7 +80,7 @@
             msg: "You need to define the variable 'slurm_config.slurm_db_password' for database configuration"
           when: slurm_config is not defined or slurm_config.slurm_db_password is not defined
         - name: configure slurmdbd
-          when: slurm_config.slurm_db_password != ''
+          when: slurm_config is defined and slurm_config.slurm_db_password != ''
           block:
             - name: Ensure slurmdbd.conf present and configured
               template:
