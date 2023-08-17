@@ -122,6 +122,7 @@ variable "ldap_dns_domain_name" {
 variable "ldap_organisation_name" {
   type = string
   description = "The ldap organization name"
+  default = "training"
 }
 
 variable "ldap_password" {
