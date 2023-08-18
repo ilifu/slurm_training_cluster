@@ -6,7 +6,6 @@
   tags:
     - ldap
     - ldap.conf
-    - never
     - build
   block:
     - name: Set BASE for {{ ldap_dns_domain_name }}
@@ -82,7 +81,6 @@
   become: yes
   tags:
     - nsswitch
-    - never
     - build
     - ldap
   block:
@@ -122,15 +120,15 @@
     mode: u=rw,go=
   notify: Restart sssd service
 
-- name: Setup nslcd.conf
-  tags: [nslcd, ldap]
-  become: yes
-  register: nslcd_conf
-  template:
-      src: nslcd.conf.j2
-      dest: /etc/nslcd.conf
-      mode: u=rw,g=r,o=
-  notify: Restart nslcd service
+#- name: Setup nslcd.conf
+#  tags: [nslcd, ldap]
+#  become: yes
+#  register: nslcd_conf
+#  template:
+#      src: nslcd.conf.j2
+#      dest: /etc/nslcd.conf
+#      mode: u=rw,g=r,o=
+#  notify: Restart nslcd service
 
 - name: Setup CA certs
   tags: [sssd, build, ldap, cert]
