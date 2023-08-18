@@ -89,11 +89,13 @@
         path: /etc/nsswitch.conf
         regexp: "^passwd: .*"
         line: "passwd:         files systemd sss ldap"
+      notify: Restart nscd service
     - name: Update group line in nsswitch.conf
       lineinfile:
         path: /etc/nsswitch.conf
         regexp: "^group: .*"
         line: "group:          files systemd sss ldap"
+      notify: Restart nscd service
 
 - name: Disable caching of passwd, group and netgroup in /etc/nscd.conf
   become: yes
@@ -118,7 +120,9 @@
     src: sssd.conf.j2
     dest: /etc/sssd/sssd.conf
     mode: u=rw,go=
-  notify: Restart sssd service
+  notify:
+    - Restart sssd service
+    - Restart nscd service
 
 #- name: Setup nslcd.conf
 #  tags: [nslcd, ldap]
