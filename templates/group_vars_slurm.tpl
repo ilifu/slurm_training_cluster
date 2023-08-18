@@ -1,6 +1,5 @@
 ---
 cluster_name: "${cluster_name}"
-organisation: "${organisation}"
 controller_host: "${controller_host}"
 database_host: "${database_host}"
 ceph_mounts:
@@ -18,7 +17,6 @@ ceph_mounts:
 
 slurm_config:
   cluster_name: "${cluster_name}"
-  organisation: "${organisation}"
   controller_host: "${controller_host}"
   database_host: "${database_host}"
   slurm_db_password: "${slurm_db_password}"

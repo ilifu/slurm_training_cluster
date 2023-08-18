@@ -66,4 +66,5 @@
     name:
       - coloredlogs
       - ldap3
+      - sshpubkeys
     virtualenv: ~/bin/.venv

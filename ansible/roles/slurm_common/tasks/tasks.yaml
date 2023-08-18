@@ -20,6 +20,7 @@
     - 'git'
     - 'hwloc'
     - 'libcgroup1'
+    - 'libdbus-1-dev'
     - 'libgpgme11-dev'
     - 'libhwloc-dev'
     - 'libjson-c-dev'

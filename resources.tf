@@ -34,7 +34,6 @@ resource "local_file" "group_vars_slurm" {
   content = templatefile("templates/group_vars_slurm.tpl",
     {
       cluster_name = var.cluster_name
-      organisation = var.organisation
       controller_host = var.controller_host
       database_host = var.database_host
       db_name = var.db_name

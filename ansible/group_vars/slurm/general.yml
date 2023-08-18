@@ -1,8 +1,6 @@
 slurm:
-  version: "22.05.8"
-  version_git: "22-05-8-1"
-  user_name: "slurm"
-  group_name: "slurm"
+  version: "23.02.4"
+  version_git: "23-02-4-1"
   db_name: "slurm_db"
   db_user: "slurm"
   dbd_port: "7031"
