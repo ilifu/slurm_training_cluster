@@ -34,6 +34,15 @@
   tags:
     - "motd"
 
+- name: Ensure ubuntu bin dir exists
+  become: no
+  file:
+      path: "~/bin"
+      state: directory
+      owner: ubuntu
+      group: ubuntu
+      mode: "u=rwx,go=rx"
+
 - name: Copy user-management scripts to headnode
   tags:
     - user_management
