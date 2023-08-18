@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/ubuntu/bin/.venv/bin/python3
 from argparse import ArgumentParser
 from getpass import getpass
 from logging import getLogger
