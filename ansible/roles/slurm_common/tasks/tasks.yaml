@@ -368,7 +368,6 @@
   tags:
     - install
     - slurm
-    - never
     - build
   block:
     - name: Check slurm directory
@@ -498,23 +497,22 @@
 - name: Configure slurm
   tags:
     - slurmconf
-    - never
     - build
   when: slurm_config is defined and slurm is defined
   become: yes
   block:
-    - name: Ensure slurm group "{{ slurm.group_name }}" exists
+    - name: Ensure slurm group "{{ slurm_config.group_name }}" exists
       group:
-        name: "{{ slurm.group_name }}"
+        name: "{{ slurm_config.group_name }}"
         state: present
         system: yes
-    - name: Ensure slurm user "{{ slurm.user_name }}" exists
+    - name: Ensure slurm user "{{ slurm_config.username }}" exists
       user:
-        name: "{{ slurm.user_name }}"
+        name: "{{ slurm_config.username }}"
         comment: "System user for slurm"
         state: present
         system: yes
-        group: "{{ slurm.group_name }}"
+        group: "{{ slurm_config.group_name }}"
 #        home: "/home/slurm"
         skeleton: /etc/skel
         shell: /bin/bash
@@ -522,8 +520,8 @@
       file:
         path: /var/spool/slurmd
         state: directory
-        owner: "{{ slurm.user_name }}"
-        group: "{{ slurm.group_name }}"
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
         mode: "ug=rwx,o=rx"
       tags: "slurmd"
 
@@ -531,16 +529,16 @@
       file:
         path: /var/log/slurm
         state: directory
-        owner: "{{ slurm.user_name }}"
-        group: "{{ slurm.group_name }}"
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
         mode: "ug=rwx,o=rx"
 
     - name: Ensure slurm etc dir /opt/slurm/{{ slurm.version }}/etc exists
       file:
         path: /opt/slurm/{{ slurm.version }}/etc
         state: directory
-        owner: "{{ slurm.user_name }}"
-        group: "{{ slurm.group_name }}"
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
         recurse: yes
 
     - name: Create slurm.conf
@@ -548,16 +546,16 @@
       template:
         src: slurm.conf.j2
         dest: /opt/slurm/{{ slurm.version }}/etc/slurm.conf
-        owner: "{{ slurm.user_name }}"
-        group: "{{ slurm.group_name }}"
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
         mode: "ug=rw,o=r"
     - name: Create cgroup.conf
       tags: cgroup.conf
       template:
         src: cgroup.conf
         dest: /opt/slurm/{{ slurm.version }}/etc/cgroup.conf
-        owner: "{{ slurm.user_name }}"
-        group: "{{ slurm.group_name }}"
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
         mode: "u=rw,g=r,o=r"
 
 - name: Ensure host has correct munge key
