@@ -171,3 +171,21 @@ variable "ceph_subnet_name" {
   type = string
   description = "The ceph subnet name"
 }
+
+variable "db_name" {
+  type = string
+  description = "The slurmdb name"
+  default = "slurmdb"
+}
+
+variable "slurm_username" {
+    type = string
+    description = "The slurm username"
+    default = "slurm"
+}
+
+variable "slurm_group_name" {
+    type = string
+    description = "The slurm group name"
+    default = "slurm"
+}

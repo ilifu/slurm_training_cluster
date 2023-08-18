@@ -22,4 +22,7 @@ slurm_config:
   controller_host: "${controller_host}"
   database_host: "${database_host}"
   slurm_db_password: "${slurm_db_password}"
+  db_name: "${db_name}"
+  username: "${slurm_username}"
+  group_name: "${slurm_group_name}"
 

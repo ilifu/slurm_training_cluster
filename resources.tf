@@ -13,7 +13,6 @@ resource "local_file" "ansible_inventory" {
       ldap_node = openstack_compute_instance_v2.ldap_node
       floating_ip = openstack_networking_floatingip_v2.slurm_float_ip
       ssh_key_location = var.ssh_key_location
-
     }
   )
   filename = "inventory.ini"
@@ -38,6 +37,9 @@ resource "local_file" "group_vars_slurm" {
       organisation = var.organisation
       controller_host = var.controller_host
       database_host = var.database_host
+      db_name = var.db_name
+      slurm_username = var.slurm_username
+      slurm_group_name = var.slurm_group_name
       slurm_db_password = var.slurm_db_password
       ceph_mounts = {
         home: {
