@@ -1,8 +1,8 @@
 [sssd]
 config_file_version = 2
-domains = cbio-training.ilifu.ac.za
+domains = {{ ldap_dns_domain_name }}
 
-[domain/cbio-training.ilifu.ac.za]
+[domain/{{ ldap_dns_domain_name }}]
 # autofs_provider = ldap
 # ldap_schema = rfc2307
 ldap_search_base = dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}
