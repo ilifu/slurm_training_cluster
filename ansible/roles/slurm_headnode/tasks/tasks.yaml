@@ -26,8 +26,8 @@
           - "98-fsck-at-reboot"
     - name: Add cbio ilifu slurm message
       template:
-        src: 50-cbio-slurm.j2
-        dest: /etc/update-motd.d/50-cbio-slurm
+        src: 50-welcome.j2
+        dest: /etc/update-motd.d/50-welcome-slurm
         owner: root
         group: root
         mode: "ug=rwx,o=rx"
