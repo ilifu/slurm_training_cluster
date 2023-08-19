@@ -2,4 +2,4 @@
 - hosts: base
   roles:
     - base
-  tags: ['base']
+  tags: ['base', 'build']

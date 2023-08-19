@@ -26,10 +26,45 @@
           - "98-fsck-at-reboot"
     - name: Add cbio ilifu slurm message
       template:
-        src: 50-cbio-slurm.j2
-        dest: /etc/update-motd.d/50-cbio-slurm
+        src: 50-welcome.j2
+        dest: /etc/update-motd.d/50-welcome-slurm
         owner: root
         group: root
         mode: "ug=rwx,o=rx"
   tags:
     - "motd"
+
+- name: Ensure ubuntu bin dir exists
+  become: no
+  file:
+      path: "~/bin"
+      state: directory
+      owner: ubuntu
+      group: ubuntu
+      mode: "u=rwx,go=rx"
+
+- name: Copy user-management scripts to headnode
+  tags:
+    - user_management
+  become: no
+  vars:
+    dcs: "dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+  template:
+    src: "{{ item }}"
+    dest: "~/bin/{{ item }}"
+    mode: "ugo=rx"
+  loop:
+    - add_user.py
+    - check_ssh_key.py
+    - csv_to_yaml.py
+
+- name: Ensure .venv exists for user-management scripts
+  tags:
+    - user_management
+  become: no
+  pip:
+    name:
+      - coloredlogs
+      - ldap3
+      - sshpubkeys
+    virtualenv: ~/bin/.venv

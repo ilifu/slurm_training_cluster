@@ -1,15 +1,18 @@
 ---
 # tasks file for roles/ldap_server
-
 - name: Install Packages
+  tags: [ldap,build]
   apt:
     name:
+      - 'gnutls-bin'
       - 'ldap-utils'
       - 'libldap2-dev'
       - 'libsasl2-dev'
       - 'libssl-dev'
       - 'python3-dev'
+      - 'python3-ldap'
       - 'slapd'
+      - 'ssl-cert'
       - 'virtualenv'
     state: latest
     update_cache: yes
@@ -18,14 +21,274 @@
   delay: 15
   until: apt_res is success
 
+#- name: Create private key for CA
+#  tags: [cert]
+#  become: yes
+#  command: certtool --generate-privkey --bits 4096 --outfile /etc/ssl/private/ldap_cakey.pem
+#  args:
+#    creates: /etc/ssl/private/ldap_cakey.pem
+#
+#- name: Create CA template file
+#  become: yes
+#  tags: [cert]
+#  copy:
+#    content: |
+#      organization = "{{ ldap_organisation }}"
+#      cn = "{{ ldap_organisation }}"
+#      CA
+#      cert_signing_key
+#      expiration_days = 3650
+#    dest: /etc/ssl/ldap_ca.info
+#
+#- name: Create self-signed CA certificate
+#  become: yes
+#  tags: [cert]
+#  command: certtool --generate-self-signed --load-privkey /etc/ssl/private/ldap_cakey.pem --template /etc/ssl/ldap_ca.info --outfile /usr/local/share/ca-certificates/ldap_ca.crt
+#  args:
+#    creates: /usr/local/share/ca-certificates/ldap_ca.crt
+#
+#- name: Update CA certificates
+#  become: yes
+#  tags: [cert]
+#  command: update-ca-certificates
+#  args:
+#    creates: /etc/ssl/certs/ldap_ca.pem
+#
+#- name: Create private key for ldap
+#  become: yes
+#  tags: [cert]
+#  command: certtool --generate-privkey --bits 4096 --outfile /etc/ssl/private/ldap_key.pem
+#  args:
+#      creates: /etc/ssl/private/ldap_key.pem
+#
+#- name: Create ldap template file
+#  become: yes
+#  tags: [cert]
+#  copy:
+#    content: |
+#      organization = "{{ ldap_organisation }}"
+#      cn = "{{ ldap_organisation }}"
+#      tls_www_server
+#      encryption_key
+#      signing_key
+#      expiration_days = 3650
+#    dest: /etc/ssl/ldap.info
+#
+#- name: Create ldap certificate
+#  become: yes
+#  tags: [cert]
+#  command: certtool --generate-certificate --load-privkey /etc/ssl/private/ldap_key.pem --load-ca-certificate /usr/local/share/ca-certificates/ldap_ca.crt --load-ca-privkey /etc/ssl/private/ldap_cakey.pem --template /etc/ssl/ldap.info --outfile /etc/ssl/certs/ldap_slapd_cert.pem
+#  args:
+#    creates: /etc/ssl/certs/ldap_slapd_cert.pem
+#
+#- name: Fix group ownership and permissions of ldap_key.pem
+#  become: yes
+#  tags: [cert]
+#  file:
+#    path: /etc/ssl/private/ldap_key.pem
+#    group: openldap
+#    mode: 0640
+#
+#- name: Create certinfo.ldif file
+#  become: yes
+#  tags: [cert]
+#  copy:
+#    content: |
+#      dn: cn=config
+#      add: olcTLSCACertificateFile
+#      olcTLSCACertificateFile: /etc/ssl/certs/ldap_ca.pem
+#      -
+#      add: olcTLSCertificateFile
+#      olcTLSCertificateFile: /etc/ssl/certs/ldap_slapd_cert.pem
+#      -
+#      add: olcTLSCertificateKeyFile
+#      olcTLSCertificateKeyFile: /etc/ssl/private/ldap_key.pem
+#    dest: /etc/ldap/certinfo.ldif
+#
+#
+#- name: Run ldapmodify
+#  become: yes
+#  tags: [cert]
+#  command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/certinfo.ldif
 
-# - name: Firewall rule -- allow port 389/LDAP traffic
-#   iptables:
-#     action: insert
-#     chain: INPUT
-#     destination_port: '389'
-#     src_range: 192.168.101.100-192.168.101.255
-#     jump: ACCEPT
-#     protocol: tcp
-#   tags:
-#     - "iptables"  
+- name: Set up keys for openssl
+  become: yes
+  tags: [cert, ldap]
+  block:
+    - name: Generate OpenSSL private key
+      become: yes
+      openssl_privatekey:
+        path: /etc/ssl/private/ldap_server_key.pem
+        size: 4096
+        mode: 0640
+        group: openldap
+        owner: openldap
+        regenerate: never
+      register: openssl_privatekey
+      retries: 3
+      delay: 15
+      until: openssl_privatekey is success
+    - name: Generate csr
+      become: yes
+      openssl_csr:
+          path: /etc/ssl/certs/ldap_slapd_cert.csr
+          privatekey_path: /etc/ssl/private/ldap_server_key.pem
+          country_name: "ZA"
+          state_or_province_name: "Western Cape"
+          locality_name: "Cape Town"
+          organization_name: "{{ ldap_organisation }}"
+          organizational_unit_name: "{{ ldap_organisation }}"
+          common_name: "{{ ldap_dns_domain_name }}"
+          email_address: "admin@{{ ldap_dns_domain_name }}"
+      register: openssl_csr
+      retries: 0
+      delay: 15
+      until: openssl_csr is success
+    - name: create certificate
+      become: yes
+      openssl_certificate:
+          path: /etc/ssl/certs/ldap_slapd_cert.crt
+          privatekey_path: /etc/ssl/private/ldap_server_key.pem
+          csr_path: /etc/ssl/certs/ldap_slapd_cert.csr
+          provider: selfsigned
+      register: openssl_certificate
+      retries: 3
+      delay: 15
+      until: openssl_certificate is success
+    - name: Copy certificates and keys to ldap dir
+      become: yes
+      copy:
+          src: "{{ item }}"
+          dest: /etc/ldap/sasl2/
+          remote_src: yes
+          owner: openldap
+          group: openldap
+          mode: 0640
+      loop:
+        - /etc/ssl/private/ldap_server_key.pem
+        - /etc/ssl/certs/ldap_slapd_cert.crt
+        - /etc/ssl/certs/ca-certificates.crt
+      notify: restart slapd
+    - name: Create ldap config .ldif for certificates
+      become: yes
+      copy:
+          content: |
+              dn: cn=config
+              changetype: modify
+              add: olcTLSCACertificateFile
+              olcTLSCACertificateFile: /etc/ldap/sasl2/ca-certificates.crt
+              -
+              add: olcTLSCertificateFile
+              olcTLSCertificateFile: /etc/ldap/sasl2/ldap_slapd_cert.crt
+              -
+              add: olcTLSCertificateKeyFile
+              olcTLSCertificateKeyFile: /etc/ldap/sasl2/ldap_server_key.pem
+          dest: /etc/ldap/certinfo.ldif
+    - name: Run ldapmodify
+      become: yes
+      command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/certinfo.ldif
+      register: ldapmodify
+      failed_when: ldapmodify.rc != 0 and "no equality matching rule" not in ldapmodify.stderr
+    - name: Enable LDAPS in slapd
+      become: yes
+      lineinfile:
+          path: /etc/default/slapd
+          regexp: "^SLAPD_SERVICES"
+          line: "SLAPD_SERVICES=\"ldap:/// ldapi:/// ldaps:///\""
+          state: present
+          mode: 0644
+          owner: root
+          group: root
+      notify: restart slapd
+
+
+- name: Warning re variables
+  when: ldap_organisation == '' or ldap_dns_domain_name == '' or ldap_password == ''
+  debug:
+    msg: "You need to define: {{ ldap.organisation_env_variable }}, {{ ldap.dns_domain_name_env_variable }} and {{ ldap_password }}  for ldap configuration"
+
+- name: Update and configure ldap
+  when: ldap_organisation != '' and ldap_dns_domain_name != '' and ldap_password != ''
+  block:
+    - name: update debconf selections
+      block:
+        - name: Configure slapd organisation
+          debconf:
+            name: slapd
+            question: shared/organization
+            vtype: 'string'
+            value: "{{ ldap_organisation }}"
+          register: ldap_org
+        - name: Configure slapd domain
+          debconf:
+            name: slapd
+            question: slapd/domain
+            vtype: 'string'
+            value: "{{ ldap_dns_domain_name }}"
+          register: ldap_domain
+
+        - name: Reconfigure slapd
+          when: ldap_org.changed or ldap_domain.changed
+          command: dpkg-reconfigure -f noninteractive slapd
+          become: yes
+
+    - name: Copy ldap ssh key schema
+      copy:
+        src: openssh-lpk.ldif
+        dest: /etc/ldap/schema/
+      become: yes
+
+    - name: Add ssh key schema
+      command: ldapadd -Y EXTERNAL -H ldapi:/// -f openssh-lpk.ldif
+      args:
+        chdir: /etc/ldap/schema/
+      become: yes
+      register: add_sshkey_schema
+      failed_when: add_sshkey_schema.rc != 0 and "Duplicate attributeType" not in add_sshkey_schema.stderr
+      changed_when: add_sshkey_schema.rc == 0
+
+    - name: Set rootDN passwd
+      tags: ldap_password
+      block:
+        - name: get SSHA of ldap passwd
+          when: ldap_password != ''
+          command: slappasswd -s "{{ ldap_password }}"
+          register: slappasswd_output
+        - name: Create changeroot ldif
+          template:
+            src: changerootpw.ldif
+            dest: /tmp/
+        - name: Update rootDN ldap password
+          command: ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/changerootpw.ldif
+          become: yes
+        - name: Remove changeroot ldif
+          file:
+            path: /tmp/changerootpw.ldif
+            state: absent
+          become: yes
+
+    - name: Configure OUs and groups
+      when: ldap_password != '' and ldap_dns_domain_name != ''
+      vars:
+        dcs: "dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+      block:
+        - name: Ensure users OU exists
+          tags: ldap_ous
+          ldap_entry:
+            dn: "ou=users,{{ dcs }}"
+            objectClass: organizationalUnit
+            bind_dn: "cn=admin,{{ dcs }}"
+            bind_pw: "{{ ldap_password }}"
+
+        - name: Ensure default user group exists
+          tags: ldap_groups
+          ldap_entry:
+            dn: "cn=training,ou=users,{{ dcs }}"
+            objectClass:
+              - posixGroup
+              - top
+            attributes:
+              gidNumber: 20000
+            bind_dn: "cn=admin,{{ dcs }}"
+            bind_pw: "{{ ldap_password }}"
+

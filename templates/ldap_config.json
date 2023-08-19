@@ -1,0 +1,8 @@
+{
+    "ldap_config": {
+        "ldap_host": "ldap",
+        "ldap_dns_domain_name": "training.ilifu.ac.za",
+        "organisation": "ilifu",
+        "password_env_variable": "LDAP_PASSWD"
+    }
+}

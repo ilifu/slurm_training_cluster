@@ -1,0 +1,160 @@
+---
+# tasks file for ldap_client
+
+- name: configure ldap.conf
+  become: yes
+  tags:
+    - ldap
+    - ldap.conf
+    - build
+  block:
+    - name: Set BASE for {{ ldap_dns_domain_name }}
+      when: ldap_dns_domain_name is defined
+      lineinfile:
+        path: /etc/ldap/ldap.conf
+        regexp: "^BASE.*"
+        line: "BASE   dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+    - name: Set URI for ldap in ldap.conf
+      when: ldap_host is defined
+      lineinfile:
+        path: /etc/ldap/ldap.conf
+        regexp: "^URI.*"
+        line:  "URI    ldap://{{ ldap_host }}"
+    - name: Set VERSION 3 for ldap in ldap.conf
+      lineinfile:
+        path: /etc/ldap/ldap.conf
+        regexp: "^VERSION.*"
+        line: "VERSION 3"
+    - name: Set TLS_REQCERT allow in ldap.conf
+      lineinfile:
+          path: /etc/ldap/ldap.conf
+          regexp: "^TLS_REQCERT.*"
+          line: "TLS_REQCERT allow"
+
+- name: Setup ldap secret file
+  become: yes
+  tags:
+    - ldap.secret
+    - ldap
+    - build
+  when: ldap_password != ''
+  lineinfile:
+    create: yes
+    path: /etc/ldap.secret
+    regexp: '.*'
+    line: "{{ ldap_password }}"
+    mode: u=r,go=
+
+- name: Copy ldap key querying script
+  become: yes
+  tags:
+    - ldap_ssh_key
+    - ldap
+    - build
+  copy:
+    src: get_ssh_key_from_ldap.sh
+    dest: /usr/local/bin/get_ssh_key_from_ldap.sh
+    mode: ugo=rx
+
+- name: Make sure authorized_key_command is queried for ssh keys
+  become: yes
+  tags:
+    - authorizedkeys
+    - build
+    - ldap
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "AuthorizedKeysCommand /usr/local/bin/get_ssh_key_from_ldap.sh"
+    regexp: "^AuthorizedKeysCommand .*"
+
+- name: Make sure the authorized_keys_command_user is nobody
+  become: yes
+  tags:
+    - authorizedkeys
+    - build
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "AuthorizedKeysCommandUser nobody"
+    regexp: "^AuthorizedKeysCommandUser.*"
+
+- name: Make sure /etc/nsswitch.conf is up-to-date
+  become: yes
+  tags:
+    - nsswitch
+    - build
+    - ldap
+  block:
+    - name: Update passwd line in nsswitch.conf
+      lineinfile:
+        path: /etc/nsswitch.conf
+        regexp: "^passwd: .*"
+        line: "passwd:         files systemd sss ldap"
+      notify: Restart nscd service
+    - name: Update group line in nsswitch.conf
+      lineinfile:
+        path: /etc/nsswitch.conf
+        regexp: "^group: .*"
+        line: "group:          files systemd sss ldap"
+      notify: Restart nscd service
+
+- name: Disable caching of passwd, group and netgroup in /etc/nscd.conf
+  become: yes
+  tags: [nscd, build, ldap]
+  lineinfile:
+    path: /etc/nscd.conf
+    regexp: '^(\s*)enable-cache(\s+){{ item }}(\s+)yes.*$'
+    line: '\1enable-cache\2{{ item }}\3no'
+    backrefs: yes
+  loop:
+    - passwd
+    - group
+    - netgroup
+    - services
+  notify: Restart nscd service
+
+- name: Setup sssd.conf
+  tags: [sssd, build, ldap]
+  become: yes
+  register: sssd_conf
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    mode: u=rw,go=
+  notify:
+    - Restart sssd service
+    - Restart nscd service
+
+#- name: Setup nslcd.conf
+#  tags: [nslcd, ldap]
+#  become: yes
+#  register: nslcd_conf
+#  template:
+#      src: nslcd.conf.j2
+#      dest: /etc/nslcd.conf
+#      mode: u=rw,g=r,o=
+#  notify: Restart nslcd service
+
+- name: Setup CA certs
+  tags: [sssd, build, ldap, cert]
+  block:
+    - name: Fetch CA certificate from LDAP server
+      become: yes
+      run_once: yes
+      fetch:
+        src: /etc/ldap/sasl2/ca-certificates.crt
+        dest: files/ldap_ca.crt
+        flat: true
+      delegate_to: "{{ ldap_host }}"
+    - name: Copy ca certificate to final destination
+      become: yes
+      copy:
+          src: ldap_ca.crt
+          dest: /usr/local/share/ca-certificates/ldap_ca.crt
+          mode: u=rw,go=r
+      notify: Update ca certificates
+
+- name: Enable home directory creation on login
+  become: yes
+  tags: pam, build, home, ldap
+  command: pam-auth-update --enable mkhomedir
+

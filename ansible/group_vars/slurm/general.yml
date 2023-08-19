@@ -1,0 +1,12 @@
+slurm:
+  version: "23.02.4"
+  version_git: "23-02-4-1"
+  db_name: "slurm_db"
+  db_user: "slurm"
+  dbd_port: "7031"
+  ctld_port: "6817"
+  slurmd_port: "6818"
+  spool_dir: "/var/spool/slurmd"
+  accounts: {
+      training: "Basic account for training",
+  }

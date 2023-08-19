@@ -1,0 +1,27 @@
+---
+# handlers file for ldap_client
+- name: Restart nscd service
+  become: yes
+  tags: [nscd, ldap]
+  service:
+    name: nscd
+    state: restarted
+
+- name: Restart sssd service
+  become: yes
+  tags: [sssd, ldap]
+  service:
+      name: sssd
+      state: restarted
+
+- name: Update ca certificates
+  become: yes
+  tags: [cert, ldap]
+  command: update-ca-certificates
+
+#- name: Restart nslcd service
+#  become: yes
+#  tags: [nslcd, ldap]
+#  service:
+#      name: nslcd
+#      state: restarted

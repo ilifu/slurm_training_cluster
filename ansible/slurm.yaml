@@ -2,26 +2,39 @@
 - hosts: slurm
   roles:
     - slurm_common
-    - hosts
-    - manage_users
+#    - hosts
 
 - hosts: slurm_headnode
   roles:
+    - ceph
+    - ldap_client
     - slurm_headnode
+#    - nextflow
+#    - software
   tags:
     - slurm
 
-- hosts: slurm_controller
+- hosts: slurm_database
   roles:
-    - slurm_controller
     - db_server
   tags:
     - slurm
+    - database
 
-- hosts: slurm_worker
+- hosts: slurm_controller
   roles:
-    - slurm_worker
-    - nextflow
+    - ldap_client
+    - slurm_controller
   tags:
     - slurm
-    
+    - controller
+
+- hosts: slurm_compute
+  roles:
+    - ldap_client
+    - ceph
+    - slurm_worker
+#    - nextflow
+  tags:
+    - slurm
+

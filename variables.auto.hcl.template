@@ -1,0 +1,26 @@
+# Packer Variables
+
+image_name_prefix = "TODO:CONFIGURE_ME"
+image_name_suffix = "TODO:CONFIGURE_ME"
+build_flavor = "TODO:CONFIGURE_ME"
+base_image_name = "TODO:CONFIGURE_ME"
+ldap_image_name = "ldap"
+slurm_base_image_name = "slurm-base"
+database_image_name = "database"
+source_image_id = "TODO:CONFIGURE_ME"
+network_ids = ["TODO:CONFIGURE_ME"]
+floating_ip_network_id = "TODO:CONFIGURE_ME"
+security_groups_ids = ["TODO:CONFIGURE_ME"]
+
+cluster_name = "TODO:CONFIGURE_ME"
+organisation = "TODO:CONFIGURE_ME"
+controller_host = "controller"
+database_host = "database"
+
+slurm_worker_node_name_prefix = "worker-"
+slurm_worker_count = "5"
+slurm_worker_flavor = "TODO:CONFIGURE_ME"
+
+ldap_host = "ldap"
+ldap_dns_domain_name = "TODO:CONFIGURE_ME"
+ldap_password_env_variable = "LDAP_PASSWORD"

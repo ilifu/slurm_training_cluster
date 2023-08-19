@@ -1,0 +1,44 @@
+---
+- name: Configure ceph
+  tags: ['ceph', 'cephfs']
+  become: yes
+  vars:
+    mount_name: "{{ item.name }}"
+    mount_location: "{{ item.export_locations[0] }}"
+    access_key: "{{ item.access_key }}"
+    access_to: "{{ item.access_to }}"
+    mount_point: "{{ item.mount_point }}"
+    secret_file_location: "/etc/cephfs/{{ mount_name }}.secret"
+  block:
+    - name: Configuring {{ mount_location }} for cephfs
+      block:
+        - name: Ensure /etc/cephfs dir exists
+          file:
+            path: /etc/cephfs
+            owner: root
+            group: root
+            mode: 'u=rw,g=,o='
+            state: directory
+        - name: Set secret in {{ secret_file_location }}
+          copy:
+            dest: "{{ secret_file_location }}"
+            content: "{{ access_key }}\n"
+            force: yes
+            owner: root
+            group: root
+            mode: 'u=rwx,g=,o='
+        - name: Ensure mount directory {{ mount_point }} exists
+          file:
+            path: "{{ mount_point }}"
+            owner: root
+            group: root
+            mode: 'u=rwx,g=rx,o=rx'
+            state: directory
+        - name: Mount {{ mount_point }}
+          mount:
+            path: "{{ mount_point }}"
+            src: "{{ mount_location }}"
+            fstype: "ceph"
+            opts: "name={{ access_to }},secretfile={{ secret_file_location }},noatime,_netdev"
+            state: mounted
+

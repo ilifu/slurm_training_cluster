@@ -1,0 +1,57 @@
+- name: Ensure software directory exists
+  when: software_directory.path != ""
+  become: yes
+  file:
+    path: "{{ software_directory.path }}"
+    owner: "{{ software_directory.owner }}"
+    group: "{{ software_directory.group }}"
+    mode: "{{ software_directory.mode }}"
+    state: directory
+
+- name: Install Valencia
+  vars:
+    valencia_venv: "{{ software_directory.path }}/valencia.venv"
+  block:
+    - name: Create Valencia directory
+      become: yes
+      file:
+        path: "{{ software_directory.path }}/valencia"
+        owner: "{{ software_directory.owner }}"
+        group: "{{ software_directory.group }}"
+        mode: "{{ software_directory.mode }}"
+        state: directory
+    - name: Clone valencia
+      git:
+        repo: https://github.com/ravel-lab/VALENCIA.git
+        dest: "{{ software_directory.path }}/valencia"
+        force: yes
+      become: yes
+      become_user: "{{ software_directory.owner }}"
+    - name: Copy requirements.txt file for valencia
+      copy:
+        src: requirements.valencia
+        dest: "/tmp/"
+    - name: Create virtual environment for valencia
+      pip:
+        requirements: "/tmp/requirements.valencia"
+        virtualenv: "{{ valencia_venv }}"
+        virtualenv_python: python3
+    - name: Patch Valencia python scripts to use venv python
+      lineinfile:
+        dest: "{{ software_directory.path }}/valencia/{{ item }}"
+        regex: "^#!.*"
+        line: "#!{{ valencia_venv }}/bin/python"
+      loop:
+        - Valencia.py
+        - convert_qiime.py
+    - name: Make convert_qiime.py executable
+      file:
+        path: "{{ software_directory.path }}/valencia/convert_qiime.py"
+        mode: "ugo+x"
+    - name: Add valencia to path
+      become: yes
+      lineinfile:
+        dest: /etc/profile.d/valencia.sh
+        create: yes
+        regex: ".*PATH=.*"
+        line: "export PATH={{ software_directory.path }}/valencia:${PATH}"

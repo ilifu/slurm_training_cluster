@@ -8,3 +8,11 @@ dist
 .openstack_history.*
 .idea
 *openrc.sh
+*.project
+variables.auto.hcl
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+.terraform/
+terraform.tfstate
+inventory.ini
+terraform.tfstate.backup

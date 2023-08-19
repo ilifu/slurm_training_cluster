@@ -1,5 +1,0 @@
-.terraform
-*.tfstate
-keys.tf
-terraform.tfvars.json
-*.out

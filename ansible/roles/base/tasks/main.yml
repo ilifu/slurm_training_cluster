@@ -1,2 +1,2 @@
 ---
-- { include: tasks.yaml, become: yes, tags: base }
+- { import_tasks: tasks.yaml, become: yes, tags: base }

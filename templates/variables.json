@@ -1,0 +1,23 @@
+{
+    "image_name_prefix": "training",
+    "image_name_suffix": "test",
+    "flavor": "TODO: openstack flavor list",
+    "build_flavor": "TODO: openstack flavor list",
+    "base_image_name": "base-ubuntu-focal",
+    "ldap_image_name": "ldap",
+    "slurm_base_image_name": "slurm_base",
+    "slurm_controller_image_name": "slurm-controller",
+    "slurm_worker_image_name": "slurm-worker",
+    "database_image_name": "database",
+    "source_image": "TODO: openstack image list",
+    "training_base_image": "is_this_needed",
+    "networks": ["TODO: openstack network list"],
+    "floating_ip_network": "TODO: openstack network list",
+    "security_groups": "TODO: openstack security group list",
+
+    "slurm_config_file": "slurm_config.json",
+    "ceph_config_file": "ceph_mounts.json",
+    "hosts_config_file": "hosts.json",
+    "ldap_config_file": "ldap_config.json",
+    "software_config_file": "software_config.json"
+}
