@@ -19,8 +19,8 @@ if [[ ! -f $VARIABLES_FILE ]]; then
   exit 1
 fi
 
-if grep -q "TODO:CONFIGURE_ME" $VARIABLES_FILE; then
-  echo -e "${RED}Unconfigured variables found in $VARIABLES_FILE. Please update the values.\n\n$(cat ${VARIABLES_FILE} | grep 'TODO:CONFIGURE_ME')${NC}\n"
+if grep -q "<unknown>" $VARIABLES_FILE; then
+  echo -e "${RED}Unconfigured variables found in $VARIABLES_FILE. Please update the values.\n\n$(cat ${VARIABLES_FILE} | grep '<unknown>')${NC}\n"
   echo -e "${RED}Note the following existing Network and Security Groups:\n$(openstack network list; openstack security group list)${NC}\n"
   echo "${RED}Aborting build.${NC}"
   exit 1
