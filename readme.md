@@ -88,4 +88,11 @@ fails and simply rerunning will resume and hopefully fix any problems encountere
 error messages). Terraform also creates an `inventory.ini`, and some variables in
 `ansible/group_vars/(all|slurm)/terraform.yml` so that ansible can then be run to configure the nodes.
 
+#### Configure the nodes
+Change to the `ansible` directory and run `ansible-playbook -i ../inventory.ini site.yml`. This will configure the
+nodes and make your cluster usable.
+
+#### Logging in and creating user accounts
+
+
 
