@@ -93,6 +93,18 @@ Change to the `ansible` directory and run `ansible-playbook -i ../inventory.ini 
 nodes and make your cluster usable.
 
 #### Logging in and creating user accounts
+Find the IP address of your login node. You can check in the `inventory.ini` or run `openstack server list` and
+find the public IP address associated with your login node. Connect there as the `ubuntu` user using the ssh key
+you specified in the `variables.auto.hcl` file. You can then create user accounts using the `add_user.py` script
+which will add the users to the ldap server. When they login for the first time their home directories will
+be automatically created on the `/users` cephfs directory.
 
+#### Creating slurm accounts and users
+As root (`sudo su `) on the login node you should first create a default accounting group. This is done with
+`sacctmgr add account training --description="Default account"`. You can then create a user for `ubuntu` with:
+`sacctmgr create user name=ubuntu DefaultAccount=training` and then give them admin privileges with:
+`sacctmgr modify user where name=ubuntu set adminlevel=Admin`. You can then stop being root and perform slurm
+admin commands as the `ubuntu` user. So for users who have had unix accounts added, they can have slurm
+accounts added with `sacctmgr create user name=<username> DefaultAccount=training`.
 
 
