@@ -1,9 +1,21 @@
 # [WIP]
 
 ## What is this?
-
 This is a series of packer, terraform and ansible recipes/playbooks that will aid in creating a slurm cluster suitable
-for training events.
+for training events. It is recommended that you create a standalone clone of this repository for each training cluster
+you create – primarily because the terraform state file is stored locally and you don't want to accidentally overwrite
+it.
+
+The default setup will create a cluster with the following configuration:
+* 1 head node, 2×cores, ~8GiB RAM
+* 1 slurm controller node, 2×cores, ~8GiB RAM
+* 1 database node, 2×cores, ~8GiB RAM
+* 1 ldap node, 1×core, ~4GiB RAM
+* 3 compute nodes, 8×cores, ~64GiB RAM
+* /users cephfs directory ~50GiB
+* /software cephfs directory ~20GiB
+* Software installed includes slurm, singularity and openmpi
+
 ## How do I use it?
 First you will need to download and install some pre-requisites including
 [Packer and Terraform](https://www.packer.io/downloads). You will also need ansible and the OpenStack CLI client
@@ -24,57 +36,75 @@ Sign into the OpenStack Dashboard, make sure you're working the correct project 
 download your [OpenStack RC File](https://dashboard2.ilifu.ac.za/project/api_access/). Once you have sourced this
 file (`. your-project-openrc.sh`) you may move on to creating the base image.
 
-### Create a project directory
-Create a project directory with a `.project` suffix (mainly so that it can be ignored by git), say
-`CBIO_16s_2021.project`. Change to this directory and the rest of the setup will be executed from there.
+### Setup your variables
+Use the `variables.auto.hcl.template` file to create a `variables.auto.hcl` file. This file will be used by both
+packer and terraform when creating the cluster. The template file contains all the variables you can set and the
+variable names are self-explanatory. The only variables you must set are those with `"<unknown>"` as the value.
+Giving a little more information about these:
 
-### Create your base image
-Create your `variables.json` file using the template file found in `templates/variables.json`), i.e.
-`cp ../templates/variables.json ./`. Edit this file so that you have the appropriate IDs in place. Note if you
-installed the CLI client, then the commands you might use are:
-`openstack flavor list`, `openstack image list`, `openstack network list` and `openstack security group list`.
-Note that the security group should allow ssh/port 22 inbound traffic as this is how we connect to the machine.
+* `floating_ip_network_id = "<unknown>"`  _# the floating IP network ID, used when building the images_
+* `ldap_password = "<unknown>"` _# the admin password for ldap, used by ansible when configuring ldap_
+* `network_ids = "<unknown>"` _# An existing network, used when building images_
+* `security_groups_ids = "<unknown>"` _# an existing security group, should allow incoming SSH, used when building images_
+* `slurm_db_password = "<unknown>"` _# The slurmdb password, used by ansible when configuring the database_
+* `ssh_key_location = "<unknown>"` _# The location of the public ssh key to use, used by ansible_
+* `ssh_public_key = "<unknown>"` _# The public ssh key itself, used by terraform when deploying nodes_
 
-Once the variables file has been created, you can run packer with:
-`packer build --var-file=variables.json ../packer/base_vm.json`. Assuming this runs successfully you will have a
-new image to work with in the rest of the process (all this initial step does is make sure your base image is
-up-to-date). Note down the image ID and update the `training_base_image` variable in your `variables.json` file.
+Other noteworthy variables are:
+* `build_flavor = "ilifu-B"` _# Flavour of machine used when building. Higher-core falvours might mean slighty fast build time_
+* `ceph_net_name = "Ceph-net"` _# Name of the Ceph Network_
+* `ceph_subnet_name = "Ceph-subnet"` _# Name of the Ceph Sub-network_
+* `cidr_prefix = "192.168.20.0"` _# Network CIDR to use_
+* `cidr_suffix = "24"` _# Network CIDR mask to use_
+* `cluster_name = "training"` _# Name to give the training cluster_
+* `controller_flavor = "ilifu-B"`
+* `controller_host = "controller"` _# Name of the node where slurmctld will run_
+* `database_flavor = "ilifu-B"`
+* `database_host = "database"` _# Name of the node where the database and slurmdbd will run_
+* `db_name = "slurmdb"` _# Name of the slurm database_
+* `floating_ip_pool_name = "Ext_Floating_IP"`
+* `image_name_prefix = "training-"` _# A prefix used on image names_
+* `image_name_suffix = "-dev"` _# A suffix used on image names_
+* `ldap_dns_domain_name = "training.ilifu.ac.za"` _# Name of the domain inside ldap_
+* `ldap_flavor = "ilifu-A"`
+* `ldap_host = "ldap"` _# Name of the host where ldap is running_
+* `ldap_organisation_name = "training"`
+* `login_flavor = "ilifu-B"`
+* `login_host = "login"` _# Name of the login node_
+* `slurm_group_name = "slurm"` _# The unix user that slurm runs as_
+* `slurm_username = "slurm"` _# The unix group for slurm_
+* `slurm_worker_count = "3"` _# Number of slurm workers to create_
+* `slurm_worker_flavor = "ilifu-E"`
+* `slurm_worker_node_name_prefix = "compute"` _# Worker nodes' prefix_
+* `source_image_id = "0f3e66e2-49e0-4efa-af1d-fd5a2f79f5f6"` _# The starter image (currently a recent ubuntu 22.04 image)
 
-### Create the slurm image
-This step creates an image that the slurm database, controller and worker images will use. Simply run
-`packer build --var-file=variables.json ../packer/slurm_base.json`
+#### Build the images
+Once you have set the variables you can build the images. This can simply be done with the `./build.sh` script. This
+will create all the necessary images and initialise terraform.
 
-### Create the infrastrucure
+#### Deploy the nodes
+Running `terraform apply` will deploy the nodes. This will take a while as the nodes are created. Occasionally this
+fails and simply rerunning will resume and hopefully fix any problems encountered (although one should pay attention
+error messages). Terraform also creates an `inventory.ini`, and some variables in
+`ansible/group_vars/(all|slurm)/terraform.yml` so that ansible can then be run to configure the nodes.
 
-Now you will need to create the VMs. The basic structure is:
-1 × ldap server
-1 × slurm database
-1 × slurm controller
-1 × login node
-n × worker nodes
+#### Configure the nodes
+Change to the `ansible` directory and run `ansible-playbook -i ../inventory.ini site.yml`. This will configure the
+nodes and make your cluster usable.
 
-First copy the terraform `main.tf` file from the templates, i.e. `cp ../templates/main.tf`. This needs to be
-modified to match the infrastructure you desire — specifically you will also need to update the `image_name`
-to match the images you created above, you will need to set appropriate flavors for each of the servers and
-identify the key you would like associated with the machines (`openstack keypair list` if you can't remember
-the name).
+#### Logging in and creating user accounts
+Find the IP address of your login node. You can check in the `inventory.ini` or run `openstack server list` and
+find the public IP address associated with your login node. Connect there as the `ubuntu` user using the ssh key
+you specified in the `variables.auto.hcl` file. You can then create user accounts using the `add_user.py` script
+which will add the users to the ldap server. When they login for the first time their home directories will
+be automatically created on the `/users` cephfs directory.
 
-Then run `terraform init`, followed by `terraform plan` (to check the work to be performed) and finally
-`terraform apply` to create the servers. Note that the created of the shared cephfs disk can fail — this
-step requires a different port to be opened between your machine and the infrastructure (8786) — this may be
-possible if you can connect via a VPN.
+#### Creating slurm accounts and users
+As root (`sudo su `) on the login node you should first create a default accounting group. This is done with
+`sacctmgr add account training --description="Default account"`. You can then create a user for `ubuntu` with:
+`sacctmgr create user name=ubuntu DefaultAccount=training` and then give them admin privileges with:
+`sacctmgr modify user where name=ubuntu set adminlevel=Admin`. You can then stop being root and perform slurm
+admin commands as the `ubuntu` user. So for users who have had unix accounts added, they can have slurm
+accounts added with `sacctmgr create user name=<username> DefaultAccount=training`.
 
-You will want to note down the following information:
-* the IP addresses for each of your servers (including both for the login node)
-* the shared disk 
 
-### setup the cephfs shared access rules
-Go to the OpenStack Dashboard / Shares section. Find the newly created shares and in the dropdown menu click
-"Manage Rules". The "Add rule". Create a cephx type rule and give the "Access To" parameter a meaningful
-name, e.g. `cbio_training-rw`
-
-### Configure your services with ansible
-Finally we use ansible to ensure everything is configured correctly.
-
-Now modify the `variables.json` to reflect the appropriate information in terms of host names and ceph
-information. And update the `inventory.yaml` to properly reflect host information.
