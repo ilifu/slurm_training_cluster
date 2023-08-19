@@ -55,8 +55,6 @@
     mode: "ugo=rx"
   loop:
     - add_user.py
-    - check_ssh_key.py
-    - csv_to_yaml.py
 
 - name: Ensure .venv exists for user-management scripts
   tags:
