@@ -54,6 +54,7 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==22.2.0"
+
         },
         "autopage": {
             "hashes": [
@@ -696,7 +697,7 @@
             "markers": "python_version >= '3.7'",
             "version": "==3.0.0"
         },
-        "prettytable": {
+        "pluggy": {
             "hashes": [
                 "sha256:2e0026af955b4ea67b22122f310b90eae890738c08cb0458693a49b6221530ac",
                 "sha256:3b767129491767a3a5108e6f305cbaa650f8020a7db5dfe994a2df7ef7bad0fe"
