@@ -101,7 +101,7 @@ be automatically created on the `/users` cephfs directory.
 
 #### Creating slurm accounts and users
 As root (`sudo su `) on the login node you should first create a default accounting group. This is done with
-`sacctmgr add account training --description="Default account"`. You can then create a user for `ubuntu` with:
+`sacctmgr add account name=training description="Default training account"`. You can then create a user for `ubuntu` with:
 `sacctmgr create user name=ubuntu DefaultAccount=training` and then give them admin privileges with:
 `sacctmgr modify user where name=ubuntu set adminlevel=Admin`. You can then stop being root and perform slurm
 admin commands as the `ubuntu` user. So for users who have had unix accounts added, they can have slurm
