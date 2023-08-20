@@ -353,17 +353,6 @@
             - /etc/zsh/zshenv
             - /etc/profile.d/openmpi.sh
 
-#- name: Set slurm version info
-#  when: slurm.version is not defined
-#  set_fact:
-#    slurm.version: "{{ slurm.version }}"
-#    slurm.version_git: "{{ slurm.version_git }}"
-#  tags:
-#    - slurm
-#    - slurmconf
-#    - never
-#    - build
-
 - name: Check Slurm Version
   become: no
   tags:
