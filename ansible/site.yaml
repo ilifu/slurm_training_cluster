@@ -25,10 +25,6 @@
   roles:
     - slurm_common
 
-- hosts: slurm_headnode
-  roles:
-    - slurm_headnode
-
 - hosts: slurm_database
   roles:
     - db_server
@@ -36,6 +32,10 @@
 - hosts: slurm_controller
   roles:
     - slurm_controller
+
+- hosts: slurm_headnode
+  roles:
+    - slurm_headnode
 
 - hosts: slurm_compute
   roles:
