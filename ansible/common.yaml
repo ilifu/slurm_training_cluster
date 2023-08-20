@@ -1,5 +1,0 @@
----
-- hosts: base, slurm, ldap_server
-  roles:
-    - common
-    - hosts

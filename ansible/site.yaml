@@ -1,5 +1,54 @@
 ---
-- import_playbook: base.yaml
-- import_playbook: common.yaml
-- import_playbook: ldap.yaml
-- import_playbook: slurm.yaml
+- hosts: base
+  roles:
+    - base
+  tags: ['base', 'build']
+
+- hosts: base, slurm, ldap_server
+  roles:
+    - common
+    - hosts
+
+- hosts: ldap
+  roles:
+    - ldap_server
+
+- hosts: slurm
+  roles:
+    - slurm_common
+#    - hosts
+
+- hosts: slurm_headnode
+  roles:
+    - ceph
+    - ldap_client
+    - slurm_headnode
+#    - nextflow
+#    - software
+  tags:
+    - slurm
+
+- hosts: slurm_database
+  roles:
+    - db_server
+  tags:
+    - slurm
+    - database
+
+- hosts: slurm_controller
+  roles:
+    - ldap_client
+    - slurm_controller
+  tags:
+    - slurm
+    - controller
+
+- hosts: slurm_compute
+  roles:
+    - ldap_client
+    - ceph
+    - slurm_worker
+#    - nextflow
+  tags:
+    - slurm
+
