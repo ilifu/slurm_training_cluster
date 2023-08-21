@@ -1,3 +1,12 @@
+packer {
+  required_plugins {
+    ansible = {
+      version = ">= 1.1.0"
+      source  = "github.com/hashicorp/ansible"
+    }
+  }
+}
+
 locals {
   base_image_name = "${var.image_name_prefix}base${var.image_name_suffix}"
   slurm_base_image_name = "${var.image_name_prefix}slurm-base${var.image_name_suffix}"
