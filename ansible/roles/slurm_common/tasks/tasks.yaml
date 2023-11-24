@@ -178,17 +178,6 @@
       become: yes
       environment:
         MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
-    - name: Add singularity to the PATH
-      lineinfile:
-        path: "{{ item }}"
-        state: present
-        create: yes
-        line: "export PATH=$PATH:/opt/singularity/bin"
-        regexp: '^export PATH=$PATH:/opt/singularity/bin$'
-      become: yes
-      loop:
-        - /etc/zsh/zshenv
-        - /etc/profile.d/singularity.sh
 
 - name: Install PMIx
   become: no
@@ -301,6 +290,8 @@
           - --with-hdf5
           - --with-hwloc
           - --with-pmix=/opt/pmix/{{ pmix.version }}
+          - --with-pmix-libdir=/opt/pmix/{{ pmix.version }}/lib
+          - --with-pmix-include=/opt/pmix/{{ pmix.version }}/include
           - --with-ucx={{ ucx.dir }}
           - --with-ucx-libdir={{ ucx.dir }}/lib
           - --with-ucx-include={{ ucx.dir }}/include
@@ -384,7 +375,18 @@
         path: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         state: directory
     - name: Configure OpenMPI
-      command: "../configure --enable-static --with-singularity --with-ucx={{ ucx.dir }} --prefix={{ install_dir }} --with-pmi=/opt/slurm/{{ slurm.version }} --with-pmi-libdir=/opt/slurm/{{ slurm.version }}/lib"
+      command:
+        argv:
+          - ../configure
+          - --enable-static
+          - --with-singularity
+          - --with-ucx={{ ucx.dir }}
+          - --with-ucx-libdir={{ ucx.dir }}/lib
+          - --prefix={{ install_dir }}
+          - --with-pmix=/opt/pmix/{{ pmix.version }}
+          - --with-pmix-libdir=/opt/pmix/{{ pmix.version }}/lib
+          - --with-pmix-include=/opt/pmix/{{ pmix.version }}/include
+          - --with-hwloc
       args:
         chdir: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         creates: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build/Makefile"
