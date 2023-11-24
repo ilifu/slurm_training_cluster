@@ -1,5 +1,5 @@
 ucx:
-  version: "1.14.1"
-  url: "https://github.com/openucx/ucx/releases/download/v1.14.1/ucx-1.14.1.tar.gz"
-  checksum: "sha256:baa0634cafb269a3112f626eb226bcd2ca8c9fcf0fec3b8e2a3553baad5f77aa"
+  version: "1.15.0"
+  url: "https://github.com/openucx/ucx/releases/download/v1.15.0/ucx-1.15.0.tar.gz"
+  checksum: "sha256:4b202087076bc1c98f9249144f0c277a8ea88ad4ca6f404f94baa9cb3aebda6d"
   dir: "/opt/ucx"

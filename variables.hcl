@@ -34,22 +34,23 @@ variable "build_flavor" {
 variable "source_image_id" {
   type = string
   description = "The source image"
-  default = "0f3e66e2-49e0-4efa-af1d-fd5a2f79f5f6"
+  default = "5b50b1b3-1119-4e22-9903-15eadfdf654b"
 }
 
 variable "network_ids" {
   type = list(string)
-  description = "The networks"
+  description = "The networks (only used when building image)"
 }
 
 variable "floating_ip_network_id" {
   type = string
   description = "The floating ip network"
+  default = "f99ab9af-902c-494b-abfc-32ccd5716234"
 }
 
 variable "security_groups_ids" {
   type = list(string)
-  description = "The security groups"
+  description = "The security groups (only used when building image)"
 }
 
 variable "cluster_name" {
@@ -145,12 +146,14 @@ variable "ldap_password" {
   type = string
   description = "The ldap password"
   sensitive = true
+  default = "youshouldprobablychangethis"
 }
 
 variable "slurm_db_password" {
   type = string
   description = "The slurm db password"
   sensitive = true
+  default = "youshouldprobablychangethis"
 }
 
 variable "ssh_public_key" {
@@ -161,6 +164,7 @@ variable "ssh_public_key" {
 variable "ssh_key_location" {
   type = string
   description = "The ssh key location"
+  default = "~/.ssh/id_ed25519"
 }
 
 variable "cidr_prefix" {

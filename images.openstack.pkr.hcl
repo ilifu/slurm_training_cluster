@@ -4,6 +4,10 @@ packer {
       version = ">= 1.1.0"
       source  = "github.com/hashicorp/ansible"
     }
+    openstack = {
+      version = ">= 1.1.1"
+      source  = "github.com/hashicorp/openstack"
+    }
   }
 }
 
@@ -94,10 +98,11 @@ build {
   provisioner "ansible" {
     use_proxy = false
     playbook_file = "./ansible/site.yaml"
-    ansible_env_vars = [
-      "ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes'"
+    extra_arguments = [
+      "--tags", "build",
+      "--ssh-extra-args", "-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oAddKeysToAgent=no -oIdentitiesOnly=yes"
+#      "--ssh-extra-args", "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes"
     ]
-    extra_arguments = ["--tags", "build"]
     user = "ubuntu"
     groups = ["base", "common"]
   }
@@ -111,10 +116,13 @@ build {
   provisioner "ansible" {
     use_proxy = false
     playbook_file = "./ansible/site.yaml"
-    ansible_env_vars = [
-      "ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes'"
+    extra_arguments = [
+      "--tags", "build",
+      "--ssh-extra-args", "-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oAddKeysToAgent=no -oIdentitiesOnly=yes"
     ]
-    extra_arguments = ["--tags", "build"]
+#    ansible_ssh_extra_args = [
+#      "-oStrictHostKeyChecking=no -oIdentitiesOnly=yes"
+#    ]
     user = "ubuntu"
     groups = ["slurm"]
   }
@@ -128,10 +136,10 @@ build {
   provisioner "ansible" {
     use_proxy = false
     playbook_file = "./ansible/site.yaml"
-    ansible_env_vars = [
-      "ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes'"
+    extra_arguments = [
+      "--tags", "build",
+      "--ssh-extra-args", "-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oAddKeysToAgent=no -oIdentitiesOnly=yes"
     ]
-    extra_arguments = ["--tags", "build"]
     user = "ubuntu"
     groups = ["ldap"]
   }
@@ -145,10 +153,10 @@ build {
   provisioner "ansible" {
     use_proxy = false
     playbook_file = "./ansible/site.yaml"
-    ansible_env_vars = [
-      "ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o AddKeysToAgent=no -o IdentitiesOnly=yes'"
+    extra_arguments = [
+      "--tags", "build",
+      "--ssh-extra-args", "-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oAddKeysToAgent=no -oIdentitiesOnly=yes"
     ]
-    extra_arguments = ["--tags", "build"]
     user = "ubuntu"
     groups = ["slurm_database"]
   }

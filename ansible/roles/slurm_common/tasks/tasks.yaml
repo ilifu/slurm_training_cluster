@@ -4,6 +4,7 @@
   run_once: yes
   debug:
     msg: "slurm: {{ slurm }} --- slurm_config: {{ slurm_config }}"
+  when: slurm_config is defined and slurm is defined
 
 - name: Install Packages
   tags:
@@ -21,6 +22,8 @@
     - 'hwloc'
     - 'libcgroup1'
     - 'libdbus-1-dev'
+    - 'libevent-dev'
+    - 'libfuse3-dev'
     - 'libgpgme11-dev'
     - 'libhwloc-dev'
     - 'libjson-c-dev'
@@ -158,7 +161,6 @@
       command:
         argv:
           - ./mconfig
-#          - --prefix=/opt/singularity
         creates: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}/builddir/Makefile"
       args:
         chdir: "~/go/src/github.com/sylabs/singularity-ce-{{ singularity.version }}"
@@ -188,6 +190,41 @@
         - /etc/zsh/zshenv
         - /etc/profile.d/singularity.sh
 
+- name: Install PMIx
+  become: no
+  tags:
+      - pmix
+      - never
+      - build
+  block:
+      - name: Download PMIx {{ pmix.version }}
+        get_url:
+          url: "{{ pmix.url }}"
+          dest: "~/src/pmix-{{ pmix.version }}.tar.gz"
+          checksum: "{{ pmix.checksum }}"
+      - name: Uncompress PMIx {{ pmix.version }}
+        unarchive:
+          src: "~/src/pmix-{{ pmix.version }}.tar.gz"
+          dest: /dev/shm
+          remote_src: yes
+      - name: Configure PMIx {{ pmix.version }}
+        command: ./configure --prefix=/opt/pmix/{{ pmix.version }}
+        args:
+            chdir: "/dev/shm/pmix-{{ pmix.version }}"
+            creates: "/dev/shm/pmix-{{ pmix.version }}/Makefile"
+      - name: Make PMIx {{ pmix.version }}
+        make:
+            chdir: "/dev/shm/pmix-{{ pmix.version }}"
+            params:
+              NUM_THREADS: "{{ ansible_processor_vcpus }}"
+        environment:
+            MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
+      - name: Install PMIx {{ pmix.version }}
+        make:
+            chdir: "/dev/shm/pmix-{{ pmix.version }}"
+            target: install
+        become: yes
+
 - name: Get OpenUCX version
   tags:
     - never
@@ -214,10 +251,6 @@
         src: "~/src/openucx-{{ ucx.version }}.tar.gz"
         dest: /dev/shm
         remote_src: yes
-#    - name: Create configure script for OpenUCX {{ ucx.version }}
-#      command: ./autogen.sh
-#      args:
-#        chdir: "/dev/shm/ucx-{{ ucx.version }}"
     - name: Run release configure for OpenUCX {{ ucx.version }}
       command: ./contrib/configure-release --prefix={{ ucx.dir }}
       args:
@@ -235,6 +268,79 @@
         target: install
       environment:
         MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
+      become: yes
+
+- name: Check Slurm Version
+  become: no
+  tags:
+    - install
+    - slurm
+    - build
+  block:
+    - name: Check slurm directory
+      stat:
+        path: /opt/slurm/{{ slurm.version }}
+      register: current_slurm_version_dir_exists
+    - name: Slurm version is incorrect
+      command: /bin/false
+      when: (not current_slurm_version_dir_exists.stat.exists) or (not current_slurm_version_dir_exists.stat.isdir)
+  rescue:
+    - name: Fetch slurm repo
+      git:
+        repo: 'https://github.com/SchedMD/slurm.git'
+        dest: ~/src/slurm
+        version: "slurm-{{ slurm.version_git }}"
+
+    - name: ./configure slurm build
+      command:
+        argv:
+          - ./configure
+          - --prefix=/opt/slurm/{{ slurm.version }}
+          - --enable-pam
+          - --with-json
+          - --with-hdf5
+          - --with-hwloc
+          - --with-pmix=/opt/pmix/{{ pmix.version }}
+          - --with-ucx={{ ucx.dir }}
+          - --with-ucx-libdir={{ ucx.dir }}/lib
+          - --with-ucx-include={{ ucx.dir }}/include
+          - --with-ucx-ldflags="-L/opt/ucx/lib -lucp -lucs -luct"
+      args:
+        chdir: ~/src/slurm
+
+    - name: Make slurm
+      make:
+        chdir: ~/src/slurm
+        params:
+          NUM_THREADS: "{{ ansible_processor_vcpus }}"
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
+
+    - name: Make slurm contrib
+      make:
+        chdir: ~/src/slurm
+        target: contrib
+        params:
+          NUM_THREADS: "{{ ansible_processor_vcpus }}"
+      environment:
+        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
+
+    - name: Make sure install destination exists
+      become: yes
+      file:
+        path: /opt/slurm/{{ slurm.version }}/etc
+        state: directory
+        recurse: yes
+
+    - name: make install slurm
+      make:
+        chdir: "~{{ ansible_user }}/src/slurm"
+        target: install
+      become: yes
+    - name: make install slurm contrib
+      make:
+        chdir: "~{{ ansible_user }}/src/slurm"
+        target: install-contrib
       become: yes
 
 - name: Get OpenMPI version
@@ -278,7 +384,7 @@
         path: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         state: directory
     - name: Configure OpenMPI
-      command: "../configure --enable-static --with-singularity --with-ucx={{ ucx.dir }} --prefix={{ install_dir }}"
+      command: "../configure --enable-static --with-singularity --with-ucx={{ ucx.dir }} --prefix={{ install_dir }} --with-pmi=/opt/slurm/{{ slurm.version }} --with-pmi-libdir=/opt/slurm/{{ slurm.version }}/lib"
       args:
         chdir: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build"
         creates: "{{ uncompress_dir }}/openmpi-{{ mpi.version }}/build/Makefile"
@@ -352,67 +458,6 @@
           loop:
             - /etc/zsh/zshenv
             - /etc/profile.d/openmpi.sh
-
-- name: Check Slurm Version
-  become: no
-  tags:
-    - install
-    - slurm
-    - build
-  block:
-    - name: Check slurm directory
-      stat:
-        path: /opt/slurm/{{ slurm.version }}
-      register: current_slurm_version_dir_exists
-    - name: Slurm version is incorrect
-      command: /bin/false
-      when: (not current_slurm_version_dir_exists.stat.exists) or (not current_slurm_version_dir_exists.stat.isdir)
-  rescue:
-    - name: Fetch slurm repo
-      git:
-        repo: 'https://github.com/SchedMD/slurm.git'
-        dest: ~/src/slurm
-        version: "slurm-{{ slurm.version_git }}"
-
-    - name: ./configure slurm build
-      command: ./configure --prefix=/opt/slurm/{{ slurm.version }} --enable-pam --with-json
-      args:
-        chdir: ~/src/slurm
-
-    - name: Make slurm
-      make:
-        chdir: ~/src/slurm
-        params:
-          NUM_THREADS: "{{ ansible_processor_vcpus }}"
-      environment:
-        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
-
-    - name: Make slurm contrib
-      make:
-        chdir: ~/src/slurm
-        target: contrib
-        params:
-          NUM_THREADS: "{{ ansible_processor_vcpus }}"
-      environment:
-        MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
-
-    - name: Make sure install destination exists
-      become: yes
-      file:
-        path: /opt/slurm/{{ slurm.version }}/etc
-        state: directory
-        recurse: yes
-        
-    - name: make install slurm
-      make:
-        chdir: "~{{ ansible_user }}/src/slurm"
-        target: install
-      become: yes
-    - name: make install slurm contrib
-      make:
-        chdir: "~{{ ansible_user }}/src/slurm"
-        target: install-contrib
-      become: yes
 
 - name: Configure paths and directories
   tags:
