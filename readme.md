@@ -78,9 +78,16 @@ Other noteworthy variables are:
 * `slurm_worker_node_name_prefix = "compute"` _# Worker nodes' prefix_
 * `source_image_id = "0f3e66e2-49e0-4efa-af1d-fd5a2f79f5f6"` _# The starter image (currently a recent ubuntu 22.04 image)
 
+#### Initialise Packer
+Run `packer init .` to initialise packer. This will download the necessary plugins.
+
 #### Build the images
 Once you have set the variables you can build the images. This can simply be done with the `./build.sh` script. This
 will create all the necessary images and initialise terraform.
+
+
+#### Initialise Terraform
+Run `terraform init` to initialise terraform. This will download the necessary plugins.
 
 #### Deploy the nodes
 Running `terraform apply` will deploy the nodes. This will take a while as the nodes are created. Occasionally this
