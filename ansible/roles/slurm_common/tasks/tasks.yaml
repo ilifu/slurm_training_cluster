@@ -578,6 +578,15 @@
         group: "{{ slurm_config.group_name }}"
         recurse: yes
 
+    - name: Ensure hdf5 profile dir exists
+      tags: hdf5profile
+      file:
+        path: /software/hdf5profile
+        state: directory
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
+        recurse: yes
+
     - name: Create slurm.conf
       tags: slurm.conf
       template:
@@ -591,6 +600,22 @@
       template:
         src: cgroup.conf
         dest: /opt/slurm/{{ slurm.version }}/etc/cgroup.conf
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
+        mode: "u=rw,g=r,o=r"
+    - name: Create acct_gather.conf
+      tags: acct_gather.conf, hdf5profile
+      template:
+        src: acct_gather.conf
+        dest: /opt/slurm/{{ slurm.version }}/etc/acct_gather.conf
+        owner: "{{ slurm_config.username }}"
+        group: "{{ slurm_config.group_name }}"
+        mode: "u=rw,g=r,o=r"
+    - name: Create topology.conf
+      tags: topology.conf
+      template:
+        src: topology.conf
+        dest: /opt/slurm/{{ slurm.version }}/etc/topology.conf
         owner: "{{ slurm_config.username }}"
         group: "{{ slurm_config.group_name }}"
         mode: "u=rw,g=r,o=r"
