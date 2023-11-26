@@ -1,119 +1,91 @@
 ClusterName={{ slurm_config.cluster_name }}
 
-SlurmctldHost={{ groups['slurm_controller'][0] | replace('_','-') }}({{ hostvars[groups['slurm_controller'][0]].private_ip }})
-#SlurmctldHost=
-# 
-#DisableRootJobs=NO 
-#EnforcePartLimits=NO 
-#Epilog=
-#EpilogSlurmctld= 
-#FirstJobId=1 
-#MaxJobId=999999 
-#GresTypes= 
-#GroupUpdateForce=0 
-#GroupUpdateTime=600 
-#JobFileAppend=0 
-#JobRequeue=1 
-#JobSubmitPlugins=1 
-#KillOnBadExit=0 
-#LaunchType=launch/slurm 
-#Licenses=foo*4,bar 
-#MailProg=/bin/mail
-MailProg=/usr/bin/true
-#MaxJobCount=5000 
-#MaxStepCount=40000 
-#MaxTasksPerNode=128 
-MpiDefault=none
-#MpiParams=ports=#-# 
-#PluginDir= 
-#PlugStackConfig= 
-#PrivateData=jobs 
 
-ProctrackType=proctrack/cgroup
-#ProctrackType=proctrack/linuxproc
+# 32 Core hosts
+#NodeName=compute-[001-021] RealMemory=237568 CPUs=32 Sockets=2 CoresPerSocket=16
 
-#Prolog=
-#PrologFlags= 
-#PrologSlurmctld= 
-#PropagatePrioProcess=0 
-#PropagateResourceLimits= 
-#PropagateResourceLimitsExcept= 
-RebootProgram="/sbin/reboot"
-ReturnToService=1
-#SallocDefaultCommand= 
-SlurmctldPidFile=/var/run/slurmctld.pid
-SlurmctldPort={{ slurm.ctld_port }}
-SlurmdPidFile=/var/run/slurmd.pid
-SlurmdPort={{ slurm.slurmd_port }}
-SlurmdSpoolDir={{ slurm.spool_dir }}
-SlurmUser={{ slurm_config.username }}
-#SlurmdUser=root 
-#SrunEpilog=
-#SrunProlog=
-StateSaveLocation=/var/spool/slurm_state
-SwitchType=switch/none
-#TaskEpilog=
+# 48 Core hosts
+#NodeName=compute-[101-105] RealMemory=237568 CPUs=48 Sockets=2 CoresPerSocket=24
 
-#TaskPlugin=task/cgroup
-#TaskPlugin=task/none
-TaskPlugin=task/cgroup
+# Ironic Baremetal nodes
+#NodeName=compute-[201-260] RealMemory=257568 CPUs=32 Sockets=2 CoresPerSocket=16
 
-#TaskPluginParam=
-#TaskProlog=
-#TopologyPlugin=topology/tree 
-#TmpFS=/tmp 
-#TrackWCKey=no 
-#TreeWidth= 
-#UnkillableStepProgram= 
-#UsePAM=0 
-# 
-# 
-# TIMERS 
-#BatchStartTimeout=10 
-#CompleteWait=0 
-#EpilogMsgTime=2000 
-#GetEnvTimeout=2 
-#HealthCheckInterval=0 
-#HealthCheckProgram= 
-InactiveLimit=0
-KillWait=30
-#MessageTimeout=10 
-#ResvOverRun=0 
-MinJobAge=3600
-#OverTimeLimit=0 
-SlurmctldTimeout=120
-SlurmdTimeout=60
-#UnkillableStepTimeout=60 
-#VSizeFactor=0 
-Waittime=0
-# 
-# 
-# SCHEDULING 
-#DefMemPerCPU=0 
-# FastSchedule=1
-#MaxMemPerCPU=0 
-#SchedulerTimeSlice=30 
+# 512GB RAM hosts
+#NodeName=highmem-[001-002] RealMemory=515624 CPUs=32 Sockets=2 CoresPerSocket=16
+#NodeName=highmem-003 RealMemory=1544192 CPUs=96 Sockets=2 CoresPerSocket=48
+
+# Jupyter Max workers
+#NodeName=jupyter-[001-010] RealMemory=237568 CPUs=32 Sockets=2 CoresPerSocket=16
+
+# P100
+#NodeName=gpu-[001-004] RealMemory=237568 CPUs=32 Sockets=2 CoresPerSocket=16 Gres=gpu:2 Features=p100,P100
+# V100
+#NodeName=gpu-005 RealMemory=237568 CPUs=24 Sockets=2 CoresPerSocket=12 Gres=gpu:1 Features=v100,V100
+# A40
+#NodeName=gpu-006 RealMemory=362582 CPUs=48 Sockets=2 CoresPerSocket=24 Gres=gpu:1 Features=a40,A40
+# A100
+#NodeName=gpu-007 RealMemory=362582 CPUs=48 Sockets=2 CoresPerSocket=24 Gres=gpu:1 Features=a100,A100
+
+# Main Partition
+#PartitionName=Main Nodes=compute-[001-059,061-074] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=7424 State=UP Default=YES AllowQos=normal,qos-interactive
+
+#PartitionName=Main Nodes=compute-[002-021],compute-[101-105],compute-[201-260] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=3096 State=UP Default=YES AllowQos=normal,qos-interactive,a01-idia-qos,a02-cbio-qos,a03-dirisa-qos,a04-cchem-qos TRESBillingWeights="CPU=1.0,Mem=7424"
+
+# JupyterHub Nodes
+#PartitionName=Jupyter Nodes=jupyter-[001-010] DefMemPerCPU=7424 State=UP Default=NO QOS=jupyter TRESBillingWeights="CPU=1.0,Mem=7424"
+
+# JupyterHub GPU Nodes
+#PartitionName=JupyterGPU Nodes=gpu-[003-004] MaxTime=14-00:00:00 DefMemPerCPU=7424 State=UP Default=NO QOS=jupyter TRESBillingWeights="CPU=4.0,Mem=7424"
+
+# High Memory nodes (512GB)
+#PartitionName=HighMem Nodes=highmem-[001-003] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=15360 State=UP Default=NO TRESBillingWeights="CPU=2.0,Mem=15360"
+
+# GPU Nodes
+#PartitionName=GPU Nodes=gpu-00[1-7] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=7424 State=UP Default=NO TRESBillingWeights="CPU=4.0,Mem=7424"
+#PartitionName=GPUV100 Nodes=gpu-005 DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=9898 State=UP Default=NO TRESBillingWeights="CPU=4.0,Mem=9898"
+
+# Devel
+#PartitionName=Devel Nodes=compute-001 DefaultTime=0-03:00:00 MaxTime=5-00:00:00 MaxMemPerNode=237568 State=UP Default=NO OverSubscribe=FORCE:4 PreemptMode=OFF SelectTypeParameters=CR_Core QOS=devel TRESBillingWeights="CPU=0.25,Mem=1856"
+
+#NodeName=compute-1 CPUs=1 RealMemory=3053 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
+#NodeName=compute-2 CPUs=1 RealMemory=3062 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
+#NodeName=compute-3 CPUs=1 RealMemory=3051 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
+
+
+{% for host in groups['slurm_compute'] %}
+NodeName={{ host }} CPUs={{ hostvars[host].ansible_processor_vcpus }} RealMemory={{ hostvars[host].ansible_memory_mb.real.free }} Sockets=1 CoresPerSocket={{ hostvars[host].ansible_processor_vcpus }} ThreadsPerCore=1 State=UNKNOWN
+{% endfor %}
+
+PartitionName=training Nodes={% for host in groups['slurm_compute'] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=2048 State=UP
+
+
+## scheduler settings
+#
 SchedulerType=sched/backfill
+#SchedulerPort=7321
+# Above nuked for upgrade to 22.5.7
 SelectType=select/cons_tres
-SelectTypeParameters=CR_CPU_Memory
-# 
-# 
-# JOB PRIORITY 
-#PriorityFlags= 
-#PriorityType=priority/basic 
-#PriorityDecayHalfLife= 
-#PriorityCalcPeriod= 
-#PriorityFavorSmall= 
-#PriorityMaxAge= 
-#PriorityUsageResetPeriod= 
-#PriorityWeightAge= 
-#PriorityWeightFairshare= 
-#PriorityWeightJobSize= 
-#PriorityWeightPartition= 
-#PriorityWeightQOS= 
-# 
-# 
-# LOGGING AND ACCOUNTING 
+SelectTypeParameters=CR_Core_Memory
+SchedulerParameters=max_script_size=6291456,nohold_on_prolog_fail
+#FastSchedule=1
+
+# use the "multifactor" plugin with weights set up to be multi-user ready
+PriorityType=priority/multifactor
+PriorityWeightAge=500
+PriorityWeightFairshare=100000
+PriorityWeightJobSize=12500
+PriorityWeightPartition=0
+PriorityWeightQOS=20000
+
+# fair share settings
+PriorityDecayHalfLife=14-0
+PriorityUsageResetPeriod=NONE
+PriorityMaxAge=7-0
+PriorityFavorSmall=NO
+PriorityFlags=MAX_TRES
+
+## accounting settings
+#
 AccountingStorageEnforce=limits,qos
 AccountingStorageHost={{ slurm_config.database_host | replace('_','-') }}
 #AccountingStorageLoc=
@@ -121,49 +93,176 @@ AccountingStorageHost={{ slurm_config.database_host | replace('_','-') }}
 AccountingStoragePort={{ slurm.dbd_port }}
 AccountingStorageType=accounting_storage/slurmdbd
 AccountingStorageUser=slurm
+
+
+#AccountingStorageType=accounting_storage/slurmdbd
+#AccountingStorageEnforce=associations,limits,qos
+#AccountingStorageEnforce=limits,qos
+#sinfo: fatal: The AccountingStoreJobComment option has been removed, please use AccountingStoreFlags=job_comment option instead.
 #AccountingStoreJobComment=YES
-#AccountingStoreFlags=job_comment
-
-#DebugFlags= 
-JobCompHost=training_controller
-#JobCompLoc=
-
+# Above changed for upgrade to 22.5.7 from 20.whatwhat
+AccountingStoreFlags=job_comment
+#AccountingStorageHost=slurm-database
+#AccountingStoragePort=6819
+# the "job completion" info is redundant if the accounting
+# infrastructure is enabled, so turn it off as it's an endless source
+# of authentication and DB connection problems ...
 JobCompType=jobcomp/none
-# JobCompPass=
-# JobCompPort={# slurm_conf.dbd.port #}
-# JobCompType=jobcomp/slurmdbd
-# JobCompUser={# slurm_conf.user.name #}
 
-#JobContainerType=job_container/none 
-JobAcctGatherFrequency=30
-JobAcctGatherType=jobacct_gather/cgroup
-SlurmctldDebug=info
+# No power consumption acct
+AcctGatherEnergyType=acct_gather_energy/none
+
+# No IB usage accounting
+AcctGatherInfinibandType=acct_gather_infiniband/none
+
+# No filesystem accounting (only works with Lustre)
+AcctGatherFilesystemType=acct_gather_filesystem/none
+
+# No job profiling (for now)
+AcctGatherProfileType=acct_gather_profile/hdf5
+#AcctGatherProfileType=acct_gather_profile/hdf5
+
+JobAcctGatherType=jobacct_gather/linux
+JobAcctGatherFrequency=20
+
+
+## resource scheduling (GRES)
+#
+GresTypes=gpu
+
+
+## job execution settings
+#
+
+#CheckpointType=checkpoint/none
+##CheckpointType=checkpoint/blcr
+#JobCheckpointDir=/var/lib/slurm/checkpoint
+# Above three commented out for upgrade to 22.5.7
+
+# requeue jobs on node failure, unless users ask otherwise
+# JobRequeue=1
+# batch job will not be requeued unless explicitly enabled by the user
+JobRequeue=0
+
+# max number of jobs in a job array
+MaxArraySize=32769
+
+# max number of jobs pending + running
+MaxJobCount=50000
+
+#MpiDefault=openmpi
+# Note: Apparently, the `MpiParams` option is needed also for non-mpi
+# jobs in slurm 2.5.3.
+MpiParams=ports=12000-12999
+
+# track resource usage via Linux /proc tree
+ProctrackType=proctrack/cgroup
+
+# do not propagate `ulimit` restrictions found on login nodes
+PropagateResourceLimits=NOFILE,AS
+
+# automatically return nodes to service, unless they have been marked DOWN by admins
+ReturnToService=2
+
+#Epilog=/opt/slurm/sbin/slurm-ilifu-epilog.sh
+#EpilogSlurmctld=/opt/slurm/sbin/slurm-ilifu-epilog-ctld.sh
+#Prolog=/opt/slurm/sbin/slurm-ilifu-prolog.sh
+
+TaskPlugin=task/cgroup
+#TaskEpilog=/etc/slurm/task_epilog
+#TaskProlog=/etc/slurm/task_prolog
+
+TmpFs=/tmp
+
+# limit virtual mem usage to this% of real mem usage
+# Changed on 20200221 as per Dane
+#VSizeFactor=101
+
+
+# misc timeout settings (commented lines show the default)
+#
+BatchStartTimeout=60
+CompleteWait=35
+#EpilogMsgTime=2000
+#HealthCheckInterval=0
+#HealthCheckProgram=
+InactiveLimit=0
+KillWait=30
+KillOnBadExit=1
+#MessageTimeout=10
+#MessageTimeout=30
+MessageTimeout=60
+#ResvOverRun=0
+MinJobAge=300
+#OverTimeLimit=0
+#UnkillableStepTimeout=60
+#VSizeFactor=0
+Waittime=0
+
+
+## `slurmctld` settings (controller nodes)
+#
+SlurmctldHost={{ groups['slurm_controller'][0] | replace('_','-') }}({{ hostvars[groups['slurm_controller'][0]].private_ip }})
+SlurmctldPidFile=/var/run/slurmctld.pid
+SlurmctldPort={{ slurm.ctld_port }}
+SlurmctldParameters=enable_configless
+
+#ControlMachine=slurm2021-controller
+#SlurmctldPidFile=/var/run/slurm/slurmctld.pid
+#SlurmctldPort=6817
+SlurmctldTimeout=300
+#SlurmctldTimeout=3000
+#StateSaveLocation=/var/spool/slurm
+StateSaveLocation=/var/spool/slurm_state
+SlurmctldDebug=error
+# Was error log level before 20210812-1230 increased for node_fail checks
+#SlurmctldDebug=verbose
 SlurmctldLogFile=/var/log/slurm/slurmctld.log
-SlurmdDebug=info
+
+DebugFlags=backfill,cpu_bind,priority,reservation,selecttype,steps,NO_CONF_HASH
+#MailProg=/usr/bin/mail
+# MailProg=/opt/slurm/etc/sendmail.py
+# Test for down/drain nodes
+TreeWidth=250
+
+## `slurmd` settings (compute nodes)
+#
+#SlurmdPort=6818
+#SlurmdPidFile=/var/run/slurm/slurmd.pid
+#SlurmdSpoolDir=/var/lib/slurm/slurmd
+SlurmdTimeout=600
+#SlurmdTimeout=6000
+SlurmdPidFile=/var/run/slurmd.pid
+SlurmdPort={{ slurm.slurmd_port }}
+SlurmdSpoolDir={{ slurm.spool_dir }}
+SlurmUser={{ slurm_config.username }}
+
+
+#SlurmdDebug=debug
+SlurmdDebug=verbose
+#SlurmdDebug=error
 SlurmdLogFile=/var/log/slurm/slurmd.log
-SlurmSchedLogFile=/var/log/slurm/slurmsched.log
-#SlurmSchedLogLevel= 
-# 
-# 
-# POWER SAVE SUPPORT FOR IDLE NODES (optional) 
-#SuspendProgram= 
-#ResumeProgram= 
-#SuspendTimeout= 
-#ResumeTimeout= 
-#ResumeRate= 
-#SuspendExcNodes= 
-#SuspendExcParts= 
-#SuspendRate= 
-#SuspendTime= 
-# 
-# 
-# COMPUTE NODES
-# NodeName=slurm_worker-00[01-10] CPUs=32 RealMemory=229376 Sockets=2 CoresPerSocket=16 ThreadsPerCore=1 State=UNKNOWN
-{% for host in groups['slurm_compute'] %}
-NodeName={{ host }} CPUs={{ hostvars[host].ansible_processor_vcpus }} RealMemory={{ hostvars[host].ansible_memory_mb.real.free }} Sockets=1 CoresPerSocket={{ hostvars[host].ansible_processor_vcpus }} ThreadsPerCore=1 State=UNKNOWN
-{% endfor %}
 
-PartitionName=training Nodes={% for host in groups['slurm_compute'] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=4096 State=UP
 
-#PrologFlags=x11
-#X11Parameters=local_xauthority
+AuthType=auth/munge
+CryptoType=crypto/munge
+
+DisableRootJobs=NO
+ 
+# Add X11 Forwarding for Slurm as per https://slurm.schedmd.com/faq.html#x11 - not working, use salloc method until v19 upgrade
+PrologFlags=x11
+X11Parameters=local_xauthority
+
+# Temporary X11 workaround using SSH from Tim
+#SallocDefaultCommand="ssh -Y $(scontrol show hostnames | head -n 1)"
+
+# Fix for groups being missing when on some worker nodes as per https://ilifu.freshdesk.com/a/tickets/773 (missing with Slurm commands but not in OS)
+LaunchParameters=send_gids,use_interactive_step
+
+# Add option to allow something like: scontrol reboot compute-999
+RebootProgram="/sbin/reboot"
+
+# Add TopologyPlugin settings
+TopologyPlugin=topology/tree
+
+ScronParameters=enable
