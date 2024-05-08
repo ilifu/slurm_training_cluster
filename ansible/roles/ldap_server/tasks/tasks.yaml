@@ -188,7 +188,7 @@
       become: yes
       command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/certinfo.ldif
       register: ldapmodify
-      failed_when: ldapmodify.rc != 0 and "no equality matching rule" not in ldapmodify.stderr
+      failed_when: ldapmodify.rc != 0 and "no equality matching rule" not in ldapmodify.stderr and "Type or value exists" not in ldapmodify.stderr
     - name: Enable LDAPS in slapd
       become: yes
       lineinfile:
