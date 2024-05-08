@@ -1,4 +1,4 @@
 go:
-  version: "1.21"
-  url: "https://go.dev/dl/go1.21.4.linux-amd64.tar.gz"
-  checksum: "sha256:73cac0215254d0c7d1241fa40837851f3b9a8a742d0b54714cbdfb3feaf8f0af"
+  version: "1.22"
+  url: "https://go.dev/dl/go1.22.3.linux-amd64.tar.gz"
+  checksum: "sha256:8920ea521bad8f6b7bc377b4824982e011c19af27df88a815e3586ea895f1b36"
