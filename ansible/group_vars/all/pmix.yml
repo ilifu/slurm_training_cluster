@@ -1,4 +1,4 @@
 pmix:
-  version: "4.2.7"
-  url: "https://github.com/openpmix/openpmix/releases/download/v4.2.7/pmix-4.2.7.tar.gz"
-  checksum: "sha256:520a08e80dba8b7fd7bfed54b62fe4e90ed9baadf9de63d7315758bdece75a1a"
+  version: "5.0.2"
+  url: "https://github.com/openpmix/openpmix/releases/download/v5.0.2/pmix-5.0.2.tar.gz"
+  checksum: "sha1:85a17290ed51b5231094f4d9c19fb266e5fb672a"

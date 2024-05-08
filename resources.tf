@@ -1,5 +1,5 @@
 resource "openstack_compute_keypair_v2" "cluster_ssh_key" {
-  name       = "${var.image_name_prefix}-sshkey"
+  name       = "${var.image_name_prefix}-sshkey-${var.image_name_suffix}"
   public_key = var.ssh_public_key
 }
 
@@ -54,6 +54,13 @@ resource "local_file" "group_vars_slurm" {
           export_locations: openstack_sharedfilesystem_share_v2.software_share.export_locations,
           access: openstack_sharedfilesystem_share_access_v2.software_share_access_rw.access_key,
           access_to: openstack_sharedfilesystem_share_access_v2.software_share_access_rw.access_to
+        }
+        data: {
+          name: "data"
+          mount_point: "/data"
+          export_locations: openstack_sharedfilesystem_share_v2.data_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.data_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.data_share_access_rw.access_to
         }
       }
     }

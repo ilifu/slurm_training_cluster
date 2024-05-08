@@ -1,10 +1,10 @@
 resource "openstack_networking_network_v2" "slurm_network" {
-    name = "${var.image_name_prefix}-net"
+    name = "${var.image_name_prefix}-net-${var.image_name_suffix}"
     admin_state_up = "true"
 }
 
 resource "openstack_networking_subnet_v2" "slurm_subnet" {
-    name = "${var.image_name_prefix}-subnet"
+    name = "${var.image_name_prefix}-subnet-${var.image_name_suffix}"
     network_id = openstack_networking_network_v2.slurm_network.id
     cidr = "${var.cidr_prefix}/${var.cidr_suffix}"
     ip_version = 4
@@ -29,7 +29,7 @@ resource "openstack_networking_floatingip_v2" "slurm_float_ip" {
 }
 
 resource "openstack_networking_router_v2" "slurm_router" {
-  name                = "${var.image_name_prefix}-router"
+  name                = "${var.image_name_prefix}-router-${var.image_name_suffix}"
   admin_state_up      = true
   external_network_id = data.openstack_networking_network_v2.public.id
 }
@@ -40,7 +40,7 @@ resource "openstack_networking_router_interface_v2" "slurm_router_interface" {
 }
 
 resource "openstack_networking_secgroup_v2" "slurm_ssh" {
-  name        = "${var.image_name_prefix}-ssh"
+  name        = "${var.image_name_prefix}-ssh-${var.image_name_suffix}"
   description = "To access login node"
 }
 
@@ -55,7 +55,7 @@ resource "openstack_networking_secgroup_rule_v2" "ssh" {
 }
 
 resource "openstack_networking_secgroup_v2" "slurm_nodes" {
-  name        = "${var.image_name_prefix}-slurm-nodes"
+  name        = "${var.image_name_prefix}-slurm-nodes-${var.image_name_suffix}"
   description = "ports that need to be open for all internal slurm traffic"
 }
 
