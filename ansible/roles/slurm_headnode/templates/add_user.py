@@ -133,7 +133,7 @@ def main():
     if args.make_changes:
         logger.debug(f'Creating user {args.username}')
         connection = get_ldap_connection()
-        uid = get_next_uid()
+        uid = get_next_uid(connection)
         create_user(connection, args.username, args.givenname, 20000, args.surname, uid, '/bin/bash', args.ssh_key, f'/users/{args.username}', 'OkayFixThisSoon')
     else:
         logger.warning('Not creating user. Specify --make-changes to get it done')
