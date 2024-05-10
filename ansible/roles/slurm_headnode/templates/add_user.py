@@ -44,16 +44,27 @@ def get_ldap_connection(
     return conn
 
 
-def get_next_uid(min_allowed: int = 10000, max_allowed: int = 20000) -> int:
-    # Get user-id to use
-    users = getpwall()
-    users = list(map(lambda x: x.pw_uid, users))
-    users = list(filter(lambda x: min_allowed <= x <= max_allowed, users))
-    if not users:
-        return min_allowed
-    proposed_uid = max([max(users) + 1, min_allowed])
-    assert min_allowed <= proposed_uid <= max_allowed
-    return proposed_uid
+def get_users_from_ldap(ldap_connection: Connection, organizational_unit: str | None = None) -> list[Entry]:
+    if not organizational_unit:
+        ldap_connection.search(
+            search_base=LDAP_SEARCH_BASE,
+            search_filter=f'(objectclass=posixAccount)',
+            attributes=ALL_ATTRIBUTES,
+        )
+        return ldap_connection.entries[:]
+    ldap_connection.search(
+        search_base=f'ou={organizational_unit},{LDAP_SEARCH_BASE}',
+        search_filter=f'(objectclass=posixAccount)',
+        attributes=ALL_ATTRIBUTES,
+    )
+    return ldap_connection.entries[:]
+
+def get_next_uid(ldap_connection: Connection, min_allowed: int = 10000, max_allowed: int = 20000) -> int:
+    all_uids = [user.uidNumber.value for user in get_users_from_ldap(ldap_connection)]
+    user_uids = [uid for uid in all_uids if min_allowed <= uid <= max_allowed]
+    uid = min_allowed if not user_uids else max(user_uids) + 1
+    assert min_allowed <= uid <= max_allowed
+    return uid
 
 
 def create_user(
@@ -122,23 +133,10 @@ def main():
     if args.make_changes:
         logger.debug(f'Creating user {args.username}')
         connection = get_ldap_connection()
-        uid = get_next_uid()
+        uid = get_next_uid(connection)
         create_user(connection, args.username, args.givenname, 20000, args.surname, uid, '/bin/bash', args.ssh_key, f'/users/{args.username}', 'OkayFixThisSoon')
     else:
         logger.warning('Not creating user. Specify --make-changes to get it done')
 
 if __name__ == "__main__":
     main()
-
-
-#def create_user(
-#        connection: Connection,
-#        username: str,
-#        given_name: str,
-#        gid_number: int,
-#        surname: str,
-#        uid_number: int,
-#        login_shell: str,
-#        ssh_public_key: str,
-#        home_directory: str,
-#        user_password: str,
