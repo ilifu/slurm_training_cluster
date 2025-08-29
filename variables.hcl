@@ -31,10 +31,10 @@ variable "build_flavor" {
 #  description = "The name of the database image"
 #}
 
-variable "source_image_id" {
+variable "source_image_name" {
   type = string
-  description = "The source image"
-  default = "5b50b1b3-1119-4e22-9903-15eadfdf654b"
+  description = "The source image name"
+  default = "20250728-jammy"
 }
 
 variable "network_ids" {
@@ -103,13 +103,13 @@ variable "slurm_worker_node_name_prefix" {
 variable "slurm_worker_count" {
   type = string
   description = "The slurm worker count"
-  default = "3"
+  default = "6"
 }
 
 variable "slurm_worker_flavor" {
   type = string
   description = "The slurm worker VM flavor"
-  default = "ilifu-E"
+  default = "ilifu-G-240G"
 }
 
 variable "ldap_host" {
@@ -213,4 +213,10 @@ variable "slurm_group_name" {
     type = string
     description = "The slurm group name"
     default = "slurm"
+}
+
+variable "node_name_suffix" {
+    type = string
+    description = "Suffix to append to node names"
+    default = ""
 }

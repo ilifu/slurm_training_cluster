@@ -1,42 +1,46 @@
 resource "openstack_compute_instance_v2" "ldap_node" {
-  name            = var.ldap_host
+  name            = "${var.ldap_host}${var.node_name_suffix}"
   image_name      = local.ldap_image_name
   flavor_name     = var.ldap_flavor
   key_pair        = openstack_compute_keypair_v2.cluster_ssh_key.name
   security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name]
+  depends_on      = [openstack_compute_instance_v2.compute_nodes]
   network {
     name = openstack_networking_network_v2.slurm_network.name
   }
 }
 
 resource "openstack_compute_instance_v2" "database_node" {
-  name            = var.database_host
+  name            = "${var.database_host}${var.node_name_suffix}"
   image_name      = local.database_image_name
   flavor_name     = var.database_flavor
   key_pair        = openstack_compute_keypair_v2.cluster_ssh_key.name
   security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name]
+  depends_on      = [openstack_compute_instance_v2.compute_nodes]
   network {
     name = openstack_networking_network_v2.slurm_network.name
   }
 }
 
 resource "openstack_compute_instance_v2" "controller_node" {
-  name            = var.controller_host
+  name            = "${var.controller_host}${var.node_name_suffix}"
   image_name      = local.slurm_base_image_name
   flavor_name     = var.controller_flavor
   key_pair        = openstack_compute_keypair_v2.cluster_ssh_key.name
   security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name]
+  depends_on      = [openstack_compute_instance_v2.ldap_node, openstack_compute_instance_v2.database_node]
   network {
     name = openstack_networking_network_v2.slurm_network.name
   }
 }
 
 resource "openstack_compute_instance_v2" "login_node" {
-  name            = var.login_host
+  name            = "${var.login_host}${var.node_name_suffix}"
   image_name      = local.slurm_base_image_name
   flavor_name     = var.login_flavor
   key_pair        = openstack_compute_keypair_v2.cluster_ssh_key.name
   security_groups = [openstack_networking_secgroup_v2.slurm_nodes.name, openstack_networking_secgroup_v2.slurm_ssh.name]
+  depends_on      = [openstack_compute_instance_v2.controller_node]
   network {
     name = openstack_networking_network_v2.slurm_network.name
   }
@@ -52,7 +56,7 @@ resource "openstack_compute_floatingip_associate_v2" "slurm_fip" {
 
 resource "openstack_compute_instance_v2" "compute_nodes" {
   count           = var.slurm_worker_count
-  name            = "${ var.slurm_worker_node_name_prefix }-${ count.index + 1 }"
+  name            = "${ var.slurm_worker_node_name_prefix }-${ count.index + 1 }${var.node_name_suffix}"
   image_name      = local.slurm_base_image_name
   flavor_name     = var.slurm_worker_flavor
   key_pair        = openstack_compute_keypair_v2.cluster_ssh_key.name

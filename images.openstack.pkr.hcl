@@ -21,7 +21,7 @@ locals {
 source "openstack" "base_image" {
   flavor       = "${var.build_flavor}"
   image_name   = "${local.base_image_name}"
-  source_image = "${var.source_image_id}"
+  source_image_name = "${var.source_image_name}"
 #  external_source_image_format = "qcow2"
   ssh_username = "ubuntu"
   networks = "${var.network_ids}"
