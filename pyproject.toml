@@ -1,0 +1,11 @@
+[project]
+name = "deployslurmtrainingcluster"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ansible>=11.9.0",
+    "ansible-lint>=25.8.2",
+    "python-openstackclient>=8.2.0",
+]
