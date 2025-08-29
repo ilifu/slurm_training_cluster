@@ -7,28 +7,28 @@ you create – primarily because the terraform state file is stored locally and 
 it.
 
 The default setup will create a cluster with the following configuration:
-* 1 head node, 2×cores, ~8GiB RAM
-* 1 slurm controller node, 2×cores, ~8GiB RAM
+* 1 login node (head node), 2×cores, ~8GiB RAM
+* 1 slurm controller node, 2×cores, ~8GiB RAM  
 * 1 database node, 2×cores, ~8GiB RAM
 * 1 ldap node, 1×core, ~4GiB RAM
-* 3 compute nodes, 8×cores, ~64GiB RAM
+* 6 compute nodes, 240GiB RAM each (`ilifu-G-240G` flavor)
 * /users cephfs directory ~50GiB
 * /software cephfs directory ~20GiB
+* /data cephfs directory
 * Software installed includes slurm, singularity and openmpi
 
 ## How do I use it?
 First you will need to download and install some pre-requisites including
 [Packer and Terraform](https://www.packer.io/downloads). You will also need ansible and the OpenStack CLI client
-running -- the recommended way for this is either setting up a virtual environment and installing with `pip`, e.g.
+running -- the recommended way is using `uv` (modern Python package manager):
+```console
+$ uv sync
+```
+Alternatively, you can use traditional pip:
 ```console
 $ virtualenv -p python3 .venv
 $ . .venv/bin/activate
 $ pip install -r requirements.txt
-```
-or using `pipenv`, e.g.
-```console
-$ pipenv sync
-$ pipenv shell
 ```
 Note the current version requires python 3.10.
 ### Get your OpenStack RC File
@@ -37,7 +37,11 @@ download your [OpenStack RC File](https://dashboard2.ilifu.ac.za/project/api_acc
 file (`. your-project-openrc.sh`) you may move on to creating the base image.
 
 ### Setup your variables
-Use the `variables.auto.hcl.template` file to create a `variables.auto.hcl` file. This file will be used by both
+First, generate the variables template:
+```console
+$ ./create_variables_auto_hcl_template.sh
+```
+Then use the `variables.auto.hcl.template` file to create a `variables.auto.hcl` file. This file will be used by both
 packer and terraform when creating the cluster. The template file contains all the variables you can set and the
 variable names are self-explanatory. The only variables you must set are those with `"<unknown>"` as the value.
 Giving a little more information about these:
@@ -73,10 +77,11 @@ Other noteworthy variables are:
 * `login_host = "login"` _# Name of the login node_
 * `slurm_group_name = "slurm"` _# The unix user that slurm runs as_
 * `slurm_username = "slurm"` _# The unix group for slurm_
-* `slurm_worker_count = "3"` _# Number of slurm workers to create_
-* `slurm_worker_flavor = "ilifu-E"`
+* `slurm_worker_count = "6"` _# Number of slurm workers to create_
+* `slurm_worker_flavor = "ilifu-G-240G"` _# Large compute nodes with 240GiB RAM_
 * `slurm_worker_node_name_prefix = "compute"` _# Worker nodes' prefix_
-* `source_image_id = "0f3e66e2-49e0-4efa-af1d-fd5a2f79f5f6"` _# The starter image (currently a recent ubuntu 22.04 image)
+* `source_image_name = "20250728-jammy"` _# The starter image name (Ubuntu 22.04 jammy)_
+* `node_name_suffix = ""` _# Optional suffix for node names (e.g., "-sep2025")_
 
 #### Initialise Packer
 Run `packer init .` to initialise packer. This will download the necessary plugins.
@@ -85,22 +90,26 @@ Run `packer init .` to initialise packer. This will download the necessary plugi
 Once you have set the variables you can build the images. This can simply be done with the `./build.sh` script. This
 will create all the necessary images and initialise terraform.
 
+The build script now uses `uv run openstack` commands for better dependency management.
 
 #### Initialise Terraform
 Run `terraform init` to initialise terraform. This will download the necessary plugins.
 
 #### Deploy the nodes
-Running `terraform apply` will deploy the nodes. This will take a while as the nodes are created. Occasionally this
-fails and simply rerunning will resume and hopefully fix any problems encountered (although one should pay attention
-error messages). Terraform also creates an `inventory.ini`, and some variables in
-`ansible/group_vars/(all|slurm)/terraform.yml` so that ansible can then be run to configure the nodes.
+Running `terraform apply` will deploy the nodes. **Deployment Order**: The system deploys nodes sequentially to optimize resource allocation:
+1. Compute nodes first (to claim large `ilifu-G-240G` instances)
+2. LDAP and Database nodes  
+3. Controller node
+4. Login node
+
+This will take a while as the nodes are created. Occasionally this fails and simply rerunning will resume and hopefully fix any problems encountered (although one should pay attention to error messages). Terraform also creates an `inventory.ini`, and some variables in `ansible/group_vars/(all|slurm)/terraform.yml` so that ansible can then be run to configure the nodes.
 
 #### Configure the nodes
 Change to the `ansible` directory and run `ansible-playbook -i ../inventory.ini site.yml`. This will configure the
 nodes and make your cluster usable.
 
 #### Logging in and creating user accounts
-Find the IP address of your login node. You can check in the `inventory.ini` or run `openstack server list` and
+Find the IP address of your login node. You can check in the `inventory.ini` or run `uv run openstack server list` and
 find the public IP address associated with your login node. Connect there as the `ubuntu` user using the ssh key
 you specified in the `variables.auto.hcl` file. You can then create user accounts using the `add_user.py` script
 which will add the users to the ldap server. When they login for the first time their home directories will
