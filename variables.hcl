@@ -220,3 +220,21 @@ variable "node_name_suffix" {
     description = "Suffix to append to node names"
     default = ""
 }
+
+variable "software_share_size" {
+    type = number
+    description = "Size of the software CephFS share in GB"
+    default = 20
+}
+
+variable "home_share_size" {
+    type = number
+    description = "Size of the home directories CephFS share in GB"
+    default = 50
+}
+
+variable "data_share_size" {
+    type = number
+    description = "Size of the data CephFS share in GB"
+    default = 5120
+}
