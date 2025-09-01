@@ -1,3 +1,0 @@
----
-# tasks file for nextflow
-- { import_tasks: tasks.yaml, become: yes, tags: "nextflow" }
