@@ -20,44 +20,60 @@
     msg: "/software directory is not available or not mounted"
   when: not software_mount.stat.exists
 
-- name: Clone ilifu/software repository to /software/software
+- name: Set proper ownership and permissions on /software directory
+  file:
+    path: /software
+    owner: ubuntu
+    group: admin
+    mode: "ug=rwx,g+s,o=rx"
+    state: directory
+  become: yes
+
+- name: Check if software repository already exists
+  stat:
+    path: /software/.software/.git
+  register: software_repo_exists
+  become: yes
+
+- name: Clone ilifu/software repository to /software/.software
   git:
     repo: https://github.com/ilifu/software.git
-    dest: /software/software
+    dest: /software/.software
     force: yes
     version: HEAD
   become: yes
   register: software_clone_result
+  when: not software_repo_exists.stat.exists
 
 - name: Set proper ownership on cloned repository
   file:
-    path: /software/software
-    owner: root
-    group: root
+    path: /software/.software
+    owner: ubuntu
+    group: admin
     recurse: yes
     mode: '0755'
   become: yes
-  when: software_clone_result is succeeded
+  when: software_clone_result is succeeded or software_repo_exists.stat.exists
 
 - name: Check if ansible group_vars file exists
   stat:
-    path: /software/software/ansible/group_vars/all
+    path: /software/.software/ansible/group_vars/all
   register: group_vars_file
   become: yes
 
 - name: Update admin_group setting in software repository
   lineinfile:
-    path: /software/software/ansible/group_vars/all
+    path: /software/.software/ansible/group_vars/all
     regexp: '^(\s*)admin_group:\s*"ubuntu"'
     line: '\1admin_group: "admin"'
     backup: yes
     backrefs: yes
   become: yes
   when: 
-    - software_clone_result is succeeded
+    - (software_clone_result is succeeded or software_repo_exists.stat.exists)
     - group_vars_file.stat.exists
 
 - name: Log completion
   debug:
-    msg: "Software repository cloned to /software/software and admin_group configured"
-  when: software_clone_result is succeeded
+    msg: "Software repository available at /software/.software and admin_group configured"
+  when: software_clone_result is succeeded or software_repo_exists.stat.exists
