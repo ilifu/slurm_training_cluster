@@ -20,6 +20,7 @@
 - hosts: slurm_headnode, slurm_compute
   roles:
     - ceph
+    - software
 
 - hosts: slurm
   roles:
