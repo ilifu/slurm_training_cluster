@@ -73,8 +73,8 @@ resource "openstack_networking_secgroup_rule_v2" "everything_internal_open" {
   direction        = "ingress"
   ethertype        = "IPv4"
   protocol         = "tcp"
-  port_range_min   = 1
-  port_range_max   = 65535
+  port_range_min   = 0
+  port_range_max   = 0
   remote_ip_prefix = "${var.cidr_prefix}/${var.cidr_suffix}"
   security_group_id = openstack_networking_secgroup_v2.slurm_nodes.id
 }
