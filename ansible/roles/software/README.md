@@ -1,38 +1,24 @@
-Role Name
-=========
+# Scientific Software Role
 
-A brief description of the role goes here.
+This role installs and configures scientific computing software and tools for the SLURM training cluster.
 
-Requirements
-------------
+## Description
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Installs essential scientific computing software including SLURM, Singularity, OpenMPI, and other tools needed for computational research and training. Software is installed in `/software` shared filesystem for cluster-wide access.
 
-Role Variables
---------------
+## Features
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- **SLURM** - Workload manager and job scheduler
+- **Singularity** - Container runtime for scientific applications  
+- **OpenMPI** - Message Passing Interface for parallel computing
+- **Scientific Libraries** - Common computational libraries and tools
+- **Environment Modules** - Software environment management
 
-Dependencies
-------------
+## Dependencies
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- **base** - System base configuration
+- **ceph** - Shared `/software` filesystem
 
-Example Playbook
-----------------
+## Author Information
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Part of the ILIFU CBIO SLURM Training Cluster deployment system.

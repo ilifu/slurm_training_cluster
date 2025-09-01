@@ -75,6 +75,7 @@ Other noteworthy variables are:
 * `ldap_organisation_name = "training"`
 * `login_flavor = "ilifu-B"`
 * `login_host = "login"` _# Name of the login node_
+* `password_login_enabled = false` _# Enable/disable SSH password authentication (default: false)_
 * `slurm_group_name = "slurm"` _# The unix user that slurm runs as_
 * `slurm_username = "slurm"` _# The unix group for slurm_
 * `slurm_worker_count = "6"` _# Number of slurm workers to create_
@@ -108,19 +109,64 @@ This will take a while as the nodes are created. Occasionally this fails and sim
 Change to the `ansible` directory and run `ansible-playbook -i ../inventory.ini site.yml`. This will configure the
 nodes and make your cluster usable.
 
-#### Logging in and creating user accounts
+#### Logging in and setting up the cluster
 Find the IP address of your login node. You can check in the `inventory.ini` or run `uv run openstack server list` and
 find the public IP address associated with your login node. Connect there as the `ubuntu` user using the ssh key
-you specified in the `variables.auto.hcl` file. You can then create user accounts using the `add_user.py` script
-which will add the users to the ldap server. When they login for the first time their home directories will
-be automatically created on the `/users` cephfs directory.
+you specified in the `variables.auto.hcl` file.
 
-#### Creating slurm accounts and users
-As root (`sudo su `) on the login node you should first create a default accounting group. This is done with
-`sacctmgr add account name=training description="Default training account"`. You can then create a user for `ubuntu` with:
-`sacctmgr create user name=ubuntu DefaultAccount=training` and then give them admin privileges with:
-`sacctmgr modify user where name=ubuntu set adminlevel=Admin`. You can then stop being root and perform slurm
-admin commands as the `ubuntu` user. So for users who have had unix accounts added, they can have slurm
-accounts added with `sacctmgr create user name=<username> DefaultAccount=training`.
+#### Initializing SLURM accounts
+After deployment, initialize the SLURM accounting system by running:
+```bash
+sudo /usr/local/bin/init_slurm_accounts
+```
+This script will:
+- Create the default `training` account in SLURM
+- Set up the `ubuntu` user with SLURM admin privileges
+- Configure the accounting database
+
+#### Creating user accounts
+The cluster provides comprehensive user management through the `add_user.py` script located in `~/bin/`:
+
+**Single user creation:**
+```bash
+# Create a regular user with SSH key
+./add_user.py --make-changes -un johndoe -n John -sn Doe --ssh-public-key "ssh-rsa AAAAB3..."
+
+# Create a user with random generated password
+./add_user.py --make-changes -un johndoe -n John -sn Doe --password RANDOM
+
+# Create an admin user with passwordless sudo and SLURM admin privileges
+./add_user.py --make-changes -un admin1 -n Admin -sn User --password RANDOM --admin
+```
+
+**Bulk user creation:**
+```bash
+# Create 10 users (user01, user02, ..., user10) with random passwords
+./add_user.py --make-changes --user_count 10
+
+# Dry run to see what users would be created
+./add_user.py --user_count 10
+```
+
+**Features:**
+- **LDAP Integration**: Users are automatically added to the LDAP directory
+- **SLURM Integration**: Users are automatically added to SLURM with the `training` account
+- **Smart Numbering**: Bulk creation automatically detects existing user## accounts and continues numbering
+- **Dictionary Passwords**: Random passwords use 5 English words for memorability
+- **Admin Users**: Can grant passwordless sudo and SLURM admin privileges with `--admin` flag
+- **Home Directory Creation**: Home directories are automatically created on first login in `/users`
+
+#### Managing existing users
+To add admin privileges to an existing user:
+```bash
+# Add to passwordless sudo group
+sudo usermod -a -G admin username
+
+# Grant SLURM admin privileges  
+sacctmgr modify user where name=username set adminlevel=Admin
+```
+
+#### SSH Access Configuration
+The cluster supports both key-based and password-based SSH authentication. Password authentication can be enabled/disabled via the `password_login_enabled` variable in `variables.auto.hcl`.
 
 
