@@ -238,3 +238,9 @@ variable "data_share_size" {
     description = "Size of the data CephFS share in GB"
     default = 5120
 }
+
+variable "password_login_enabled" {
+    type = bool
+    description = "Enable password authentication on the login node (default: false for security)"
+    default = false
+}

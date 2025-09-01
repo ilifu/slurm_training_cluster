@@ -27,6 +27,7 @@
 # network_ids = "<unknown>"  # The networks (only used when building image)
 # node_name_suffix = ""  # Suffix to append to node names
 # organisation = "<unknown>"  # The organisation
+# password_login_enabled = false  # Enable password authentication on the login node (default: false for security)
 # security_groups_ids = "<unknown>"  # The security groups (only used when building image)
 # slurm_db_password = "<sensitive>"  # The slurm db password
 # slurm_group_name = "slurm"  # The slurm group name

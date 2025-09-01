@@ -4,6 +4,14 @@
     regexp: ".*AllowAgentForwarding.*"
     line: "AllowAgentForwarding yes"
 
+- name: Configure password authentication based on variable
+  tags: password_login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication.*"
+    line: "PasswordAuthentication {{ 'yes' if password_login_enabled else 'no' }}"
+  notify: restart sshd
+
 - name: Update MOTD
   block:
     - name: Remove default motds
