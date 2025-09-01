@@ -6,7 +6,7 @@ uid nslcd
 gid nslcd
 
 # The location at which the LDAP server(s) should be reachable.
-uri ldaps://{{ ldap_host }}:636/
+uri ldap://{{ ldap_host }}:389/
 
 # The search base that will be used for all queries.
 base dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}
@@ -22,7 +22,7 @@ base dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if n
 #rootpwmoddn cn=admin,dc=example,dc=com
 
 # SSL options
-ssl on
+ssl off
 tls_reqcert allow
 tls_cacertfile /usr/local/share/ca-certificates/ldap_ca.crt
 
