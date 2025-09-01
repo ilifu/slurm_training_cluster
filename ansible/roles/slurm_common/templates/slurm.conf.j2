@@ -52,8 +52,15 @@ ClusterName={{ slurm_config.cluster_name }}
 #NodeName=compute-3 CPUs=1 RealMemory=3051 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
 
 
+# Compute node definitions - generated with fallback defaults for limited host runs
 {% for host in groups['slurm_compute'] %}
+{% if hostvars[host].ansible_processor_vcpus is defined and hostvars[host].ansible_memory_mb is defined %}
+# {{ host }} - using gathered facts
 NodeName={{ host }} CPUs={{ hostvars[host].ansible_processor_vcpus }} RealMemory={{ hostvars[host].ansible_memory_mb.real.free }} Sockets=1 CoresPerSocket={{ hostvars[host].ansible_processor_vcpus }} ThreadsPerCore=1 State=UNKNOWN
+{% else %}
+# {{ host }} - using default values (facts not available, likely due to --limit)
+NodeName={{ host }} CPUs=8 RealMemory=240000 Sockets=1 CoresPerSocket=8 ThreadsPerCore=1 State=UNKNOWN
+{% endif %}
 {% endfor %}
 
 PartitionName=training Nodes={% for host in groups['slurm_compute'] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %} Default=YES MaxTime=14-00:00:00 DefMemPerCPU=2048 State=UP
@@ -203,7 +210,12 @@ Waittime=0
 
 ## `slurmctld` settings (controller nodes)
 #
+{% if hostvars[groups['slurm_controller'][0]].private_ip is defined %}
 SlurmctldHost={{ groups['slurm_controller'][0] | replace('_','-') }}({{ hostvars[groups['slurm_controller'][0]].private_ip }})
+{% else %}
+# Controller private_ip not available, using hostname only (likely due to --limit)
+SlurmctldHost={{ groups['slurm_controller'][0] | replace('_','-') }}
+{% endif %}
 SlurmctldPidFile=/var/run/slurmctld.pid
 SlurmctldPort={{ slurm.ctld_port }}
 SlurmctldParameters=enable_configless
