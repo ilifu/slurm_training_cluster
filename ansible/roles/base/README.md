@@ -1,38 +1,43 @@
-Role Name
-=========
+# Base System Role
 
-A brief description of the role goes here.
+This role provides fundamental system configuration for all cluster nodes, including timezone setup, package updates, and basic system hardening.
 
-Requirements
-------------
+## Description
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The base role configures essential system settings that all cluster nodes require. It handles timezone configuration, system package updates, and provides a foundation for other roles to build upon.
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- Ubuntu 22.04 (Jammy Jellyfish)
+- Internet connectivity for package updates
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Required Variables
+- `timezone` - System timezone (default: Africa/Johannesburg)
 
-Example Playbook
-----------------
+## Features
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+- **Timezone Configuration** - Sets system timezone and updates tzdata
+- **Package Management** - Updates all system packages to latest versions
+- **System Hardening** - Basic security configurations
+- **Foundation Setup** - Prepares system for specialized roles
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+## Dependencies
 
-License
--------
+None - this is a foundational role.
 
-BSD
+## Example Playbook
 
-Author Information
-------------------
+```yaml
+- hosts: all
+  become: yes
+  roles:
+    - role: base
+      vars:
+        timezone: "Africa/Johannesburg"
+```
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+## Author Information
+
+Part of the ILIFU CBIO SLURM Training Cluster deployment system.

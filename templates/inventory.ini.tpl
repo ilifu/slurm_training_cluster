@@ -30,6 +30,7 @@ login ansible_host=${floating_ip.address} private_ip=${login_node.access_ip_v4}
 
 [slurm_headnode:vars]
 ansible_ssh_extra_args=""
+password_login_enabled=${password_login_enabled}
 
 [slurm_compute]
 %{ for node in compute_nodes ~}

@@ -3,7 +3,7 @@ resource "openstack_sharedfilesystem_share_v2" "software_share" {
   description      = "shared fs for software"
   share_proto      = "CEPHFS"
   share_type       = "cephfs"
-  size             = 20
+  size             = var.software_share_size
   availability_zone = "nova"
 #  share_network_id = "${openstack_sharedfilesystem_sharenetwork_v2.cephfs_sharenetwork.id}"
 }
@@ -20,7 +20,7 @@ resource "openstack_sharedfilesystem_share_v2" "home_share" {
   description      = "shared fs for user home directories"
   share_proto      = "CEPHFS"
   share_type       = "cephfs"
-  size             = 50
+  size             = var.home_share_size
   availability_zone = "nova"
 #  share_network_id = "${openstack_sharedfilesystem_sharenetwork_v2.cephfs_sharenetwork.id}"
 }
@@ -37,7 +37,7 @@ resource "openstack_sharedfilesystem_share_v2" "data_share" {
   description      = "shared fs for user home directories"
   share_proto      = "CEPHFS"
   share_type       = "cephfs"
-  size             = 1024
+  size             = var.data_share_size
   availability_zone = "nova"
 #  share_network_id = "${openstack_sharedfilesystem_sharenetwork_v2.cephfs_sharenetwork.id}"
 }

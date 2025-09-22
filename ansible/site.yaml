@@ -21,6 +21,11 @@
   roles:
     - ceph
 
+- hosts: slurm_compute[0]
+  roles:
+    - role: software
+      tags: software
+
 - hosts: slurm
   roles:
     - slurm_common

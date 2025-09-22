@@ -1,38 +1,59 @@
-Role Name
-=========
+# CephFS Client Role
 
-A brief description of the role goes here.
+This role configures CephFS client mounting for shared storage access across the cluster, providing `/users`, `/software`, and `/data` filesystems.
 
-Requirements
-------------
+## Description
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+CephFS provides distributed shared storage for the cluster. This role mounts CephFS filesystems that are shared across all nodes, enabling users to access their home directories, shared software, and data from any node in the cluster.
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- Ubuntu 22.04 (Jammy Jellyfish)  
+- Network connectivity to CephFS cluster
+- Proper CephFS credentials and configuration
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Required Variables
+- `ceph_net_name` - Ceph network name
+- `ceph_subnet_name` - Ceph subnet name
 
-Example Playbook
-----------------
+## Features
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+### Shared Filesystems
+- **`/users`** - User home directories (~50GiB)
+- **`/software`** - Shared scientific software (~20GiB)  
+- **`/data`** - Shared data storage
+- **Automatic Mounting** - Persistent mounts via /etc/fstab
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+### Client Configuration
+- **CephFS Kernel Module** - Native kernel client for performance
+- **Authentication** - Secure access to CephFS cluster
+- **Performance Tuning** - Optimized mount options
 
-License
--------
+## Dependencies
 
-BSD
+- **base** - System base configuration
 
-Author Information
-------------------
+## Example Playbook
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+```yaml
+- hosts: cluster_nodes
+  become: yes
+  roles:
+    - role: ceph
+      vars:
+        ceph_net_name: "Ceph-net"
+        ceph_subnet_name: "Ceph-subnet"
+```
+
+## Mount Points
+
+The role creates these shared filesystems:
+- **`/users`** - User home directories (auto-created on first login)
+- **`/software`** - Scientific computing software and modules
+- **`/data`** - Shared project and research data
+
+## Author Information
+
+Part of the ILIFU CBIO SLURM Training Cluster deployment system.

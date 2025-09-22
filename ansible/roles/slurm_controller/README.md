@@ -1,38 +1,103 @@
-Role Name
-=========
+# SLURM Controller Role
 
-A brief description of the role goes here.
+This role configures the SLURM controller node (slurmctld), which manages job scheduling, resource allocation, and cluster coordination.
 
-Requirements
-------------
+## Description
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The SLURM controller is the central management daemon for the cluster. It handles job submission, scheduling, resource allocation, and communicates with compute nodes and the accounting database. This role configures slurmctld with proper database integration and sets up the controller for cluster management.
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- Ubuntu 22.04 (Jammy Jellyfish)
+- Functional MariaDB database server (slurmdbd)
+- Network connectivity to database and compute nodes
+- SLURM common configuration already applied
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Required Variables
+- `controller_host` - Hostname of the controller node
+- `database_host` - Hostname of the database server
+- `slurm_cluster_name` - Name of the SLURM cluster
+- `slurm_db_password` - Password for SLURM database connection
 
-Example Playbook
-----------------
+### Optional Variables
+- `slurm_username` - SLURM system user (default: slurm)
+- `slurm_group_name` - SLURM system group (default: slurm)
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Features
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+### Controller Daemon
+- **slurmctld Service** - Main SLURM controller daemon
+- **Job Scheduling** - Manages job queue and resource allocation
+- **Node Management** - Tracks compute node status and availability
+- **Database Integration** - Connects to slurmdbd for accounting
 
-License
--------
+### Configuration Management
+- **slurm.conf** - Main SLURM configuration file
+- **Resource Definition** - Defines partitions, nodes, and resources
+- **Policy Configuration** - Job limits, priorities, and scheduling policies
 
-BSD
+### Service Management
+- **Systemd Integration** - Proper service configuration and startup
+- **Log Management** - Centralized logging configuration
+- **Process Monitoring** - Health checks and automatic restart
 
-Author Information
-------------------
+## Dependencies
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+- **slurm_common** - Base SLURM configuration and packages
+- **db_server** - Database server for accounting
+- **base** - System base configuration
+
+## Example Playbook
+
+```yaml
+- hosts: slurm_controller
+  become: yes
+  roles:
+    - role: slurm_controller
+      vars:
+        controller_host: "controller.training.ilifu.ac.za"
+        database_host: "database.training.ilifu.ac.za"
+        slurm_cluster_name: "training"
+        slurm_db_password: "{{ vault_slurm_db_password }}"
+```
+
+## Configuration
+
+The controller manages cluster resources through slurm.conf, including:
+- **Compute Nodes** - Node definitions with CPU, memory, and features
+- **Partitions** - Logical groupings of nodes for job submission
+- **Scheduling** - Job prioritization and resource allocation policies
+
+## Troubleshooting
+
+### Common Issues
+- **Database Connection** - Verify slurmdbd is running and accessible
+- **Node Communication** - Check network connectivity to compute nodes
+- **Configuration Errors** - Validate slurm.conf syntax
+
+### Useful Commands
+```bash
+# Check controller status
+sudo systemctl status slurmctld
+
+# View cluster information
+sinfo
+
+# Check node status
+sinfo -N
+
+# Monitor controller logs
+sudo journalctl -u slurmctld -f
+```
+
+## Tags
+
+- `slurm` - SLURM-related configuration
+- `controller` - Controller-specific tasks
+- `build` - Tasks run during image building
+
+## Author Information
+
+Part of the ILIFU CBIO SLURM Training Cluster deployment system.

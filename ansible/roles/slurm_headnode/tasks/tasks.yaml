@@ -4,6 +4,14 @@
     regexp: ".*AllowAgentForwarding.*"
     line: "AllowAgentForwarding yes"
 
+- name: Configure password authentication based on variable
+  tags: password_login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication.*"
+    line: "PasswordAuthentication {{ 'yes' if password_login_enabled else 'no' }}"
+  notify: restart sshd
+
 - name: Update MOTD
   block:
     - name: Remove default motds
@@ -55,6 +63,38 @@
     mode: "ugo=rx"
   loop:
     - add_user.py
+
+- name: Copy SLURM initialization script to system directory
+  tags:
+    - user_management  
+  become: yes
+  template:
+    src: "init_slurm_accounts.sh"
+    dest: "/usr/local/bin/init_slurm_accounts"
+    mode: "u=rwx,go=rx"
+    owner: root
+    group: root
+
+- name: Create passwordless sudo group for admin users
+  tags:
+    - user_management
+    - sudo_config
+  become: yes
+  block:
+    - name: Create admin group
+      group:
+        name: admin
+        state: present
+        
+    - name: Configure passwordless sudo for admin group
+      lineinfile:
+        path: /etc/sudoers.d/90-admin-nopasswd
+        line: "%admin ALL=(ALL) NOPASSWD:ALL"
+        create: yes
+        mode: '0440'
+        owner: root
+        group: root
+        validate: visudo -cf %s
 
 - name: Ensure .venv exists for user-management scripts
   tags:

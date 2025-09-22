@@ -724,5 +724,5 @@
       become: yes
       lineinfile:
           path: /etc/profile.d/lmod.sh
-          line: "export MODULEPATH=/software/modules:$MODULEPATH"
+          line: "export MODULEPATH=/software/modules/common:/software/modules/bio:/software/modules/astro:$MODULEPATH"
           insertafter: EOF
