@@ -303,7 +303,8 @@ def main():
         else:
             user_password = args.password
     else:
-        user_password = 'OkayFixThisSoon'  # Default fallback
+        user_password = generate_random_password()  # Secure random fallback
+        print(f"Generated password: {user_password}")
 
     # Validate SSH key if provided
     if args.ssh_key:
