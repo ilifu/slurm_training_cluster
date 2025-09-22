@@ -62,7 +62,7 @@ def generate_random_password() -> str:
     word_list = load_word_list()
     if len(word_list) < 5:
         logger.error("Not enough words available for password generation")
-        return "fallback password words here now"
+        raise RuntimeError("Cannot generate password: not enough words available")
     words = secrets.SystemRandom().choices(word_list, k=5)
     return ' '.join(words)
 
