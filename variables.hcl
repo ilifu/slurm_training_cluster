@@ -21,16 +21,6 @@ variable "build_flavor" {
   default = "ilifu-B"
 }
 
-#variable "ldap_image_name" {
-#  type = string
-#  description = "The name of the ldap image"
-#}
-#
-#variable "database_image_name" {
-#  type = string
-#  description = "The name of the database image"
-#}
-
 variable "source_image_name" {
   type = string
   description = "The source image name"
@@ -58,11 +48,6 @@ variable "cluster_name" {
   description = "The cluster name"
   default = "training"
 }
-
-#variable "organisation" {
-#  type = string
-#  description = "The organisation"
-#}
 
 variable "database_flavor" {
   type = string

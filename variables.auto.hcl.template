@@ -9,7 +9,6 @@
 # data_share_size = 5120  # Size of the data CephFS share in GB
 # database_flavor = "ilifu-B"  # The database VM flavor
 # database_host = "database"  # The database host
-# database_image_name = "<unknown>"  # The name of the database image
 # db_name = "slurmdb"  # The slurmdb name
 # floating_ip_network_id = "f99ab9af-902c-494b-abfc-32ccd5716234"  # The floating ip network
 # floating_ip_pool_name = "Ext_Floating_IP"  # The floating ip pool
@@ -19,14 +18,12 @@
 # ldap_dns_domain_name = "training.ilifu.ac.za"  # The ldap dns domain name
 # ldap_flavor = "ilifu-A"  # The ldap VM flavor
 # ldap_host = "ldap"  # The ldap host
-# ldap_image_name = "<unknown>"  # The name of the ldap image
 # ldap_organisation_name = "training"  # The ldap organization name
 # ldap_password = "<sensitive>"  # The ldap password
 # login_flavor = "ilifu-B"  # The login VM flavor
 # login_host = "login"  # The login host
 # network_ids = "<unknown>"  # The networks (only used when building image)
 # node_name_suffix = ""  # Suffix to append to node names
-# organisation = "<unknown>"  # The organisation
 # password_login_enabled = false  # Enable password authentication on the login node (default: false for security)
 # security_groups_ids = "<unknown>"  # The security groups (only used when building image)
 # slurm_db_password = "<sensitive>"  # The slurm db password
