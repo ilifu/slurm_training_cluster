@@ -34,7 +34,7 @@ variable "build_flavor" {
 variable "source_image_name" {
   type = string
   description = "The source image name"
-  default = "20250728-jammy"
+  default = "20250925-noble"
 }
 
 variable "network_ids" {

@@ -36,6 +36,6 @@
 # slurm_worker_flavor = "ilifu-G-240G"  # The slurm worker VM flavor
 # slurm_worker_node_name_prefix = "compute"  # The slurm worker node name
 # software_share_size = 20  # Size of the software CephFS share in GB
-# source_image_name = "20250728-jammy"  # The source image name
+# source_image_name = "20250925-noble"  # The source image name
 # ssh_key_location = "~/.ssh/id_ed25519"  # The ssh key location
 # ssh_public_key = "<unknown>"  # The ssh public key
