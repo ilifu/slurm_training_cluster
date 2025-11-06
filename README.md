@@ -24,13 +24,7 @@ running -- the recommended way is using `uv` (modern Python package manager):
 ```console
 $ uv sync
 ```
-Alternatively, you can use traditional pip:
-```console
-$ virtualenv -p python3 .venv
-$ . .venv/bin/activate
-$ pip install -r requirements.txt
-```
-Note the current version requires python 3.10.
+
 ### Get your OpenStack RC File
 Sign into the OpenStack Dashboard, make sure you're working the correct project via the top menu bar, and then
 download your [OpenStack RC File](https://dashboard2.ilifu.ac.za/project/api_access/). Once you have sourced this
