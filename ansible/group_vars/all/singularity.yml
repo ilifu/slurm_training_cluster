@@ -1,4 +1,0 @@
-singularity:
-  version: "4.3.2"
-  url: "https://github.com/sylabs/singularity/releases/download/v4.3.4/singularity-ce-4.3.4.tar.gzz"
-  checksum: "sha256:324b42374614dc18b4b2a3dffd803fd867db8a112c9b6e11f5b4aa789e415c2a"

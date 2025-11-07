@@ -1,4 +1,0 @@
-mpi:
-  version: "5.0.8"
-  url: "https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.8.tar.bz2"
-  checksum: "sha256:53131e1a57e7270f645707f8b0b65ba56048f5b5ac3f68faabed3eb0d710e449"

@@ -1,5 +1,0 @@
-ucx:
-  version: "1.19.0"
-  url: "https://github.com/openucx/ucx/releases/download/v1.19.0/ucx-1.19.0.tar.gz"
-  checksum: "sha256:9af07d55281059542f20c5b411db668643543174e51ac71f53f7ac839164f285"
-  dir: "/opt/ucx"

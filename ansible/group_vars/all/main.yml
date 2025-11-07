@@ -1,0 +1,52 @@
+ldap:
+  password_env_variable: "LDAP_PASSWORD"
+  organisation_env_variable: "LDAP_ORGANISATION"
+  dns_domain_name_env_variable: "LDAP_DOMAIN"
+
+
+go:
+  version: "1.25"
+  url: "https://go.dev/dl/go1.25.4.linux-amd64.tar.gz"
+  checksum: "sha256:9fa5ffeda4170de60f67f3aa0f824e426421ba724c21e133c1e35d6159ca1bec"
+
+
+singularity:
+  version: "4.3.4"
+  url: "https://github.com/sylabs/singularity/releases/download/v4.3.4/singularity-ce-4.3.4.tar.gz"
+  checksum: "sha256:324b42374614dc18b4b2a3dffd803fd867db8a112c9b6e11f5b4aa789e415c2a"
+
+
+ucx:
+  version: "1.19.0"
+  url: "https://github.com/openucx/ucx/releases/download/v1.19.0/ucx-1.19.0.tar.gz"
+  checksum: "sha256:9af07d55281059542f20c5b411db668643543174e51ac71f53f7ac839164f285"
+  dir: "/opt/ucx"
+
+
+pmix:
+  version: "5.0.9"
+  url: "https://github.com/openpmix/openpmix/releases/download/v5.0.9/pmix-5.0.9.tar.gz"
+  checksum: "sha1:856bdac81a8546769973f3159af96c1ada6d3c36"
+
+mpi:
+  version: "5.0.8"
+  url: "https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.8.tar.bz2"
+  checksum: "sha256:53131e1a57e7270f645707f8b0b65ba56048f5b5ac3f68faabed3eb0d710e449"
+
+slurm:
+  version: "25.11.0"
+  version_git: "25-11-0-1"
+  db_name: "slurm_db"
+  db_user: "slurm"
+  dbd_port: "7031"
+  ctld_port: "6817"
+  slurmd_port: "6818"
+  spool_dir: "/var/spool/slurmd"
+  accounts: {
+      training: "Basic account for training",
+  }
+
+  lmod:
+    version: "9.0.2"
+    url: "https://github.com/TACC/Lmod/archive/refs/tags/9.0.2.tar.gz"
+    checksum: "sha256:e84688cc7ba2186bd748b236f91fc8b2eabb87a39d7ccefb0aedf8c24a480b85"

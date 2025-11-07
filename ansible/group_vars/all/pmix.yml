@@ -1,4 +1,0 @@
-pmix:
-  version: "5.0.9"
-  url: "https://github.com/openpmix/openpmix/releases/download/v5.0.9/pmix-5.0.9.tar.gz"
-  checksum: "sha1:856bdac81a8546769973f3159af96c1ada6d3c36"
