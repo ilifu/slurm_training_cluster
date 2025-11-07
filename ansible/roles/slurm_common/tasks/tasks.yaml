@@ -29,6 +29,8 @@
     - 'libhwloc-dev'
     - 'libjson-c-dev'
     - 'libjwt-dev'
+    - 'liblua5.4-0:amd64'
+    - 'liblua5.4-dev:amd64'
     - 'libmariadb-dev'
     - 'libmunge-dev'
     - 'libnss-ldapd'
@@ -38,12 +40,21 @@
     - 'libseccomp-dev'
     - 'libssl-dev'
     - 'libsubid-dev'
+    - 'libtcl8.6:amd64'
     - 'libyaml-dev'
+    - 'lua5.4'
+    - 'lua-bit32:amd64'
+    - 'lua-posix:amd64'
+    - 'lua-posix-dev'
     - 'munge'
     - 'openjdk-11-jre-headless'
     - 'pkg-config'
     - 'python3-dev'
     - 'squashfs-tools'
+    - 'tcl'
+    - 'tcl-dev'
+    - 'tcl8.6'
+    - 'tcl8.6-dev:amd64'
     - 'unzip'
     - 'uuid-dev'
     - 'virtualenv'
@@ -270,7 +281,7 @@
     - slurm
     - build
   block:
-    - name: Check slurm directory
+    - name: Check slurm directory /opt/slurm/{{ slurm.version }} exists
       stat:
         path: /opt/slurm/{{ slurm.version }}
       register: current_slurm_version_dir_exists
@@ -278,7 +289,7 @@
       command: /bin/false
       when: (not current_slurm_version_dir_exists.stat.exists) or (not current_slurm_version_dir_exists.stat.isdir)
   rescue:
-    - name: Fetch slurm repo
+    - name: Fetch slurm repo from https://github.com/SchedMD/slurm.git
       git:
         repo: 'https://github.com/SchedMD/slurm.git'
         dest: ~/src/slurm
@@ -320,14 +331,14 @@
       environment:
         MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
 
-    - name: Make sure install destination exists
+    - name: Make sure install destination /opt/slurm/{{ slurm.version }}/etc exists
       become: yes
       file:
         path: /opt/slurm/{{ slurm.version }}/etc
         state: directory
         recurse: yes
 
-    - name: make install slurm
+    - name: make install slurm to /opt/slurm/{{ slurm.version }}
       make:
         chdir: "~{{ ansible_user }}/src/slurm"
         target: install
@@ -675,21 +686,7 @@
     - never
     - build
   block:
-    - name: Install lmod dependencies
-      apt:
-        name:
-          - lua5.4
-          - lua-bit32:amd64
-          - lua-posix:amd64
-          - lua-posix-dev
-          - liblua5.4-0:amd64
-          - liblua5.4-dev:amd64
-          - tcl
-          - tcl-dev
-          - tcl8.6
-          - tcl8.6-dev:amd64
-          - libtcl8.6:amd64
-    - name: Fetch lmod source
+    - name: Fetch lmod version "{{ lmod.version }}" source from {{ lmod.url }} to "~/src/lmod.{{ lmod.version }}.tar.gz"
       become: no
       get_url:
         url: "{{ lmod.url }}"
