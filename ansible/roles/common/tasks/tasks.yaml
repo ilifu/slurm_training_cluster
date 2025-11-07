@@ -119,6 +119,7 @@
   group:
     name: admin
     state: present
+    gid: 110
 
 - name: Add ubuntu user to admin group
   user:
