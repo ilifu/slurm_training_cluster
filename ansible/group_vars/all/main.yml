@@ -46,7 +46,7 @@ slurm:
       training: "Basic account for training",
   }
 
-  lmod:
-    version: "9.0.2"
-    url: "https://github.com/TACC/Lmod/archive/refs/tags/9.0.2.tar.gz"
-    checksum: "sha256:e84688cc7ba2186bd748b236f91fc8b2eabb87a39d7ccefb0aedf8c24a480b85"
+lmod:
+  version: "9.0.2"
+  url: "https://github.com/TACC/Lmod/archive/refs/tags/9.0.2.tar.gz"
+  checksum: "sha256:e84688cc7ba2186bd748b236f91fc8b2eabb87a39d7ccefb0aedf8c24a480b85"
