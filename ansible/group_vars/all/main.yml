@@ -1,8 +1,4 @@
-ldap:
-  password_env_variable: "LDAP_PASSWORD"
-  organisation_env_variable: "LDAP_ORGANISATION"
-  dns_domain_name_env_variable: "LDAP_DOMAIN"
-
+---
 
 go:
   version: "1.25"
@@ -50,3 +46,9 @@ lmod:
   version: "9.0.2"
   url: "https://github.com/TACC/Lmod/archive/refs/tags/9.0.2.tar.gz"
   checksum: "sha256:e84688cc7ba2186bd748b236f91fc8b2eabb87a39d7ccefb0aedf8c24a480b85"
+
+docker:
+  install: false
+
+jupyterhub:
+  install: false
