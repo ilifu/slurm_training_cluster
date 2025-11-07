@@ -16,3 +16,4 @@ variables.auto.hcl
 terraform.tfstate
 inventory.ini
 terraform.tfstate.backup
+inventory.yml
