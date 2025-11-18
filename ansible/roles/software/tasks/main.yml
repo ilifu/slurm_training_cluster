@@ -51,7 +51,6 @@
     owner: ubuntu
     group: admin
     recurse: yes
-    mode: '0755'
   become: yes
   when: software_clone_result is succeeded or software_repo_exists.stat.exists
 
