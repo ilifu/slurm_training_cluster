@@ -77,6 +77,13 @@
     - role: jupyterlab
       when: jupyterhub.install|bool == true
 
+- name: Caddy reverse proxy installation
+  hosts: slurm_headnode
+  tags: [caddy]
+  roles:
+    - role: caddy
+      when: caddy.install|bool == true
+
 - name: JupyterHub installation
   hosts: slurm_headnode
   tags: [jupyterhub]
