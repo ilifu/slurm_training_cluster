@@ -6,6 +6,33 @@ all:
     ansible_ssh_private_key_file: ${ssh_key_location}
     ansible_user: ubuntu
 
+    ldap:
+      host: "${ldap_host}"
+      dns_domain_name: "${ldap_dns_domain_name}"
+      password: "${ldap_password}"
+      organisation: "${ldap_organisation_name}"
+    slurm_config:
+      cluster_name: ${cluster_name}
+      controller_host: ${controller_host}
+      database_host: ${database_host}
+      slurm_db_password: ${slurm_db_password}
+      db_name: ${db_name}
+      username: ${slurm_username}
+      group_name: ${slurm_group_name}
+    ceph_mounts:
+%{ for mount in ceph_mounts ~}
+      - ${ mount.name }:
+        name: "${ mount.name }"
+        export_locations:
+%{ for location in mount.export_locations ~}
+          - "${ location.path }"
+%{ endfor ~}
+        access_key: "${ mount.access }"
+        access_to: "${ mount.access_to }"
+        mount_point: "${ mount.mount_point }"
+%{ endfor ~}
+    password_login_enabled: ${password_login_enabled}
+
   children:
     ldap_server:
       hosts:
@@ -44,17 +71,3 @@ all:
               private_ip: ${node.access_ip_v4}
 %{ endfor ~}
 
-      vars:
-        slurm:
-          lmod:
-            version: ${lmod.version}
-            url: ${lmod.url}
-          slurm_config:
-            cluster_name: ${cluster_name}
-            controller_host: ${controller_host}
-            database_host: ${database_host}
-            slurm_db_password: ${slurm_db_password}
-            db_name: ${db_name}
-            username: ${slurm_username}
-            group_name: ${slurm_group_name}
-          ceph_mounts: ${ceph_mounts_json:-[]}
