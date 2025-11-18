@@ -66,10 +66,6 @@
   delay: 15
   until: apt_res is success
 
-#- name: "Ansible | List all known variables and facts"
-#  debug:
-#    var: hostvars[inventory_hostname]
-
 - name: Ensure ~/src exists
   tags:
     - build
@@ -550,7 +546,7 @@
   tags:
     - slurmconf
     - build
-  when: slurm_config is defined and slurm is defined
+  when: slurm_config is defined
   become: yes
   block:
     - name: Ensure slurm group "{{ slurm_config.group_name }}" exists
@@ -680,7 +676,7 @@
     - never
     - build
 
-- name: Install lmod and dependencies
+- name: Install lmod
   tags:
     - lmod
     - never
@@ -714,7 +710,7 @@
       become: yes
       command: make install
       args:
-        chdir: "~/src/Lmod-{{ lmod.version }}"
+        chdir: "/home/{{ ansible_user }}/src/Lmod-{{ lmod.version }}"
     - name: Link profile.d lmod.sh
       become: yes
       file:
