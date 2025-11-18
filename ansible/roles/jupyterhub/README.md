@@ -65,6 +65,21 @@ Role Variables
 - `jupyterhub_config_dir` (string, default: "/etc/jupyterhub") - Config directory
 - `jupyterhub_data_dir` (string, default: "/var/lib/jupyterhub") - Data directory
 
+Caddy Integration
+-----------------
+
+JupyterHub deploys its own Caddy reverse proxy configuration file to
+`/etc/caddy/conf.d/jupyterhub.conf`. When Caddy is installed, this config
+is automatically created and Caddy reloads its configuration.
+
+The JupyterHub role:
+- Creates `caddy_jupyterhub.conf.j2` template
+- Deploys config to `/etc/caddy/conf.d/jupyterhub.conf`
+- Notifies Caddy handlers to validate and reload
+- Only runs if `caddy.install == true`
+
+See Caddy README for adding additional services alongside JupyterHub.
+
 Dependencies
 ------------
 
@@ -72,6 +87,7 @@ Required roles (must be configured first):
 - `slurm_headnode` - SLURM login node with slurmctld/slurmdbd access
 - `ldap_client` - LDAP/SSSD authentication for user login
 - `slurm_common` - SLURM common configuration
+- `caddy` - Reverse proxy (optional but recommended for HTTPS)
 
 Usage Example
 -------------
