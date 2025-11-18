@@ -6,10 +6,10 @@ uid nslcd
 gid nslcd
 
 # The location at which the LDAP server(s) should be reachable.
-uri ldap://{{ ldap_host }}:389/
+uri ldap://{{ ldap.host }}:389/
 
 # The search base that will be used for all queries.
-base dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}
+base dc={% for element in ldap.dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}
 
 # The LDAP protocol version to use.
 #ldap_version 3

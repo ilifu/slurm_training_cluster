@@ -25,7 +25,7 @@ from sshpubkeys import InvalidKeyError, SSHKey
 LDAP_ADMIN = 'cn=admin,{{ dcs }}'
 LDAP_PORT = 389
 LDAP_SEARCH_BASE = '{{ dcs }}'
-LDAP_SERVER_ADDRESS = '{{ ldap_host }}'
+LDAP_SERVER_ADDRESS = '{{ ldap.host }}'
 LDAP_USER_BASE = 'cn={username},ou=users,{{ dcs }}'
 
 # SLURM configuration
