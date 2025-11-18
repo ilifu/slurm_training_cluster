@@ -1,47 +1,85 @@
 ---
-- hosts: base
+- name: Base installation
+  hosts: base
   roles:
     - base
   tags: ['base', 'build']
 
-- hosts: base, slurm, ldap_server
+- name: Common configuration for all nodes
+  hosts: base, slurm, ldap_server
   roles:
     - common
     - hosts
 
-- hosts: ldap
+- name: LDAP server installation
+  hosts: ldap
+  tags: [ldap, ldap_server]
   roles:
     - ldap_server
 
-- hosts: slurm_headnode, slurm_controller, slurm_compute
+- name: LDAP client installation
+  hosts: slurm_headnode, slurm_controller, slurm_compute
+  tags: [ldap, ldap_client]
   roles:
     - ldap_client
 
-- hosts: slurm_headnode, slurm_compute
+
+- name: Ceph installation
+  hosts: slurm_headnode, slurm_compute
+  tags: [ceph]
   roles:
     - ceph
 
-- hosts: slurm_compute[0]
-  roles:
-    - role: software
-      tags: software
+#- name: Install software into /software
+#  hosts: slurm_compute
+#  run_once: true
+#  roles:
+#    - role: software
+#      tags: software
 
-- hosts: slurm
+- name: Slurm common installation
+  hosts: slurm
   roles:
     - slurm_common
 
-- hosts: slurm_database
+- name: Slurm database server installation
+  hosts: slurm_database
+  tags: [slurmdbd]
   roles:
     - db_server
 
-- hosts: slurm_controller
+- name: Slurm controller installation
+  hosts: slurm_controller
+  tags: [slurmctld]
   roles:
     - slurm_controller
 
-- hosts: slurm_headnode
+- name: Slurm headnode installation
+  hosts: slurm_headnode
+  tags: [slurm]
   roles:
     - slurm_headnode
 
-- hosts: slurm_compute
+- name: Slurm compute nodes installation
+  hosts: slurm_compute
+  tags: [slurm]
   roles:
     - slurm_worker
+
+- name: Software installation including docker and jupyterlab
+  hosts: slurm_compute
+  tags: [software, docker, jupyterlab]
+  roles:
+    - role: software
+      run_once: true
+    - role: docker
+      when: docker.install|bool == true
+    - role: jupyterlab
+      when: jupyterhub.install|bool == true
+
+- name: JupyterHub installation
+  hosts: slurm_headnode
+  tags: [jupyterhub]
+  roles:
+    - role: jupyterhub
+      when: jupyterhub.install|bool == true
