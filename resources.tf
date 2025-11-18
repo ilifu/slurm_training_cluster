@@ -25,6 +25,8 @@ resource "local_file" "ansible_inventory_yml" {
       slurm_username         = var.slurm_username
       slurm_group_name       = var.slurm_group_name
       slurm_db_password      = var.slurm_db_password
+      install_docker         = var.install_docker
+      install_jupyterhub     = var.install_jupyterhub
       ceph_mounts = {
         home : {
           name : "home"

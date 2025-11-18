@@ -32,6 +32,10 @@ all:
         mount_point: "${ mount.mount_point }"
 %{ endfor ~}
     password_login_enabled: ${password_login_enabled}
+    docker:
+      install: ${install_docker}
+    jupyterhub:
+      install: ${install_jupyterhub}
 
   children:
     ldap_server:
