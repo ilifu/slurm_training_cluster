@@ -119,3 +119,19 @@
       systemd:
         name: jupyterhub
         state: started
+
+- name: Configure Caddy reverse proxy for JupyterHub
+  become: yes
+  tags: [jupyterhub, caddy]
+  block:
+    - name: Deploy JupyterHub Caddy configuration
+      template:
+        src: caddy_jupyterhub.conf.j2
+        dest: "{{ caddy.config_dir }}/jupyterhub.conf"
+        owner: root
+        group: caddy
+        mode: '0644'
+      notify:
+        - Validate Caddy configuration
+        - Reload Caddy
+      when: caddy.install|bool == true

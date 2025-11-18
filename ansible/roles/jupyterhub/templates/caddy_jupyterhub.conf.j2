@@ -1,0 +1,28 @@
+# JupyterHub reverse proxy configuration
+# Deployed to /etc/caddy/conf.d/jupyterhub.conf by Caddy role import
+
+{% if jupyterhub.install %}
+{{ caddy.domain }} {
+  # Log JupyterHub requests
+  log {
+    output stdout
+    format json
+  }
+
+  # Reverse proxy to JupyterHub
+  reverse_proxy /jupyter* localhost:{{ jupyterhub.service.port }} {
+    # Pass through important headers for proper proxying
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+    header_up X-Forwarded-Host {host}
+
+    # WebSocket support for JupyterHub and Jupyter
+    header_up Connection "upgrade"
+    header_up Upgrade "websocket"
+  }
+
+  # Optional: Root redirect to JupyterHub
+  redir / /jupyter 301
+}
+{% endif %}
