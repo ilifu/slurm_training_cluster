@@ -61,17 +61,15 @@
       debug:
         msg: "You need to define the variable 'slurm_config.slurm_db_password' for database configuration"
       when: slurm_config is not defined or slurm_config.slurm_db_password is not defined
-    - name: Install and configure mariadb
+    - name: Ensure Slurm DB user present
       when: slurm_config is defined and slurm_config.slurm_db_password != ''
-      block:
-        - name: Ensure Slurm DB user present
-          mysql_user:
-            name: "{{ slurm.db_user }}"
-            password: "{{ slurm_config.slurm_db_password }}"
-            priv: "{{ slurm.db_name }}.*:ALL"
-            state: present
-            login_unix_socket: /var/run/mysqld/mysqld.sock
-          become: yes
+      mysql_user:
+        name: "{{ slurm.db_user }}"
+        password: "{{ slurm_config.slurm_db_password }}"
+        priv: "{{ slurm.db_name }}.*:ALL"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      become: yes
 
     - name: Ensure slurmdbd configured
       block:
@@ -93,6 +91,13 @@
 
     - name: Copy systemd configure and enable systemd
       block:
+        - name: Ensure /var/run/slurmdbd is owned by slurm user
+          file:
+            path: /var/run/slurmdbd
+            state: directory
+            owner: slurm
+            group: slurm
+            mode: "u=rwx,g=rx,o="
         - name: Copy slurmdbd systemd file
           copy:
             src: "~{{ ansible_user }}/src/slurm/etc/slurmdbd.service"
