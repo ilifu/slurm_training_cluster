@@ -2,6 +2,9 @@
 set -e
 
 packer init .
+uv sync
+
+. ./.venv/bin/activate
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
