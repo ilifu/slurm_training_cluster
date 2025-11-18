@@ -1,3 +1,16 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for software
+
+docker:
+  install: false
+  add_users_to_docker_group: false
+
+
+jupyterhub:
+  install: false
+  version: "5.4.2"
+  admin_users:
+    - ubuntu
+  jupyter_user: jupyter
+  jupyter_group: jupyter

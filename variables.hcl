@@ -12,7 +12,7 @@ variable "image_name_prefix" {
 variable "image_name_suffix" {
   type = string
   description = "The suffix of the image name"
-  default = "-dev"
+  default = "dev"
 }
 
 variable "build_flavor" {
@@ -228,4 +228,22 @@ variable "password_login_enabled" {
     type = bool
     description = "Enable password authentication on the login node (default: false for security)"
     default = false
+}
+
+variable "install_docker" {
+    type = bool
+    description = "Whether to install Docker on the compute nodes"
+    default = false
+}
+
+variable "install_jupyterhub" {
+    type = bool
+    description = "Whether to install JupyterHub on the login node and jupyterlab on the compute nodes"
+    default = false
+}
+
+variable "domain_name" {
+    type = string
+    description = "The domain name for the cluster — mostly used for jupyter"
+    default = "training.ilifu.ac.za"
 }
