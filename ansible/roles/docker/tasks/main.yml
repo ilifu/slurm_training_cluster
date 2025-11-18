@@ -1,0 +1,19 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for docker
+# Install Docker and manage user permissions on compute nodes
+
+- name: Install Docker packages and daemon
+  include_tasks: install.yml
+  tags: [docker, build]
+  when: docker.install|bool == true
+
+- name: Configure Docker daemon and groups
+  include_tasks: configure.yml
+  tags: [docker, config]
+  when: docker.install|bool == true
+
+- name: Manage Docker user permissions
+  include_tasks: user_permissions.yml
+  tags: [docker, user_permissions]
+  when: docker.install|bool == true and docker.user_docker|bool == true

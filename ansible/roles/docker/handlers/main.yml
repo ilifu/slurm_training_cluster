@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for docker
+
+- name: Restart Docker
+  become: yes
+  systemd:
+    name: docker
+    state: restarted
+  listen: "Restart Docker"
