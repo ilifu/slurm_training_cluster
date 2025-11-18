@@ -1,0 +1,20 @@
+#SPDX-License-Identifier: MIT-0
+---
+# Manage Docker group memberships for specified users
+# Users in docker_privileged_users list are added to the docker group
+# This allows them to run docker commands without sudo
+
+- name: Add specified users to docker group
+  become: yes
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_privileged_users | default([]) }}"
+  when: docker_privileged_users is defined and docker_privileged_users | length > 0
+  register: docker_users_added
+
+- name: Inform users about shell restart requirement
+  debug:
+    msg: "Docker group membership added. Users must log out and back in for changes to take effect."
+  when: docker_users_added is changed

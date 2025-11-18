@@ -1,0 +1,17 @@
+#SPDX-License-Identifier: MIT-0
+---
+# Configure Docker daemon and ensure docker group exists
+
+- name: Ensure docker group exists
+  become: yes
+  group:
+    name: docker
+    state: present
+    system: yes
+
+- name: Ensure Docker daemon is started
+  become: yes
+  systemd:
+    name: docker
+    state: started
+    daemon_reload: yes
