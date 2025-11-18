@@ -236,6 +236,12 @@ variable "install_docker" {
     default = false
 }
 
+variable "user_docker" {
+    type = bool
+    description = "Whether to allow users to run Docker commands without sudo (requires install_docker = true)"
+    default = false
+}
+
 variable "install_jupyterhub" {
     type = bool
     description = "Whether to install JupyterHub on the login node and jupyterlab on the compute nodes"
