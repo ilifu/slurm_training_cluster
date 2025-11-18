@@ -30,6 +30,11 @@ This design provides:
 - **Clarity**: Service config location is predictable
 - **Validation**: Configuration validated before reload
 - **Separation of Concerns**: Service roles own their routing config
+- **Path-based Routing**: Multiple services can coexist on a single domain at different paths
+  - JupyterHub serves at `https://domain/jupyter`
+  - RStudio would serve at `https://domain/rstudio`
+  - VSCode would serve at `https://domain/vscode`
+  - Root `/` can host a landing page (future enhancement)
 
 Requirements
 ------------

@@ -9,20 +9,18 @@
     format json
   }
 
-  # Reverse proxy to JupyterHub
+  # Reverse proxy to JupyterHub on /jupyter path
   reverse_proxy /jupyter* localhost:{{ jupyterhub.service.port }} {
     # Pass through important headers for proper proxying
     header_up X-Real-IP {remote_host}
     header_up X-Forwarded-For {remote_host}
     header_up X-Forwarded-Proto {scheme}
     header_up X-Forwarded-Host {host}
+    header_up X-Script-Name /jupyter
 
     # WebSocket support for JupyterHub and Jupyter
     header_up Connection "upgrade"
     header_up Upgrade "websocket"
   }
-
-  # Optional: Root redirect to JupyterHub
-  redir / /jupyter 301
 }
 {% endif %}
