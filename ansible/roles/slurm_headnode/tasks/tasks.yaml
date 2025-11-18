@@ -12,6 +12,15 @@
     line: "PasswordAuthentication {{ 'yes' if password_login_enabled else 'no' }}"
   notify: restart sshd
 
+- name: Override cloud-init SSH config that disables password auth
+  tags: password_login
+  become: yes
+  file:
+    path: /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+    state: absent
+  when: password_login_enabled
+  notify: restart sshd
+
 - name: Update MOTD
   block:
     - name: Remove default motds
@@ -56,13 +65,14 @@
     - user_management
   become: no
   vars:
-    dcs: "dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+    dcs: "dc={% for element in ldap.dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
   template:
     src: "{{ item }}"
     dest: "~/bin/{{ item }}"
     mode: "ugo=rx"
   loop:
     - add_user.py
+    - update_password.py
 
 - name: Copy SLURM initialization script to system directory
   tags:
