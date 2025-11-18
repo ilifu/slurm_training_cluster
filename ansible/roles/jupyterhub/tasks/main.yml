@@ -1,3 +1,121 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for jupyterhub
+# Install JupyterHub with SlurmSpawner on login node
+
+- name: Install system dependencies for JupyterHub
+  become: yes
+  tags: [jupyterhub, build]
+  block:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required system packages
+      apt:
+        name:
+          - python3-venv
+          - python3-dev
+          - build-essential
+          - git
+          - npm
+        state: present
+
+- name: Create jupyter user and group
+  become: yes
+  tags: [jupyterhub, build]
+  block:
+    - name: Create jupyter group
+      group:
+        name: "{{ jupyterhub.jupyter_group }}"
+        state: present
+        system: yes
+
+    - name: Create jupyter user
+      user:
+        name: "{{ jupyterhub.jupyter_user }}"
+        group: "{{ jupyterhub.jupyter_group }}"
+        home: "/var/lib/jupyterhub"
+        shell: /sbin/nologin
+        state: present
+        system: yes
+
+- name: Setup JupyterHub virtual environment and packages
+  become: yes
+  become_user: root
+  tags: [jupyterhub, build]
+  block:
+    - name: Create JupyterHub directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ jupyterhub.jupyter_user }}"
+        group: "{{ jupyterhub.jupyter_group }}"
+        mode: '0755'
+      loop:
+        - "{{ jupyterhub_python_venv }}"
+        - "{{ jupyterhub_config_dir }}"
+        - "{{ jupyterhub_data_dir }}"
+
+    - name: Create Python virtual environment for JupyterHub
+      command:
+        cmd: "python3 -m venv {{ jupyterhub_python_venv }}"
+        creates: "{{ jupyterhub_python_venv }}/bin/python"
+
+    - name: Upgrade pip in virtual environment
+      pip:
+        name: pip
+        state: latest
+        virtualenv: "{{ jupyterhub_python_venv }}"
+        virtualenv_command: "python3 -m venv"
+
+    - name: Install JupyterHub and dependencies
+      pip:
+        name:
+          - "jupyterhub=={{ jupyterhub.version }}"
+          - jupyterlab
+          - batchspawner
+          - "notebook>=6.1"
+        state: present
+        virtualenv: "{{ jupyterhub_python_venv }}"
+        virtualenv_command: "python3 -m venv"
+
+    - name: Install Node.js packages for JupyterLab
+      command:
+        cmd: "{{ jupyterhub_python_venv }}/bin/pip install jupyterlab_server"
+      changed_when: false
+
+- name: Configure JupyterHub
+  become: yes
+  tags: [jupyterhub, config]
+  block:
+    - name: Deploy JupyterHub configuration
+      template:
+        src: jupyterhub_config.py.j2
+        dest: "{{ jupyterhub_config_dir }}/jupyterhub_config.py"
+        owner: "{{ jupyterhub.jupyter_user }}"
+        group: "{{ jupyterhub.jupyter_group }}"
+        mode: '0644'
+      notify:
+        - Restart JupyterHub
+
+    - name: Deploy JupyterHub systemd service file
+      template:
+        src: jupyterhub.service.j2
+        dest: /etc/systemd/system/jupyterhub.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Restart JupyterHub
+
+    - name: Ensure JupyterHub service is enabled
+      systemd:
+        name: jupyterhub
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Ensure JupyterHub service is started
+      systemd:
+        name: jupyterhub
+        state: started

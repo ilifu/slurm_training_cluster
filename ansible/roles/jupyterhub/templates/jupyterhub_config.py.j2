@@ -1,0 +1,96 @@
+# JupyterHub configuration file
+# Generated from Ansible template
+# For use with SlurmSpawner on login node
+
+c = get_config()
+
+#
+# Application configuration
+#
+
+# Admin users - can manage server and users
+c.JupyterHub.admin_users = [
+{% for user in jupyterhub.admin_users %}
+  '{{ user }}',
+{% endfor %}
+]
+
+# The port the JupyterHub should listen on
+c.JupyterHub.ip = '{{ jupyterhub.service.ip }}'
+c.JupyterHub.port = {{ jupyterhub.service.port }}
+
+# Allow hub to be run as root if needed (not recommended)
+c.JupyterHub.allow_root = {{ jupyterhub.service.allow_root | lower }}
+
+#
+# Database configuration
+#
+
+# Use SQLite database
+c.JupyterHub.db_url = 'sqlite:////var/lib/jupyterhub/jupyterhub.sqlite'
+
+#
+# Authenticator configuration
+#
+
+# Use PAM authenticator which delegates to SSSD/LDAP
+c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+c.PAMAuthenticator.open_sessions = False
+
+#
+# Spawner configuration
+#
+
+# Use batchspawner SlurmSpawner
+c.JupyterHub.spawner_class = 'batchspawner.SlurmSpawner'
+
+# SLURM spawner settings
+c.SlurmSpawner.partition = '{{ jupyterhub.spawner_config.partition }}'
+c.SlurmSpawner.memory = '{{ jupyterhub.spawner_config.memory }}'
+c.SlurmSpawner.cpus = {{ jupyterhub.spawner_config.cpus }}
+c.SlurmSpawner.time_limit = '{{ jupyterhub.spawner_config.time_limit }}'
+c.SlurmSpawner.account = ''  # Leave empty unless you want to specify accounting
+
+{% if jupyterhub.spawner_config.prologue %}
+# SLURM prologue script
+c.SlurmSpawner.prologue = """{{ jupyterhub.spawner_config.prologue }}"""
+{% endif %}
+
+{% if jupyterhub.spawner_config.epilogue %}
+# SLURM epilogue script
+c.SlurmSpawner.epilogue = """{{ jupyterhub.spawner_config.epilogue }}"""
+{% endif %}
+
+# Use default spawner settings (start_workers waits for jobs to start)
+c.Spawner.start_timeout = 300
+c.Spawner.http_timeout = 300
+
+# Working directory for notebook sessions
+c.Spawner.notebook_dir = '{{ jupyterhub.notebook_dir }}'
+
+#
+# Server configuration
+#
+
+# Allow any authenticated user to spawn a single-user notebook server
+c.JupyterHub.allow_named_servers = False
+c.JupyterHub.default_url = '/lab'
+
+# Use JupyterLab as default interface
+c.Spawner.default_url = '/lab'
+
+# Timeout before giving up on spawning a server
+c.JupyterHub.spawn_timeout = 300
+
+# Timeout for single suser server
+c.Spawner.default_args = []
+
+# Ensure notebooks are in user home directories
+c.Spawner.args = ['--NotebookApp.notebook_dir=~']
+
+#
+# Logging configuration
+#
+
+import logging
+c.JupyterHub.log_level = logging.INFO

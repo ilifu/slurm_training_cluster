@@ -1,3 +1,35 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for jupyterhub
+# JupyterHub with SlurmSpawner for job-based notebook environments
+
+jupyterhub:
+  install: false
+  version: "5.4.2"
+  admin_users:
+    - ubuntu
+  jupyter_user: jupyter
+  jupyter_group: jupyter
+
+  spawner_type: "slurm"
+
+  spawner_config:
+    partition: "debug"
+    memory: "4G"
+    cpus: 2
+    time_limit: "01:00:00"
+    prologue: ""
+    epilogue: ""
+
+  service:
+    ip: "127.0.0.1"
+    port: 8000
+    allow_root: false
+
+  authenticator: "pam"
+  notebook_dir: "/home/{username}"
+
+# Python installation paths
+jupyterhub_python_venv: "/opt/jupyterhub/venv"
+jupyterhub_config_dir: "/etc/jupyterhub"
+jupyterhub_data_dir: "/var/lib/jupyterhub"

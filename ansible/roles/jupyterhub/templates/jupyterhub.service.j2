@@ -1,0 +1,35 @@
+[Unit]
+Description=JupyterHub with SlurmSpawner
+After=network-online.target slurmd.service
+Wants=network-online.target
+
+[Service]
+User={{ jupyterhub.jupyter_user }}
+Group={{ jupyterhub.jupyter_group }}
+WorkingDirectory={{ jupyterhub_data_dir }}
+
+# Use the virtual environment
+Environment="PATH={{ jupyterhub_python_venv }}/bin:$PATH"
+Environment="VIRTUAL_ENV={{ jupyterhub_python_venv }}"
+
+# Start JupyterHub
+ExecStart={{ jupyterhub_python_venv }}/bin/jupyterhub \
+  --JupyterHub.config_file={{ jupyterhub_config_dir }}/jupyterhub_config.py \
+  --JupyterHub.data_files_path={{ jupyterhub_python_venv }}/share/jupyterhub
+
+# Restart on failure
+Restart=on-failure
+RestartSec=10s
+
+# Allow graceful shutdown
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jupyterhub
+
+[Install]
+WantedBy=multi-user.target

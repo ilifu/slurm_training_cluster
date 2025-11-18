@@ -1,3 +1,16 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # handlers file for jupyterhub
+
+- name: Restart JupyterHub
+  become: yes
+  systemd:
+    name: jupyterhub
+    state: restarted
+    daemon_reload: yes
+
+- name: Reload JupyterHub configuration
+  become: yes
+  systemd:
+    name: jupyterhub
+    state: restarted
