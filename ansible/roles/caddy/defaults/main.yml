@@ -1,0 +1,16 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for caddy
+# Reverse proxy service for routing traffic to other services
+
+caddy:
+  install: false
+  domain: "training.ilifu.ac.za"
+  email: "admin@training.ilifu.ac.za"
+  acme_provider: "letsencrypt"
+  port_http: 80
+  port_https: 443
+
+# Routes for reverse proxying to other services
+# Define these in higher-level vars or templates, not here
+caddy_routes: {}

@@ -1,0 +1,44 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for caddy
+# Install and configure Caddy reverse proxy
+
+- name: Install Caddy web server
+  become: yes
+  tags: [caddy, build]
+  block:
+    - name: Add Caddy official repository key
+      apt_key:
+        url: https://dl.caddy.community/linux/caddy/gpg.key
+        state: present
+
+    - name: Add Caddy official repository
+      apt_repository:
+        repo: "deb [trusted=yes] https://dl.caddy.community/linux/caddy any main"
+        state: present
+        filename: caddy
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install caddy package
+      apt:
+        name: caddy
+        state: present
+
+    - name: Create Caddyfile configuration
+      template:
+        src: Caddyfile.j2
+        dest: /etc/caddy/Caddyfile
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Reload Caddy
+
+    - name: Ensure Caddy service is enabled and started
+      systemd:
+        name: caddy
+        enabled: yes
+        state: started

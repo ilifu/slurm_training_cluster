@@ -1,0 +1,52 @@
+# Caddy configuration generated from Ansible template
+# Reverse proxy server for {{ caddy.domain }}
+
+# Global options
+{
+  email {{ caddy.email }}
+  acme_provider {{ caddy.acme_provider }}
+}
+
+# Main domain configuration
+{{ caddy.domain }} {
+  # Log requests
+  log {
+    output stdout
+    format json
+  }
+
+  # Reverse proxy to JupyterHub if installed
+{% if jupyterhub.install %}
+  # JupyterHub reverse proxy
+  reverse_proxy /jupyter* localhost:{{ jupyterhub.service.port }} {
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+    header_up X-Forwarded-Host {host}
+
+    # WebSocket support for Jupyter
+    header_up Connection "upgrade"
+    header_up Upgrade "websocket"
+  }
+
+  # Root redirect to JupyterHub
+  redir / /jupyter 301
+{% endif %}
+
+  # Health check endpoint
+  handle /health {
+    respond 200 "OK"
+  }
+
+  # Default response if no routes match
+  handle {
+    respond 404 "Not Found"
+  }
+}
+
+# Additional routes can be added here for future services
+# Example for RStudio:
+# reverse_proxy /rstudio* localhost:8787
+#
+# Example for VSCode:
+# reverse_proxy /vscode* localhost:8443
