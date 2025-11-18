@@ -21,96 +21,6 @@
   delay: 15
   until: apt_res is success
 
-#- name: Create private key for CA
-#  tags: [cert]
-#  become: yes
-#  command: certtool --generate-privkey --bits 4096 --outfile /etc/ssl/private/ldap_cakey.pem
-#  args:
-#    creates: /etc/ssl/private/ldap_cakey.pem
-#
-#- name: Create CA template file
-#  become: yes
-#  tags: [cert]
-#  copy:
-#    content: |
-#      organization = "{{ ldap_organisation }}"
-#      cn = "{{ ldap_organisation }}"
-#      CA
-#      cert_signing_key
-#      expiration_days = 3650
-#    dest: /etc/ssl/ldap_ca.info
-#
-#- name: Create self-signed CA certificate
-#  become: yes
-#  tags: [cert]
-#  command: certtool --generate-self-signed --load-privkey /etc/ssl/private/ldap_cakey.pem --template /etc/ssl/ldap_ca.info --outfile /usr/local/share/ca-certificates/ldap_ca.crt
-#  args:
-#    creates: /usr/local/share/ca-certificates/ldap_ca.crt
-#
-#- name: Update CA certificates
-#  become: yes
-#  tags: [cert]
-#  command: update-ca-certificates
-#  args:
-#    creates: /etc/ssl/certs/ldap_ca.pem
-#
-#- name: Create private key for ldap
-#  become: yes
-#  tags: [cert]
-#  command: certtool --generate-privkey --bits 4096 --outfile /etc/ssl/private/ldap_key.pem
-#  args:
-#      creates: /etc/ssl/private/ldap_key.pem
-#
-#- name: Create ldap template file
-#  become: yes
-#  tags: [cert]
-#  copy:
-#    content: |
-#      organization = "{{ ldap_organisation }}"
-#      cn = "{{ ldap_organisation }}"
-#      tls_www_server
-#      encryption_key
-#      signing_key
-#      expiration_days = 3650
-#    dest: /etc/ssl/ldap.info
-#
-#- name: Create ldap certificate
-#  become: yes
-#  tags: [cert]
-#  command: certtool --generate-certificate --load-privkey /etc/ssl/private/ldap_key.pem --load-ca-certificate /usr/local/share/ca-certificates/ldap_ca.crt --load-ca-privkey /etc/ssl/private/ldap_cakey.pem --template /etc/ssl/ldap.info --outfile /etc/ssl/certs/ldap_slapd_cert.pem
-#  args:
-#    creates: /etc/ssl/certs/ldap_slapd_cert.pem
-#
-#- name: Fix group ownership and permissions of ldap_key.pem
-#  become: yes
-#  tags: [cert]
-#  file:
-#    path: /etc/ssl/private/ldap_key.pem
-#    group: openldap
-#    mode: 0640
-#
-#- name: Create certinfo.ldif file
-#  become: yes
-#  tags: [cert]
-#  copy:
-#    content: |
-#      dn: cn=config
-#      add: olcTLSCACertificateFile
-#      olcTLSCACertificateFile: /etc/ssl/certs/ldap_ca.pem
-#      -
-#      add: olcTLSCertificateFile
-#      olcTLSCertificateFile: /etc/ssl/certs/ldap_slapd_cert.pem
-#      -
-#      add: olcTLSCertificateKeyFile
-#      olcTLSCertificateKeyFile: /etc/ssl/private/ldap_key.pem
-#    dest: /etc/ldap/certinfo.ldif
-#
-#
-#- name: Run ldapmodify
-#  become: yes
-#  tags: [cert]
-#  command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/certinfo.ldif
-
 - name: Set up keys for openssl
   become: yes
   tags: [cert, ldap]
@@ -136,10 +46,10 @@
           country_name: "ZA"
           state_or_province_name: "Western Cape"
           locality_name: "Cape Town"
-          organization_name: "{{ ldap_organisation }}"
-          organizational_unit_name: "{{ ldap_organisation }}"
-          common_name: "{{ ldap_dns_domain_name }}"
-          email_address: "admin@{{ ldap_dns_domain_name }}"
+          organization_name: "{{ ldap.organisation }}"
+          organizational_unit_name: "{{ ldap.organisation }}"
+          common_name: "{{ ldap.dns_domain_name }}"
+          email_address: "admin@{{ ldap.dns_domain_name }}"
       register: openssl_csr
       retries: 0
       delay: 15
@@ -201,14 +111,8 @@
           group: root
       notify: restart slapd
 
-
-- name: Warning re variables
-  when: ldap_organisation == '' or ldap_dns_domain_name == '' or ldap_password == ''
-  debug:
-    msg: "You need to define: {{ ldap.organisation_env_variable }}, {{ ldap.dns_domain_name_env_variable }} and {{ ldap_password }}  for ldap configuration"
-
 - name: Update and configure ldap
-  when: ldap_organisation != '' and ldap_dns_domain_name != '' and ldap_password != ''
+  when: ldap.organisation != '' and ldap.dns_domain_name != '' and ldap.password != ''
   block:
     - name: update debconf selections
       block:
@@ -217,14 +121,14 @@
             name: slapd
             question: shared/organization
             vtype: 'string'
-            value: "{{ ldap_organisation }}"
+            value: "{{ ldap.organisation }}"
           register: ldap_org
         - name: Configure slapd domain
           debconf:
             name: slapd
             question: slapd/domain
             vtype: 'string'
-            value: "{{ ldap_dns_domain_name }}"
+            value: "{{ ldap.dns_domain_name }}"
           register: ldap_domain
 
         - name: Reconfigure slapd
@@ -251,8 +155,8 @@
       tags: ldap_password
       block:
         - name: get SSHA of ldap passwd
-          when: ldap_password != ''
-          command: slappasswd -s "{{ ldap_password }}"
+          when: ldap.password != ''
+          command: slappasswd -s "{{ ldap.password }}"
           register: slappasswd_output
         - name: Create changeroot ldif
           template:
@@ -268,9 +172,9 @@
           become: yes
 
     - name: Configure OUs and groups
-      when: ldap_password != '' and ldap_dns_domain_name != ''
+      when: ldap.password != '' and ldap.dns_domain_name != ''
       vars:
-        dcs: "dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+        dcs: "dc={% for element in ldap.dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
       block:
         - name: Ensure users OU exists
           tags: ldap_ous
@@ -278,7 +182,7 @@
             dn: "ou=users,{{ dcs }}"
             objectClass: organizationalUnit
             bind_dn: "cn=admin,{{ dcs }}"
-            bind_pw: "{{ ldap_password }}"
+            bind_pw: "{{ ldap.password }}"
 
         - name: Ensure default user group exists
           tags: ldap_groups
@@ -290,5 +194,5 @@
             attributes:
               gidNumber: 20000
             bind_dn: "cn=admin,{{ dcs }}"
-            bind_pw: "{{ ldap_password }}"
+            bind_pw: "{{ ldap.password }}"
 
