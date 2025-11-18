@@ -8,18 +8,18 @@
     - ldap.conf
     - build
   block:
-    - name: Set BASE for {{ ldap_dns_domain_name }}
-      when: ldap_dns_domain_name is defined
+    - name: Set BASE for {{ ldap.dns_domain_name }}
+      when: ldap.dns_domain_name is defined
       lineinfile:
         path: /etc/ldap/ldap.conf
         regexp: "^BASE.*"
-        line: "BASE   dc={% for element in ldap_dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
+        line: "BASE   dc={% for element in ldap.dns_domain_name.split('.') %}{{ element }}{% if not loop.last %},dc={% endif %}{% endfor %}"
     - name: Set URI for ldap in ldap.conf
-      when: ldap_host is defined
+      when: ldap.host is defined
       lineinfile:
         path: /etc/ldap/ldap.conf
         regexp: "^URI.*"
-        line:  "URI    ldap://{{ ldap_host }}"
+        line:  "URI    ldap://{{ ldap.host }}"
     - name: Set VERSION 3 for ldap in ldap.conf
       lineinfile:
         path: /etc/ldap/ldap.conf
@@ -37,12 +37,12 @@
     - ldap.secret
     - ldap
     - build
-  when: ldap_password != ''
+  when: ldap.password != ''
   lineinfile:
     create: yes
     path: /etc/ldap.secret
     regexp: '.*'
-    line: "{{ ldap_password }}"
+    line: "{{ ldap.password }}"
     mode: u=r,go=
 
 - name: Copy ldap key querying script
@@ -144,7 +144,7 @@
         src: /etc/ldap/sasl2/ca-certificates.crt
         dest: files/ldap_ca.crt
         flat: true
-      delegate_to: "{{ ldap_host }}"
+      delegate_to: "{{ ldap.host }}"
     - name: Copy ca certificate to final destination
       become: yes
       copy:
@@ -153,8 +153,21 @@
           mode: u=rw,go=r
       notify: Update ca certificates
 
-- name: Enable home directory creation on login
+- name: Configure PAM for SSSD-first authentication
   become: yes
-  tags: pam, build, home, ldap
-  command: pam-auth-update --enable mkhomedir
+  tags: [pam, build, sssd, ldap]
+  block:
+    - name: Enable home directory creation on login
+      command: pam-auth-update --enable mkhomedir --force
+
+    - name: Deploy common-auth PAM configuration with SSSD priority
+      template:
+        src: common-auth.j2
+        dest: /etc/pam.d/common-auth
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Restart sssd service
+        - Restart nscd service
 
