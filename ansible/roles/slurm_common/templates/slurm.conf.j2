@@ -1,56 +1,6 @@
 ClusterName={{ slurm_config.cluster_name }}
 
 
-# 32 Core hosts
-#NodeName=compute-[001-021] RealMemory=237568 CPUs=32 Sockets=2 CoresPerSocket=16
-
-# 48 Core hosts
-#NodeName=compute-[101-105] RealMemory=237568 CPUs=48 Sockets=2 CoresPerSocket=24
-
-# Ironic Baremetal nodes
-#NodeName=compute-[201-260] RealMemory=257568 CPUs=32 Sockets=2 CoresPerSocket=16
-
-# 512GB RAM hosts
-#NodeName=highmem-[001-002] RealMemory=515624 CPUs=32 Sockets=2 CoresPerSocket=16
-#NodeName=highmem-003 RealMemory=1544192 CPUs=96 Sockets=2 CoresPerSocket=48
-
-# Jupyter Max workers
-#NodeName=jupyter-[001-010] RealMemory=237568 CPUs=32 Sockets=2 CoresPerSocket=16
-
-# P100
-#NodeName=gpu-[001-004] RealMemory=237568 CPUs=32 Sockets=2 CoresPerSocket=16 Gres=gpu:2 Features=p100,P100
-# V100
-#NodeName=gpu-005 RealMemory=237568 CPUs=24 Sockets=2 CoresPerSocket=12 Gres=gpu:1 Features=v100,V100
-# A40
-#NodeName=gpu-006 RealMemory=362582 CPUs=48 Sockets=2 CoresPerSocket=24 Gres=gpu:1 Features=a40,A40
-# A100
-#NodeName=gpu-007 RealMemory=362582 CPUs=48 Sockets=2 CoresPerSocket=24 Gres=gpu:1 Features=a100,A100
-
-# Main Partition
-#PartitionName=Main Nodes=compute-[001-059,061-074] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=7424 State=UP Default=YES AllowQos=normal,qos-interactive
-
-#PartitionName=Main Nodes=compute-[002-021],compute-[101-105],compute-[201-260] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=3096 State=UP Default=YES AllowQos=normal,qos-interactive,a01-idia-qos,a02-cbio-qos,a03-dirisa-qos,a04-cchem-qos TRESBillingWeights="CPU=1.0,Mem=7424"
-
-# JupyterHub Nodes
-#PartitionName=Jupyter Nodes=jupyter-[001-010] DefMemPerCPU=7424 State=UP Default=NO QOS=jupyter TRESBillingWeights="CPU=1.0,Mem=7424"
-
-# JupyterHub GPU Nodes
-#PartitionName=JupyterGPU Nodes=gpu-[003-004] MaxTime=14-00:00:00 DefMemPerCPU=7424 State=UP Default=NO QOS=jupyter TRESBillingWeights="CPU=4.0,Mem=7424"
-
-# High Memory nodes (512GB)
-#PartitionName=HighMem Nodes=highmem-[001-003] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=15360 State=UP Default=NO TRESBillingWeights="CPU=2.0,Mem=15360"
-
-# GPU Nodes
-#PartitionName=GPU Nodes=gpu-00[1-7] DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=7424 State=UP Default=NO TRESBillingWeights="CPU=4.0,Mem=7424"
-#PartitionName=GPUV100 Nodes=gpu-005 DefaultTime=0-03:00:00 MaxTime=14-00:00:00 DefMemPerCPU=9898 State=UP Default=NO TRESBillingWeights="CPU=4.0,Mem=9898"
-
-# Devel
-#PartitionName=Devel Nodes=compute-001 DefaultTime=0-03:00:00 MaxTime=5-00:00:00 MaxMemPerNode=237568 State=UP Default=NO OverSubscribe=FORCE:4 PreemptMode=OFF SelectTypeParameters=CR_Core QOS=devel TRESBillingWeights="CPU=0.25,Mem=1856"
-
-#NodeName=compute-1 CPUs=1 RealMemory=3053 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
-#NodeName=compute-2 CPUs=1 RealMemory=3062 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
-#NodeName=compute-3 CPUs=1 RealMemory=3051 Sockets=1 CoresPerSocket=1 ThreadsPerCore=1 State=UNKNOWN
-
 
 # Compute node definitions - generated with fallback defaults for limited host runs
 {% for host in groups['slurm_compute'] %}
@@ -99,7 +49,7 @@ AccountingStorageHost={{ slurm_config.database_host | replace('_','-') }}
 #AccountingStoragePass=
 AccountingStoragePort={{ slurm.dbd_port }}
 AccountingStorageType=accounting_storage/slurmdbd
-AccountingStorageUser=slurm
+# AccountingStorageUser=slurm
 
 
 #AccountingStorageType=accounting_storage/slurmdbd
@@ -233,7 +183,7 @@ SlurmctldDebug=error
 SlurmctldLogFile=/var/log/slurm/slurmctld.log
 
 DebugFlags=backfill,cpu_bind,priority,reservation,selecttype,steps,NO_CONF_HASH
-#MailProg=/usr/bin/mail
+# MailProg=/usr/bin/mail
 # MailProg=/opt/slurm/etc/sendmail.py
 # Test for down/drain nodes
 TreeWidth=250
