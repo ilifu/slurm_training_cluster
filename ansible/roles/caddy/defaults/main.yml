@@ -10,7 +10,4 @@ caddy:
   acme_provider: "letsencrypt"
   port_http: 80
   port_https: 443
-
-# Routes for reverse proxying to other services
-# Define these in higher-level vars or templates, not here
-caddy_routes: {}
+  config_dir: /etc/caddy/conf.d

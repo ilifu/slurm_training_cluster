@@ -1,7 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for caddy
-# Install and configure Caddy reverse proxy
+# Install and configure Caddy reverse proxy with hierarchical configuration
 
 - name: Install Caddy web server
   become: yes
@@ -27,14 +27,27 @@
         name: caddy
         state: present
 
-    - name: Create Caddyfile configuration
+- name: Configure Caddy with hierarchical configuration
+  become: yes
+  tags: [caddy, config]
+  block:
+    - name: Create Caddy service config directory for per-service configs
+      file:
+        path: "{{ caddy.config_dir }}"
+        state: directory
+        owner: root
+        group: caddy
+        mode: '0755'
+
+    - name: Create main Caddyfile with import directive
       template:
         src: Caddyfile.j2
         dest: /etc/caddy/Caddyfile
         owner: root
-        group: root
+        group: caddy
         mode: '0644'
       notify:
+        - Validate Caddy configuration
         - Reload Caddy
 
     - name: Ensure Caddy service is enabled and started

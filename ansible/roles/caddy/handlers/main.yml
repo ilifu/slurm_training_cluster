@@ -2,14 +2,23 @@
 ---
 # handlers file for caddy
 
+- name: Validate Caddy configuration
+  become: yes
+  command: caddy validate --config /etc/caddy/Caddyfile
+  listen: "Validate Caddy configuration"
+  register: caddy_validation
+  failed_when: caddy_validation.rc != 0
+
 - name: Reload Caddy
   become: yes
   systemd:
     name: caddy
     state: reloaded
+  listen: "Reload Caddy"
 
 - name: Restart Caddy
   become: yes
   systemd:
     name: caddy
     state: restarted
+  listen: "Restart Caddy"
