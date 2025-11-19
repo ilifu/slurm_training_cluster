@@ -3093,11 +3093,8 @@ c.JupyterHub.admin_users = [
 ]
 
 #
-# Service binding configuration
+# Note: Service binding is configured via bind_url below, not via ip/port
 #
-c.JupyterHub.ip = '{{ jupyterhub.service.ip }}'
-c.JupyterHub.port = {{ jupyterhub.service.port }}
-c.JupyterHub.allow_root = {{ jupyterhub.service.allow_root }}
 
 #
 # Database configuration
@@ -3109,6 +3106,8 @@ c.JupyterHub.db_url = 'sqlite:////var/lib/jupyterhub/jupyterhub.sqlite'
 #
 c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
 c.PAMAuthenticator.open_sessions = False
+# Allow any user who can successfully authenticate via PAM/LDAP to login
+c.Authenticator.allow_all = True
 # Ensure admin users are set for the training cluster
 c.Authenticator.admin_users = {{ jupyterhub.admin_users | tojson }}
 
@@ -3123,20 +3122,46 @@ c.ConfigurableHTTPProxy.command = ['/usr/local/bin/configurable-http-proxy']
 #
 c.JupyterHub.spawner_class = 'batchspawner.SlurmSpawner'
 
-# SLURM resource allocation
-c.SlurmSpawner.partition = '{{ jupyterhub.spawner_config.partition }}'
-c.SlurmSpawner.memory = '{{ jupyterhub.spawner_config.memory }}'
-c.SlurmSpawner.cpus = {{ jupyterhub.spawner_config.cpus }}
-c.SlurmSpawner.time_limit = '{{ jupyterhub.spawner_config.time_limit }}'
-c.SlurmSpawner.account = ''
+# SLURM resource allocation (using req_ prefix for SlurmSpawner)
+c.SlurmSpawner.req_partition = '{{ jupyterhub.spawner_config.partition }}'
+c.SlurmSpawner.req_memory = '{{ jupyterhub.spawner_config.memory }}'
+c.SlurmSpawner.req_nprocs = '{{ jupyterhub.spawner_config.cpus }}'
+c.SlurmSpawner.req_runtime = '{{ jupyterhub.spawner_config.time_limit }}'
+# c.SlurmSpawner.req_account = ''
+
+c.SlurmSpawner.batch_submit_cmd = '/usr/local/bin/sbatch --parsable'
+c.SlurmSpawner.batch_query_cmd = '/usr/local/bin/squeue -h -j {job_id} -o "%T %B"'
+c.SlurmSpawner.batch_cancel_cmd = '/usr/local/bin/scancel {job_id}'
+c.BatchSpawnerBase.req_srun = '/usr/local/bin/srun'
+
+# SLURM batch script template - defines the exact job submission script
+c.SlurmSpawner.batch_script = """{% raw %}#!/bin/bash
+#SBATCH --output={{homedir}}/jupyterhub_slurmspawner_%j.log
+#SBATCH --job-name=jupyter-{{username}}
+#SBATCH --chdir={{homedir}}
+#SBATCH --export={{keepvars}}
+#SBATCH --get-user-env
+#SBATCH --partition={{partition}}
+#SBATCH --time={{runtime}}
+#SBATCH --mem={{memory}}
+#SBATCH --cpus-per-task={{nprocs}}
+
+trap 'echo SIGTERM received' TERM
+unset XDG_RUNTIME_DIR
+{{ prologue }}
+echo "Starting jupyterhub-singleuser for user '{{username}}' on host '$(hostname)'"
+{% if srun %}{{ srun }} {% endif %}{{ cmd }}
+echo "jupyterhub-singleuser ended gracefully"
+{{ epilogue }}
+{% endraw %}"""
 
 {% if jupyterhub.spawner_config.prologue %}
-# SLURM prologue script
+# Additional prologue (if not already in batch_script)
 c.SlurmSpawner.prologue = """{{ jupyterhub.spawner_config.prologue }}"""
 {% endif %}
 
 {% if jupyterhub.spawner_config.epilogue %}
-# SLURM epilogue script
+# Additional epilogue (if not already in batch_script)
 c.SlurmSpawner.epilogue = """{{ jupyterhub.spawner_config.epilogue }}"""
 {% endif %}
 
@@ -3155,7 +3180,7 @@ c.JupyterHub.bind_url = 'http://:8000/jupyter'
 # User interface configuration
 #
 c.JupyterHub.allow_named_servers = False
-c.JupyterHub.spawn_timeout = 300
+c.JupyterHub.init_spawners_timeout = 10
 
 #
 # Logging configuration

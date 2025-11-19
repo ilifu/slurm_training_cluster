@@ -1,0 +1,22 @@
+# Logrotate configuration for JupyterHub logs
+/var/log/jupyterhub/stdout
+/var/log/jupyterhub/stderr
+{
+    # Rotate logs daily
+    daily
+
+    # Keep 14 days of logs
+    rotate 14
+
+    # Compress old logs
+    compress
+
+    # Don't error if log files are missing
+    missingok
+
+    # Don't rotate empty logs
+    notifempty
+
+    # Create new log file with same permissions after rotation
+    create 0644 jupyter jupyter
+}

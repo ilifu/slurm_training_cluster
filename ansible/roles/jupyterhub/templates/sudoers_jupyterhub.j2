@@ -1,0 +1,4 @@
+# JupyterHub SLURM spawner permissions
+# Allow JupyterHub to submit, manage, and cancel SLURM jobs on behalf of users
+
+{{ jupyterhub.jupyter_user }} ALL=(ALL) NOPASSWD:SETENV: /usr/local/bin/sbatch, /usr/local/bin/srun, /usr/local/bin/scancel, /usr/local/bin/squeue, /usr/local/bin/sinfo

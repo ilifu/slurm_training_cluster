@@ -723,3 +723,24 @@
           path: /etc/profile.d/lmod.sh
           line: "export MODULEPATH=/software/modules/common:/software/modules/bio:/software/modules/astro:$MODULEPATH"
           insertafter: EOF
+
+- name: Create symlinks for SLURM binaries in /usr/local/bin
+  become: yes
+  tags:
+    - slurm
+    - path
+    - install
+    - build
+  block:
+    - name: Create symlinks for SLURM commands
+      file:
+        src: "/opt/slurm/{{ slurm.version }}/bin/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        state: link
+        force: yes
+      loop:
+        - sbatch
+        - srun
+        - scancel
+        - squeue
+        - sinfo

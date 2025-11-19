@@ -26,10 +26,14 @@ KillMode=mixed
 KillSignal=SIGTERM
 TimeoutStopSec=30s
 
-# Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=jupyterhub
+# Logging - direct output to files
+StandardOutput=file:/var/log/jupyterhub/stdout
+StandardError=file:/var/log/jupyterhub/stderr
+
+# Create log directory if it doesn't exist
+ExecStartPre=/bin/mkdir -p /var/log/jupyterhub
+ExecStartPre=/bin/chown {{ jupyterhub.jupyter_user }}:{{ jupyterhub.jupyter_group }} /var/log/jupyterhub
+ExecStartPre=/bin/chmod 0755 /var/log/jupyterhub
 
 [Install]
 WantedBy=multi-user.target

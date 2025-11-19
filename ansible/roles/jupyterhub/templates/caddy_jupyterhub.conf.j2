@@ -24,19 +24,16 @@
   }
 
   # Reverse proxy to JupyterHub on /jupyter path
-  # Use handle (not handle_path) to preserve the full path including /jupyter
-  handle /jupyter* {
-    reverse_proxy localhost:{{ jupyterhub.service.port }} {
-      # Pass through important headers for proper proxying
-      header_up X-Real-IP {remote_host}
-      header_up X-Forwarded-For {remote_host}
-      header_up X-Forwarded-Proto {scheme}
-      header_up X-Forwarded-Host {host}
-
-      # WebSocket support for JupyterHub and Jupyter
-      header_up Connection "upgrade"
-      header_up Upgrade "websocket"
-    }
+  reverse_proxy /jupyter* localhost:{{ jupyterhub.service.port }} {
+    # Preserve the original Host header for JupyterHub routing
+    header_up Host {http.request.header.Host}
+    # Forward the original client IP
+    header_up X-Real-IP {http.request.remote.host}
+    header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
+    # Indicate the original scheme (HTTPS from Caddy perspective)
+    header_up X-Forwarded-Proto https
+    # Handle WebSocket upgrade properly (Caddy does this automatically)
+    # but we ensure Connection and Upgrade headers are preserved when needed
   }
 }
 {% endif %}
