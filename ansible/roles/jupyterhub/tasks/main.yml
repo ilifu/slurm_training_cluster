@@ -125,6 +125,25 @@
       args:
         executable: /bin/bash
 
+    - name: Find configurable-http-proxy binary location
+      become: yes
+      shell: |
+        export NVM_DIR="{{ nvm_dir }}"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        which configurable-http-proxy
+      args:
+        executable: /bin/bash
+      register: chp_binary_path
+      changed_when: false
+
+    - name: Create symlink for configurable-http-proxy in /usr/local/bin
+      become: yes
+      file:
+        src: "{{ chp_binary_path.stdout | trim }}"
+        dest: /usr/local/bin/configurable-http-proxy
+        state: link
+        force: yes
+
 
 - name: Configure JupyterHub
   become: yes
