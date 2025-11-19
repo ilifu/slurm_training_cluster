@@ -27,16 +27,17 @@ KillSignal=SIGTERM
 TimeoutStopSec=30s
 
 # Create log directory if it doesn't exist
-ExecStartPre=/bin/mkdir -p /var/log/jupyterhub
-ExecStartPre=/bin/chown {{ jupyterhub.jupyter_user }}:{{ jupyterhub.jupyter_group }} /var/log/jupyterhub
-ExecStartPre=/bin/chmod 0755 /var/log/jupyterhub
+# Use ! to run as root despite User=jupyter setting
+ExecStartPre=!/bin/mkdir -p /var/log/jupyterhub
+ExecStartPre=!/bin/chown {{ jupyterhub.jupyter_user }}:{{ jupyterhub.jupyter_group }} /var/log/jupyterhub
+ExecStartPre=!/bin/chmod 0755 /var/log/jupyterhub
 
 # Logging - direct output to files with proper ownership
 # Note: StandardOutput/StandardError with file: creates files as root,
 # so we use a script to create files with correct ownership first
-ExecStartPre=/bin/touch /var/log/jupyterhub/stdout /var/log/jupyterhub/stderr
-ExecStartPre=/bin/chown {{ jupyterhub.jupyter_user }}:{{ jupyterhub.jupyter_group }} /var/log/jupyterhub/stdout /var/log/jupyterhub/stderr
-ExecStartPre=/bin/chmod 0644 /var/log/jupyterhub/stdout /var/log/jupyterhub/stderr
+ExecStartPre=!/bin/touch /var/log/jupyterhub/stdout /var/log/jupyterhub/stderr
+ExecStartPre=!/bin/chown {{ jupyterhub.jupyter_user }}:{{ jupyterhub.jupyter_group }} /var/log/jupyterhub/stdout /var/log/jupyterhub/stderr
+ExecStartPre=!/bin/chmod 0644 /var/log/jupyterhub/stdout /var/log/jupyterhub/stderr
 StandardOutput=file:/var/log/jupyterhub/stdout
 StandardError=file:/var/log/jupyterhub/stderr
 
