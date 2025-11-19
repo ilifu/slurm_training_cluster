@@ -3149,10 +3149,11 @@ c.SlurmSpawner.batch_script = """{% raw %}#!/bin/bash
 trap 'echo SIGTERM received' TERM
 unset XDG_RUNTIME_DIR
 # Ensure jupyterlab venv is in PATH for jupyterhub-singleuser
-export PATH="/opt/jupyterlab/venv/bin:$PATH"
+# export PATH="/opt/jupyterlab/venv/bin:$PATH"
+. /opt/jupyterlab/venv/bin/activate
 {{ prologue }}
 echo "Starting jupyterhub-singleuser for user '{{username}}' on host '$(hostname)'"
-{% if srun %}{{ srun }} {% endif %}{{ cmd }}
+{{ cmd }}
 echo "jupyterhub-singleuser ended gracefully"
 {{ epilogue }}
 {% endraw %}"""
@@ -3171,6 +3172,17 @@ c.SlurmSpawner.epilogue = """{{ jupyterhub.spawner_config.epilogue }}"""
 c.Spawner.start_timeout = 300
 c.Spawner.http_timeout = 300
 c.Spawner.notebook_dir = '{{ jupyterhub.notebook_dir }}'
+
+#
+# Hub connection configuration - critical for spawned jobs to reach the Hub
+#
+# Internal Hub IP/port (what the Hub binds to, for internal communication)
+c.JupyterHub.hub_ip = '0.0.0.0'  # Bind on all interfaces
+c.JupyterHub.hub_port = 8081
+
+# How spawners/compute nodes reach the Hub
+# This must be resolvable from compute nodes and point to the login node
+c.JupyterHub.hub_connect_ip = '{{ ansible_hostname }}'  # Hostname resolvable from compute nodes
 
 #
 # Reverse proxy / base URL configuration
