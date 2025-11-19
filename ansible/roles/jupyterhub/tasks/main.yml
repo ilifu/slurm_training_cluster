@@ -124,6 +124,10 @@
   become: yes
   tags: [jupyterhub, caddy]
   block:
+    - name: Debug - Show caddy variable
+      debug:
+        var: caddy
+
     - name: Deploy JupyterHub Caddy configuration
       template:
         src: caddy_jupyterhub.conf.j2

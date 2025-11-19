@@ -38,6 +38,10 @@ all:
     caddy:
       install: ${install_jupyterhub}
       domain: "${domain_name}"
+      email: "admin@${domain_name}"
+      port_http: 80
+      port_https: 443
+      config_dir: "/etc/caddy/conf.d"
     jupyterhub:
       install: ${install_jupyterhub}
 
