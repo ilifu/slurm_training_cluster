@@ -27,7 +27,7 @@ jupyterhub:
     allow_root: false
 
   authenticator: "pam"
-  notebook_dir: "/home/{username}"
+  notebook_dir: "~"
 
 # Python installation paths
 jupyterhub_python_venv: "/opt/jupyterhub/venv"
