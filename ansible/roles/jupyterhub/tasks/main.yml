@@ -84,6 +84,7 @@
           - jupyterlab
           - batchspawner
           - "notebook>=6.1"
+          - ipykernel
         state: present
         virtualenv: "{{ jupyterhub_python_venv }}"
         virtualenv_command: "python3 -m venv"
