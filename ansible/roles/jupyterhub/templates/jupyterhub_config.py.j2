@@ -3148,6 +3148,8 @@ c.SlurmSpawner.batch_script = """{% raw %}#!/bin/bash
 
 trap 'echo SIGTERM received' TERM
 unset XDG_RUNTIME_DIR
+# Ensure jupyterlab venv is in PATH for jupyterhub-singleuser
+export PATH="/opt/jupyterlab/venv/bin:$PATH"
 {{ prologue }}
 echo "Starting jupyterhub-singleuser for user '{{username}}' on host '$(hostname)'"
 {% if srun %}{{ srun }} {% endif %}{{ cmd }}
