@@ -1,5 +1,8 @@
 #SPDX-License-Identifier: MIT-0
 ---
+# Import handlers from Caddy role
+- import_tasks: ../../caddy/handlers/main.yml
+
 # handlers file for jupyterhub
 
 - name: Restart JupyterHub

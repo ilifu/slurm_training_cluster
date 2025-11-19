@@ -3,6 +3,11 @@
 # tasks file for jupyterhub
 # Install JupyterHub with SlurmSpawner on login node
 
+- name: Load Caddy defaults
+  include_vars:
+    file: caddy.yml
+  tags: [jupyterhub, always]
+
 - name: Install system dependencies for JupyterHub
   become: yes
   tags: [jupyterhub, build]
