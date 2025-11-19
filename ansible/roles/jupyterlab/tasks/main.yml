@@ -79,6 +79,7 @@
     - name: Install JupyterLab and dependencies
       pip:
         name:
+          - "jupyterhub=={{ jupyterhub.version }}"
           - "jupyterlab=={{ jupyterlab.version }}"
           - batchspawner
           - "notebook>=6.1"
