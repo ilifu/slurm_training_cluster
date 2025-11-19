@@ -24,17 +24,19 @@
   }
 
   # Reverse proxy to JupyterHub on /jupyter path
-  reverse_proxy /jupyter* localhost:{{ jupyterhub.service.port }} {
-    # Pass through important headers for proper proxying
-    header_up X-Real-IP {remote_host}
-    header_up X-Forwarded-For {remote_host}
-    header_up X-Forwarded-Proto {scheme}
-    header_up X-Forwarded-Host {host}
-    header_up X-Script-Name /jupyter
+  # Use handle (not handle_path) to preserve the full path including /jupyter
+  handle /jupyter* {
+    reverse_proxy localhost:{{ jupyterhub.service.port }} {
+      # Pass through important headers for proper proxying
+      header_up X-Real-IP {remote_host}
+      header_up X-Forwarded-For {remote_host}
+      header_up X-Forwarded-Proto {scheme}
+      header_up X-Forwarded-Host {host}
 
-    # WebSocket support for JupyterHub and Jupyter
-    header_up Connection "upgrade"
-    header_up Upgrade "websocket"
+      # WebSocket support for JupyterHub and Jupyter
+      header_up Connection "upgrade"
+      header_up Upgrade "websocket"
+    }
   }
 }
 {% endif %}
