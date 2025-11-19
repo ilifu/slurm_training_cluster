@@ -14,8 +14,8 @@ jupyterhub:
   spawner_type: "slurm"
 
   spawner_config:
-    partition: "debug"
-    memory: "4G"
+    partition: "training"
+    memory: "2G"
     cpus: 2
     time_limit: "01:00:00"
     prologue: ""

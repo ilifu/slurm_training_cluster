@@ -3109,6 +3109,12 @@ c.JupyterHub.db_url = 'sqlite:////var/lib/jupyterhub/jupyterhub.sqlite'
 #
 c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
 c.PAMAuthenticator.open_sessions = False
+# Require users to login - do not allow automatic login
+c.PAMAuthenticator.auto_login = False
+# Require explicit authentication - do not allow all users
+c.PAMAuthenticator.allow_all = False
+# Ensure admin users are set for the training cluster
+c.Authenticator.admin_users = {{ jupyterhub.admin_users | tojson }}
 
 #
 # Proxy configuration
@@ -3146,6 +3152,9 @@ c.Spawner.notebook_dir = '{{ jupyterhub.notebook_dir }}'
 #
 # Reverse proxy / base URL configuration
 #
+# Tell JupyterHub it's running behind a reverse proxy at /jupyter path
+# The bind_url should match what the proxy sends (without path stripping in Caddy)
+c.JupyterHub.bind_url = 'http://:8000/jupyter'
 c.JupyterHub.base_url = '/jupyter/'
 # Tell JupyterHub its full public URL so redirects preserve the /jupyter base path
 c.JupyterHub.public_url = 'https://{{ caddy.domain }}/jupyter/'
