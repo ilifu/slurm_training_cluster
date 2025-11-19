@@ -3154,4 +3154,53 @@ c.JupyterHub.spawn_timeout = 300
 # Logging configuration
 #
 import logging
+
 c.JupyterHub.log_level = logging.INFO
+
+# Configure file-based logging with rotation
+c.JupyterHub.logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "%(asctime)s [%(name)s] [%(levelname)s] %(message)s",
+        },
+        "file": {
+            "format": "%(asctime)s [%(name)s] [%(levelname)s] %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "console",
+            "stream": "ext://sys.stdout",
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "formatter": "file",
+            "filename": "/var/log/jupyterhub/jupyterhub.log",
+            "maxBytes": 52428800,  # 50MB
+            "backupCount": 5,
+        },
+    },
+    "loggers": {
+        "jupyterhub": {
+            "level": "INFO",
+            "handlers": ["console", "file"],
+        },
+        "jupyterhub.spawner": {
+            "level": "INFO",
+            "handlers": ["console", "file"],
+        },
+        "jupyterhub.auth": {
+            "level": "INFO",
+            "handlers": ["console", "file"],
+        },
+        "jupyterhub.proxy": {
+            "level": "INFO",
+            "handlers": ["console", "file"],
+        },
+    },
+}

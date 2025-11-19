@@ -45,6 +45,14 @@
   become_user: root
   tags: [jupyterhub, build]
   block:
+    - name: Create JupyterHub log directory
+      file:
+        path: /var/log/jupyterhub
+        state: directory
+        owner: "{{ jupyterhub.jupyter_user }}"
+        group: "{{ jupyterhub.jupyter_group }}"
+        mode: '0755'
+
     - name: Create JupyterHub directories
       file:
         path: "{{ item }}"
