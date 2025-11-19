@@ -7,7 +7,6 @@ caddy:
   install: false
   domain: "training.ilifu.ac.za"
   email: "admin@training.ilifu.ac.za"
-  acme_provider: "letsencrypt"
   port_http: 80
   port_https: 443
   config_dir: /etc/caddy/conf.d
