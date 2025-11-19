@@ -3,9 +3,23 @@
 
 {% if jupyterhub.install %}
 {{ caddy.domain }} {
-  # Log JupyterHub requests
+  # Access logging - all successful requests
   log {
-    output stdout
+    output file /var/log/caddy/jupyterhub-access.log {
+      roll_size 50mb
+      roll_keep 10
+      roll_keep_for 720h
+    }
+    format json
+  }
+
+  # Error logging - failed requests and errors
+  log error {
+    output file /var/log/caddy/jupyterhub-error.log {
+      roll_size 50mb
+      roll_keep 5
+      roll_keep_for 720h
+    }
     format json
   }
 

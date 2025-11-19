@@ -52,6 +52,14 @@
   become: yes
   tags: [caddy, config]
   block:
+    - name: Create Caddy log directory
+      file:
+        path: /var/log/caddy
+        state: directory
+        owner: caddy
+        group: caddy
+        mode: '0755'
+
     - name: Create Caddy service config directory for per-service configs
       file:
         path: "{{ caddy.config_dir }}"

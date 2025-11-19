@@ -5,8 +5,13 @@
 {
   email {{ caddy.email }}
 
+  # Global logging configuration - all access logs to structured JSON file
   log {
-    output stdout
+    output file /var/log/caddy/access.log {
+      roll_size 100mb
+      roll_keep 5
+      roll_keep_for 720h
+    }
     format json
   }
 }
