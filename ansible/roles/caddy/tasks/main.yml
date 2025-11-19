@@ -7,16 +7,37 @@
   become: yes
   tags: [caddy, build]
   block:
-    - name: Add Caddy official repository key
-      apt_key:
-        url: https://dl.caddy.community/linux/caddy/gpg.key
+    - name: Install dependencies for Caddy repository
+      apt:
+        name:
+          - debian-keyring
+          - debian-archive-keyring
+          - apt-transport-https
+          - curl
         state: present
+        update_cache: yes
 
-    - name: Add Caddy official repository
-      apt_repository:
-        repo: "deb [trusted=yes] https://dl.caddy.community/linux/caddy any main"
-        state: present
-        filename: caddy
+    - name: Download and add Caddy GPG key
+      shell: |
+        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+
+    - name: Add Caddy repository list
+      shell: |
+        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+      args:
+        creates: /etc/apt/sources.list.d/caddy-stable.list
+
+    - name: Set proper permissions on Caddy keyring
+      file:
+        path: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+        mode: '0644'
+
+    - name: Set proper permissions on Caddy sources list
+      file:
+        path: /etc/apt/sources.list.d/caddy-stable.list
+        mode: '0644'
 
     - name: Update apt cache
       apt:
