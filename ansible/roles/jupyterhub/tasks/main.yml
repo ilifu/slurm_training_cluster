@@ -3,11 +3,6 @@
 # tasks file for jupyterhub
 # Install JupyterHub with SlurmSpawner on login node
 
-- name: Load Caddy defaults
-  include_vars:
-    file: caddy.yml
-  tags: [jupyterhub, always]
-
 - name: Install system dependencies for JupyterHub
   become: yes
   tags: [jupyterhub, build]
@@ -89,6 +84,47 @@
       command:
         cmd: "{{ jupyterhub_python_venv }}/bin/pip install jupyterlab_server"
       changed_when: false
+
+- name: Install nvm, node.js and configurable-http-proxy
+  tags: [jupyterhub, build,nvm,nodejs,configurable-http-proxy]
+  vars:
+    nvm_dir: /usr/local/nvm
+  block:
+    - name: Install nvm (Node Version Manager)
+      become: yes
+      shell: |
+        export NVM_DIR="{{ nvm_dir }}"
+        mkdir -p $NVM_DIR
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+      args:
+        creates: "{{ nvm_dir }}/nvm.sh"
+    - name: Make nvm available to all users
+      become: yes
+      copy:
+        dest: /etc/profile.d/nvm.sh
+        content: |
+          export NVM_DIR="{{ nvm_dir }}"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    - name: Install Node.js using nvm
+      become: yes
+      shell: |
+        export NVM_DIR="{{ nvm_dir }}"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install --lts
+      args:
+        executable: /bin/bash
+        creates: "{{ nvm_dir }}/versions"
+
+    - name: Install configurable-http-proxy globally using npm
+      become: yes
+      shell: |
+        export NVM_DIR="{{ nvm_dir }}"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        npm install -g configurable-http-proxy
+      args:
+        executable: /bin/bash
+
 
 - name: Configure JupyterHub
   become: yes
