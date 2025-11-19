@@ -1,3 +1,100 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for jupyterlab
+# Install JupyterLab on compute nodes for direct user access
+
+- name: Install system dependencies for JupyterLab
+  become: yes
+  tags: [jupyterlab, build]
+  block:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required system packages
+      apt:
+        name:
+          - python3-venv
+          - python3-dev
+          - build-essential
+          - git
+        state: present
+
+- name: Create jupyter user and group
+  become: yes
+  tags: [jupyterlab, build]
+  block:
+    - name: Create jupyter group
+      group:
+        name: "{{ jupyterlab.jupyter_group }}"
+        state: present
+        system: yes
+
+    - name: Create jupyter user
+      user:
+        name: "{{ jupyterlab.jupyter_user }}"
+        group: "{{ jupyterlab.jupyter_group }}"
+        home: "/var/lib/jupyterhub"
+        shell: /sbin/nologin
+        state: present
+        system: yes
+
+- name: Setup JupyterLab virtual environment and packages
+  become: yes
+  become_user: root
+  tags: [jupyterlab, build]
+  block:
+    - name: Create JupyterLab log directory
+      file:
+        path: /var/log/jupyterlab
+        state: directory
+        owner: "{{ jupyterlab.jupyter_user }}"
+        group: "{{ jupyterlab.jupyter_group }}"
+        mode: '0755'
+
+    - name: Create JupyterLab directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ jupyterlab.jupyter_user }}"
+        group: "{{ jupyterlab.jupyter_group }}"
+        mode: '0755'
+      loop:
+        - "{{ jupyterlab_python_venv }}"
+        - "{{ jupyterlab_config_dir }}"
+        - "{{ jupyterlab_data_dir }}"
+
+    - name: Create Python virtual environment for JupyterLab
+      command:
+        cmd: "python3 -m venv {{ jupyterlab_python_venv }}"
+        creates: "{{ jupyterlab_python_venv }}/bin/python"
+
+    - name: Upgrade pip in virtual environment
+      pip:
+        name: pip
+        state: latest
+        virtualenv: "{{ jupyterlab_python_venv }}"
+        virtualenv_command: "python3 -m venv"
+
+    - name: Install JupyterLab and dependencies
+      pip:
+        name:
+          - "jupyterlab=={{ jupyterlab.version }}"
+          - batchspawner
+          - "notebook>=6.1"
+          - jupyterlab_server
+        state: present
+        virtualenv: "{{ jupyterlab_python_venv }}"
+        virtualenv_command: "python3 -m venv"
+
+- name: Configure JupyterLab
+  become: yes
+  tags: [jupyterlab, config]
+  block:
+    - name: Deploy JupyterLab configuration
+      template:
+        src: jupyter_lab_config.py.j2
+        dest: "{{ jupyterlab_config_dir }}/jupyter_lab_config.py"
+        owner: "{{ jupyterlab.jupyter_user }}"
+        group: "{{ jupyterlab.jupyter_group }}"
+        mode: '0644'
