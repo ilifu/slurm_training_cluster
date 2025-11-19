@@ -152,6 +152,25 @@
         state: link
         force: yes
 
+    - name: Find node binary location
+      become: yes
+      shell: |
+        export NVM_DIR="{{ nvm_dir }}"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        which node
+      args:
+        executable: /bin/bash
+      register: node_binary_path
+      changed_when: false
+
+    - name: Create symlink for node in /usr/local/bin
+      become: yes
+      file:
+        src: "{{ node_binary_path.stdout | trim }}"
+        dest: /usr/local/bin/node
+        state: link
+        force: yes
+
 
 - name: Configure JupyterHub
   become: yes

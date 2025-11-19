@@ -9,7 +9,7 @@ Group={{ jupyterhub.jupyter_group }}
 WorkingDirectory={{ jupyterhub_data_dir }}
 
 # Use the virtual environment
-Environment="PATH={{ jupyterhub_python_venv }}/bin:$PATH"
+Environment="PATH={{ jupyterhub_python_venv }}/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="VIRTUAL_ENV={{ jupyterhub_python_venv }}"
 
 # Start JupyterHub
