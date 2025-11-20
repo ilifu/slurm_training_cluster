@@ -73,6 +73,7 @@
   loop:
     - add_user.py
     - update_password.py
+    - manage_groups.py
 
 - name: Copy SLURM initialization script to system directory
   tags:
