@@ -5,98 +5,774 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ilifu SLURM Training Cluster</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-blue-300 to-blue-500 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full p-12">
-        <div class="text-center mb-12">
+    <div class="bg-white rounded-lg shadow-2xl max-w-6xl w-full p-8">
+        <div class="text-center mb-8">
             <h1 class="text-5xl font-bold text-blue-600 mb-4">ilifu SLURM Training Cluster</h1>
             <p class="text-xl text-gray-600">High-Performance Computing Environment for Learning</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                <h3 class="text-lg font-semibold text-blue-600 mb-2">📊 SLURM Scheduler</h3>
-                <p class="text-gray-600">Multi-node job scheduling and resource management for distributed computing tasks</p>
+        <!-- Tab Navigation -->
+        <div x-data="{ activeTab: 'overview' }" class="w-full">
+            <!-- Tab Buttons -->
+            <div class="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-200 pb-4 justify-center">
+                <button @click="activeTab = 'overview'"
+                    :class="activeTab === 'overview' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    Overview
+                </button>
+                <button @click="activeTab = 'access'"
+                    :class="activeTab === 'access' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    Access the Cluster
+                </button>
+                <button @click="activeTab = 'slurm'"
+                    :class="activeTab === 'slurm' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    SLURM Job Management
+                </button>
+                <button @click="activeTab = 'nextflow'"
+                    :class="activeTab === 'nextflow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    NextFlow
+                </button>
+                <button @click="activeTab = 'wdl'"
+                    :class="activeTab === 'wdl' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    WDL Scripts
+                </button>
+                <button @click="activeTab = 'containers'"
+                    :class="activeTab === 'containers' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    Containers
+                </button>
+                <button @click="activeTab = 'other'"
+                    :class="activeTab === 'other' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                    class="px-4 py-2 rounded font-semibold transition-colors">
+                    Other
+                </button>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                <h3 class="text-lg font-semibold text-blue-600 mb-2">🐍 Interactive Computing</h3>
-                <p class="text-gray-600">Jupyter notebooks for interactive data analysis and scientific computing</p>
-            </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                <h3 class="text-lg font-semibold text-blue-600 mb-2">💾 Shared Storage</h3>
-                <p class="text-gray-600">CephFS distributed storage for users, software, and data</p>
-            </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                <h3 class="text-lg font-semibold text-blue-600 mb-2">🔐 User Management</h3>
-                <p class="text-gray-600">LDAP-based authentication and centralized user management</p>
-            </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                <h3 class="text-lg font-semibold text-blue-600 mb-2">🖥️ Compute Nodes</h3>
-                <p class="text-gray-600">Multiple compute nodes with substantial memory for parallel processing</p>
-            </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                <h3 class="text-lg font-semibold text-blue-600 mb-2">📚 Training Ready</h3>
-                <p class="text-gray-600">Pre-configured environment designed for HPC training and education</p>
-            </div>
-        </div>
 
-        <div class="border-t-2 border-gray-200 pt-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Access the Cluster</h2>
+            <!-- Overview Tab -->
+            <div x-show="activeTab === 'overview'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Cluster Features</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-2">📊 SLURM Scheduler</h3>
+                        <p class="text-gray-600">Multi-node job scheduling and resource management for distributed computing tasks</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-2">🐍 Interactive Computing</h3>
+                        <p class="text-gray-600">Jupyter notebooks for interactive data analysis and scientific computing</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-2">💾 Shared Storage</h3>
+                        <p class="text-gray-600">CephFS distributed storage for users, software, and data</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-2">🔐 User Management</h3>
+                        <p class="text-gray-600">LDAP-based authentication and centralized user management</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-2">🖥️ Compute Nodes</h3>
+                        <p class="text-gray-600">Multiple compute nodes with substantial memory for parallel processing</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-2">📚 Training Ready</h3>
+                        <p class="text-gray-600">Pre-configured environment designed for HPC training and education</p>
+                    </div>
+                </div>
+            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <!-- SSH Access -->
-                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
-                    <h3 class="text-xl font-semibold text-blue-600 mb-4">🔒 SSH Access</h3>
-                    <p class="text-gray-600 mb-4">Connect to the login node using SSH:</p>
-                    <code class="block bg-gray-900 text-green-400 p-3 rounded text-sm mb-4 overflow-x-auto">
-                        ssh username@{{ caddy.domain }}
-                    </code>
-                    <p class="text-gray-600 text-sm">Replace <code class="bg-gray-200 px-1 rounded">username</code> with your login credentials</p>
+            <!-- Access the Cluster Tab -->
+            <div x-show="activeTab === 'access'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Access the Cluster</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- SSH Access -->
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔒 SSH Access</h3>
+                        <p class="text-gray-600 mb-4">Connect to the login node using SSH:</p>
+                        <pre class="bg-gray-900 text-green-400 p-3 rounded text-sm mb-4 overflow-x-auto whitespace-pre-wrap break-words"><code>ssh username@{{ caddy.domain }}</code></pre>
+                        <p class="text-gray-600 text-sm">Replace <code class="bg-gray-200 px-1 rounded">username</code> with your login credentials</p>
+                    </div>
+
+                    <!-- Jupyter Access -->
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🐍 JupyterHub Access</h3>
+                        <p class="text-gray-600 mb-4">Access interactive notebooks through the web:</p>
+                        <a href="/jupyter/" class="inline-block bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition-colors">
+                            Launch JupyterHub
+                        </a>
+                        <p class="text-gray-600 text-sm mt-4">Same credentials as SSH login</p>
+                    </div>
                 </div>
 
-                <!-- Jupyter Access -->
-                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
-                    <h3 class="text-xl font-semibold text-blue-600 mb-4">🐍 JupyterHub Access</h3>
-                    <p class="text-gray-600 mb-4">Access interactive notebooks through the web:</p>
-                    <a href="/jupyter/" class="inline-block bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition-colors">
-                        Launch JupyterHub
-                    </a>
-                    <p class="text-gray-600 text-sm mt-4">Same credentials as SSH login</p>
+                <!-- SSH Key Setup -->
+                <div class="bg-amber-50 p-6 rounded-lg border-l-4 border-amber-600">
+                    <h3 class="text-xl font-semibold text-amber-700 mb-4">🔑 Setting Up SSH Keys (Recommended)</h3>
+                    <p class="text-gray-700 mb-4">For passwordless, secure access, generate an ed25519 SSH key pair:</p>
+
+                    <div class="bg-gray-900 text-green-400 p-4 rounded mb-4">
+                        <p class="text-sm mb-2 font-semibold">On your local machine:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">ssh-keygen -t ed25519 -C "your-email@example.com"</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 mb-2 text-sm"><strong>Steps:</strong></p>
+                    <ol class="text-gray-700 text-sm space-y-1 ml-4 list-decimal">
+                        <li>Press Enter to accept the default key location</li>
+                        <li>Enter a secure passphrase (or press Enter for no passphrase)</li>
+                        <li>Your public key is now at <code class="bg-gray-200 px-1 rounded">~/.ssh/id_ed25519.pub</code></li>
+                    </ol>
+
+                    <p class="text-gray-700 mt-4 mb-2 text-sm"><strong>Add your public key to the cluster:</strong></p>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto">
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">ssh-copy-id -i ~/.ssh/id_ed25519.pub username@{{ caddy.domain }}</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 mt-4 text-sm">After this, you can SSH without entering a password!</p>
                 </div>
             </div>
 
-            <!-- SSH Key Setup -->
-            <div class="bg-amber-50 p-6 rounded-lg border-l-4 border-amber-600 mb-12">
-                <h3 class="text-xl font-semibold text-amber-700 mb-4">🔑 Setting Up SSH Keys (Recommended)</h3>
-                <p class="text-gray-700 mb-4">For passwordless, secure access, generate an ed25519 SSH key pair:</p>
+            <!-- SLURM Job Management Tab -->
+            <div x-show="activeTab === 'slurm'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">SLURM Job Management</h2>
 
-                <div class="bg-gray-900 text-green-400 p-4 rounded mb-4">
-                    <p class="text-sm mb-2 font-semibold">On your local machine:</p>
-                    <code class="block text-sm overflow-x-auto">
-                        ssh-keygen -t ed25519 -C "your-email@example.com"
-                    </code>
+                <div class="space-y-6">
+                    <!-- Job Submission -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📝 Submitting Jobs</h3>
+                        <p class="text-gray-700 mb-4">Submit batch jobs using <code class="bg-gray-200 px-1 rounded">sbatch</code> or run interactive jobs with <code class="bg-gray-200 px-1 rounded">srun</code>:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">#!/bin/bash
+#SBATCH --job-name=my_job
+#SBATCH --ntasks=4
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=16G
+#SBATCH --time=01:00:00
+#SBATCH --partition=training
+
+# Your commands here
+echo "Running on $(hostname)"
+sleep 30</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Submit with: <code class="bg-gray-200 px-1 rounded">sbatch script.sh</code></p>
+                    </div>
+
+                    <!-- Job Monitoring -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">👀 Monitoring Jobs</h3>
+                        <p class="text-gray-700 mb-4">Check job status and cluster information:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># View your running jobs
+squeue -u $USER
+
+# Check detailed job info
+scontrol show job &lt;job_id&gt;
+
+# View cluster node status
+sinfo
+
+# View account information
+sacctmgr show accounts</code></pre>
+                    </div>
+
+                    <!-- Job Control -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Job Control</h3>
+                        <p class="text-gray-700 mb-4">Manage your running and completed jobs:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Cancel a job
+scancel &lt;job_id&gt;
+
+# Cancel all your jobs
+scancel -u $USER
+
+# View job history
+sacct --starttime=2025-01-01
+
+# Get job details
+sacct -j &lt;job_id&gt; --format=jobid,elapsed,state,exitcode</code></pre>
+                    </div>
+
+                    <!-- Partition Info -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🎯 Partitions</h3>
+                        <p class="text-gray-700 mb-4">The cluster has different partitions optimized for different workloads. View available partitions with:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">sinfo
+sinfo -p training  # View specific partition details</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Specify partition in your job script: <code class="bg-gray-200 px-1 rounded">#SBATCH --partition=training</code></p>
+                    </div>
+
+                    <!-- SLURM Job Dependencies -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⛓️ Job Dependencies</h3>
+                        <p class="text-gray-700 mb-4">Chain jobs together so they run in sequence. Useful for pipelines before you move to Cromwell/NextFlow:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Submit first job and capture its ID
+JOB1=$(sbatch --job-name=step1 step1.sh | awk '{print $4}')
+
+# Submit dependent jobs
+JOB2=$(sbatch --job-name=step2 --dependency=afterok:$JOB1 step2.sh | awk '{print $4}')
+JOB3=$(sbatch --job-name=step3 --dependency=afterok:$JOB2 step3.sh | awk '{print $4}')
+
+# Alternative dependency types:
+# afterok:jobid  - Run after job succeeds
+# afternotok:jobid - Run after job fails
+# afterany:jobid - Run regardless of job outcome</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Note: For complex workflows, consider using NextFlow or Cromwell instead of manual job dependencies.</p>
+                    </div>
+
+                    <!-- Job Arrays -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔁 Job Arrays</h3>
+                        <p class="text-gray-700 mb-4">Run the same job many times with different parameters using job arrays:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">#!/bin/bash
+#SBATCH --job-name=array_job
+#SBATCH --array=1-100
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=8G
+#SBATCH --time=01:00:00
+
+# SLURM_ARRAY_TASK_ID contains the array index
+echo "Processing sample $SLURM_ARRAY_TASK_ID"
+python analysis.py --input data_${SLURM_ARRAY_TASK_ID}.txt --output results_${SLURM_ARRAY_TASK_ID}.txt</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Submit with: <code class="bg-gray-200 px-1 rounded">sbatch array_job.sh</code> - This creates 100 jobs automatically!</p>
+                    </div>
                 </div>
-
-                <p class="text-gray-700 mb-2 text-sm"><strong>Steps:</strong></p>
-                <ol class="text-gray-700 text-sm space-y-1 ml-4 list-decimal">
-                    <li>Press Enter to accept the default key location</li>
-                    <li>Enter a secure passphrase (or press Enter for no passphrase)</li>
-                    <li>Your public key is now at <code class="bg-gray-200 px-1 rounded">~/.ssh/id_ed25519.pub</code></li>
-                </ol>
-
-                <p class="text-gray-700 mt-4 mb-2 text-sm"><strong>Add your public key to the cluster:</strong></p>
-                <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto">
-                    <code>ssh-copy-id -i ~/.ssh/id_ed25519.pub username@{{ caddy.domain }}</code>
-                </div>
-
-                <p class="text-gray-700 mt-4 text-sm">After this, you can SSH without entering a password!</p>
             </div>
-        </div>
 
-        <div class="text-center pt-8 border-t border-gray-200">
-            <p class="text-gray-500 text-sm">🌐 Domain: {{ caddy.domain }}</p>
-            <p class="text-gray-500 text-sm mt-2">For support or questions, contact your cluster administrator</p>
+            <!-- NextFlow Tab -->
+            <div x-show="activeTab === 'nextflow'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">NextFlow Workflows</h2>
+
+                <div class="space-y-6">
+                    <!-- Basic Workflow -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📋 Basic Workflow Structure</h3>
+                        <p class="text-gray-700 mb-4">A simple NextFlow workflow for data processing:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">#!/usr/bin/env nextflow
+
+params.input = "data/*.txt"
+params.outdir = "results"
+
+process PROCESS_DATA {
+    input:
+    path data_file
+
+    output:
+    path "*.processed"
+
+    script:
+    """
+    cat $data_file | wc -l > ${data_file.baseName}.processed
+    """
+}
+
+workflow {
+    data_files = Channel.fromPath(params.input)
+    PROCESS_DATA(data_files)
+}</code></pre>
+                    </div>
+
+                    <!-- Nextflow Configuration -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Configure for SLURM</h3>
+                        <p class="text-gray-700 mb-4">Create a <code class="bg-gray-200 px-1 rounded">nextflow.config</code> to use SLURM:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">process {
+    executor = 'slurm'
+    queue = 'training'
+    memory = '8 GB'
+    cpus = 2
+    time = '1h'
+}
+
+executor {
+    queueSize = 10
+    pollInterval = '30 sec'
+}
+
+profiles {
+    slurm {
+        process.executor = 'slurm'
+        process.queue = 'training'
+    }
+
+    local {
+        process.executor = 'local'
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- Running Workflows -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🚀 Running Workflows</h3>
+                        <p class="text-gray-700 mb-4">Execute NextFlow workflows with SLURM:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Run with default parameters
+nextflow run workflow.nf
+
+# Run with custom parameters
+nextflow run workflow.nf --input "mydata/*.fq" --outdir "my_results"
+
+# Resume a failed workflow
+nextflow run workflow.nf -resume
+
+# Run with specific profile
+nextflow run workflow.nf -profile slurm
+
+# Use SLURM resources
+nextflow run workflow.nf -profile slurm --queue training --memory 16g</code></pre>
+                    </div>
+
+                    <!-- Multiple Processes -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔗 Chaining Processes</h3>
+                        <p class="text-gray-700 mb-4">Create pipelines by connecting multiple processes:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">process ALIGN {
+    input:
+    path reads
+
+    output:
+    path "*.bam"
+
+    script:
+    """
+    bwa mem reference.fa $reads | samtools view -b > aligned.bam
+    """
+}
+
+process SORT {
+    input:
+    path bam_file
+
+    output:
+    path "*.sorted.bam"
+
+    script:
+    """
+    samtools sort $bam_file -o ${bam_file.baseName}.sorted.bam
+    """
+}
+
+workflow {
+    reads = Channel.fromPath("reads/*.fq")
+    bams = ALIGN(reads)
+    SORT(bams)
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WDL Tab -->
+            <div x-show="activeTab === 'wdl'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">WDL (Workflow Description Language)</h2>
+
+                <div class="space-y-6">
+                    <!-- Basic Task -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📦 Defining Tasks</h3>
+                        <p class="text-gray-700 mb-4">A WDL task defines a unit of work:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">task hello {
+    input {
+        String name
+        String message = "Hello"
+    }
+
+    command {
+        echo "~{message}, ~{name}!"
+    }
+
+    output {
+        String result = read_string(stdout())
+    }
+
+    runtime {
+        docker: "ubuntu:22.04"
+        memory: "1 GB"
+        cpu: 1
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- Workflow Definition -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔧 Defining Workflows</h3>
+                        <p class="text-gray-700 mb-4">Workflows orchestrate tasks together:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">workflow hello_world {
+    input {
+        String person
+    }
+
+    call hello { input: name = person }
+
+    output {
+        String greeting = hello.result
+    }
+}
+
+# Alternative: with multiple tasks
+workflow data_pipeline {
+    input {
+        File input_file
+    }
+
+    call process_step1 { input: data = input_file }
+    call process_step2 { input: data = process_step1.output }
+
+    output {
+        File final_result = process_step2.output
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- Input JSON -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📄 Input Files</h3>
+                        <p class="text-gray-700 mb-4">Create input JSON files (e.g., <code class="bg-gray-200 px-1 rounded">inputs.json</code>):</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-json">{
+    "hello_world.person": "Alice",
+    "hello_world.hello.message": "Hi"
+}</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Run with: <code class="bg-gray-200 px-1 rounded">cromwell run workflow.wdl -i inputs.json</code></p>
+                    </div>
+
+                    <!-- Runtime Specification -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Runtime Configuration</h3>
+                        <p class="text-gray-700 mb-4">Configure compute resources for tasks:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">task compute_intensive {
+    input {
+        File data
+    }
+
+    command {
+        python analysis.py ~{data}
+    }
+
+    output {
+        File results = "results.txt"
+    }
+
+    runtime {
+        docker: "python:3.9"
+        memory: "32 GB"
+        cpu: 8
+        disks: "local-disk 100 HDD"
+        time: 120  # in minutes
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- Working with SLURM -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🎯 Running on SLURM</h3>
+                        <p class="text-gray-700 mb-4">Use Cromwell backend configuration for SLURM:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-conf">include required(classpath("application"))
+
+backend {
+    default = slurm
+
+    providers {
+        slurm {
+            actor-factory = "cromwell.backend.impl.sfs.config.ConfigBackendLifecycleActorFactory"
+            config {
+                runtime-attributes = """
+                    Int cpu = 1
+                    Int memory_mb = 1024
+                    String queue = "training"
+                    String walltime = "01:00:00"
+                """
+
+                submit = "sbatch --job-name=${job_name} --cpus-per-task=${cpu} --mem=${memory_mb}M --time=${walltime} --partition=${queue} ${script}"
+                kill = "scancel ${job_id}"
+                check-alive = "squeue -j ${job_id}"
+                job-id-regex = "Submitted batch job (\\d+)"
+            }
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Containers Tab -->
+            <div x-show="activeTab === 'containers'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Container Technologies</h2>
+
+                <div class="space-y-6">
+                    <!-- Container Overview -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📦 What are Containers?</h3>
+                        <p class="text-gray-700 mb-4">Containers package your application and its dependencies into a self-contained unit that runs consistently across different environments. This is crucial for reproducible research and deployment in HPC.</p>
+                        <p class="text-gray-700 mb-2"><strong>Key Benefits:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li>Reproducibility: Same environment everywhere (local machine, cluster, cloud)</li>
+                            <li>Portability: Run on any system with container runtime installed</li>
+                            <li>Isolation: Dependencies don't conflict with system or other containers</li>
+                            <li>Easy sharing: Distribute your entire analysis environment as a single image</li>
+                        </ul>
+                    </div>
+
+                    <!-- Docker Section -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🐳 Docker</h3>
+                        <p class="text-gray-700 mb-4">Docker is the most popular containerization platform. Define environments using a Dockerfile:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">FROM ubuntu:22.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential
+
+# Install Python packages
+RUN pip install numpy scipy pandas scikit-learn
+
+# Set working directory
+WORKDIR /data
+
+# Default command
+CMD ["python3"]</code></pre>
+                        <p class="text-gray-700 mb-4 mt-4">Build and run:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Build the image
+docker build -t myanalysis:latest .
+
+# Run a container
+docker run -v /path/to/data:/data myanalysis:latest python3 analysis.py</code></pre>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Pros for HPC:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li>Easy to use and widely adopted in development</li>
+                            <li>Large ecosystem with millions of pre-built images</li>
+                            <li>Great for development, testing, and CI/CD pipelines</li>
+                            <li>Excellent documentation and community support</li>
+                        </ul>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Cons for HPC:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li><strong>Security:</strong> Requires root/sudo to run (major concern on shared clusters)</li>
+                            <li><strong>Performance:</strong> Heavier weight and more overhead than Singularity</li>
+                            <li><strong>HPC Integration:</strong> Not designed with HPC security model in mind</li>
+                            <li><strong>Privilege Escalation:</strong> Root access requirement violates many HPC security policies</li>
+                        </ul>
+                    </div>
+
+                    <!-- Singularity Section -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🚀 Singularity / Apptainer</h3>
+                        <p class="text-gray-700 mb-4">Singularity (now called Apptainer) was designed specifically for HPC. Define environments using a Definition File:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">Bootstrap: docker
+From: ubuntu:22.04
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip build-essential
+    pip install numpy scipy pandas scikit-learn
+
+%runscript
+    python3 "$@"
+
+%environment
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    export LC_ALL=C</code></pre>
+                        <p class="text-gray-700 mb-4 mt-4">Build and run:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Build the image
+singularity build myanalysis.sif myanalysis.def
+
+# Run directly (no root required)
+singularity run myanalysis.sif analysis.py input.txt
+
+# Or use the image like an executable
+./myanalysis.sif analysis.py input.txt
+
+# Run with SLURM
+sbatch --job-name=container_job \
+  singularity exec myanalysis.sif python3 analysis.py</code></pre>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Pros for HPC:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li><strong>Security:</strong> Runs without root privileges (critical for shared HPC systems)</li>
+                            <li><strong>Performance:</strong> Lightweight and minimal overhead</li>
+                            <li><strong>HPC Native:</strong> Designed specifically for HPC environments and schedulers</li>
+                            <li><strong>User Namespaces:</strong> Preserves user identity and permissions</li>
+                            <li><strong>GPU/MPI:</strong> Native support for GPUs and MPI applications</li>
+                            <li><strong>Scheduler Integration:</strong> Seamless integration with SLURM, PBS, etc.</li>
+                        </ul>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Cons for HPC:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li>Smaller community and ecosystem compared to Docker</li>
+                            <li>Less intuitive definition file syntax</li>
+                            <li>Fewer pre-built community images available</li>
+                            <li>Less common in general development workflows</li>
+                        </ul>
+                    </div>
+
+                    <!-- Practical Guidance -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🎯 When to Use Which?</h3>
+                        <p class="text-gray-700 mb-4"><strong>Use Docker for:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li>Local development and testing on your machine</li>
+                            <li>CI/CD pipelines (GitHub Actions, GitLab CI, etc.)</li>
+                            <li>Web applications and microservices</li>
+                            <li>Quick prototyping and experimentation</li>
+                        </ul>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Use Singularity for:</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li>Production runs on HPC clusters (with SLURM or other schedulers)</li>
+                            <li>Large-scale parallel jobs (MPI applications)</li>
+                            <li>GPU-accelerated workloads on shared systems</li>
+                            <li>Any production HPC environment</li>
+                        </ul>
+
+                        <p class="text-gray-700 mb-4 mt-4"><strong>Converting Docker to Singularity:</strong></p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># You can build Singularity images directly from Docker images
+singularity build myimage.sif docker://ubuntu:22.04
+
+# Or from a Docker Hub image
+singularity build myimage.sif docker://continuumio/anaconda3:latest
+
+# Or convert from a Dockerfile by bootstrapping from Docker
+# (use a Singularity definition file that references Docker)</code></pre>
+                    </div>
+
+                    <!-- Running on the Cluster -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🖥️ Running Containers with SLURM</h3>
+                        <p class="text-gray-700 mb-4">Submit a container job to the cluster:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">#!/bin/bash
+#SBATCH --job-name=container_analysis
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
+#SBATCH --time=01:00:00
+#SBATCH --partition=training
+
+# Load Singularity module (if needed)
+module load singularity
+
+# Run container with SLURM
+singularity exec myanalysis.sif \
+    python3 /data/analysis.py \
+    --input input.txt \
+    --output results.txt
+
+# For GPU jobs
+#SBATCH --gres=gpu:1
+singularity exec --nv myanalysis.sif \
+    python3 /data/gpu_analysis.py</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Note: The <code class="bg-gray-200 px-1 rounded">--nv</code> flag enables GPU support in Singularity.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Tab -->
+            <div x-show="activeTab === 'other'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Other Useful Tips & Tools</h2>
+
+                <div class="space-y-6">
+                    <!-- tmux Basics -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📺 Terminal Multiplexing with tmux</h3>
+                        <p class="text-gray-700 mb-4">tmux lets you manage multiple terminal sessions and windows in a single connection. This is invaluable for long-running jobs and managing multiple workflows:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Create a new tmux session
+tmux new-session -s mywork
+
+# Attach to an existing session
+tmux attach -t mywork
+
+# Create a new window within session (Ctrl+b, then c)
+# Switch between windows (Ctrl+b, then n or p)
+# Create a split pane (Ctrl+b, then % for vertical or " for horizontal)
+# Navigate panes (Ctrl+b, then arrow keys)
+
+# List all sessions
+tmux list-sessions
+
+# Detach from session (Ctrl+b, then d)</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Tip: Start a long-running job in tmux, detach, and reconnect later even if your SSH connection drops!</p>
+                    </div>
+
+                    <!-- Version Control -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔀 Version Control with Git & GitHub</h3>
+                        <p class="text-gray-700 mb-4">Always use version control for your scripts and analysis code. This ensures reproducibility, enables collaboration, and lets you track changes:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Initialize a Git repository
+git init
+git add *.py *.sh workflow.nf
+git commit -m "Initial commit: analysis scripts and workflows"
+
+# Create a README.md describing your project
+# Then push to GitHub
+git remote add origin https://github.com/username/myproject.git
+git branch -M main
+git push -u origin main
+
+# Good practices:
+# - Write meaningful commit messages
+# - Create a README.md explaining your project
+# - Use .gitignore for data files and outputs
+# - Tag releases with meaningful versions (v1.0, v2.0, etc.)</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">Benefits: Reproducibility, collaboration, change tracking, and a permanent record of your scientific work.</p>
+                    </div>
+
+                    <!-- Resource Monitoring -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📊 Resource Monitoring</h3>
+                        <p class="text-gray-700 mb-4">Monitor cluster resource usage to optimize your workflows:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Real-time system monitoring
+htop
+
+# Quick CPU and memory stats
+top -u $USER
+
+# Check disk usage
+df -h          # Overall filesystem usage
+du -sh ~/.*    # Your directory usage
+
+# Check SLURM queue
+squeue
+
+# Monitor a specific job
+watch -n 5 'squeue -j &lt;job_id&gt;'</code></pre>
+                    </div>
+
+                    <!-- Pro Tips -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">💡 Additional Pro Tips</h3>
+                        <div class="text-gray-700 space-y-3 text-sm">
+                            <p><strong>📁 Environment Modules:</strong> If available, use <code class="bg-gray-200 px-1 rounded">module load</code> to manage different software versions. Try <code class="bg-gray-200 px-1 rounded">module avail</code> to see what's available.</p>
+{#                            <p><strong>💾 Storage Quotas:</strong> Check your disk usage regularly with <code class="bg-gray-200 px-1 rounded">quota</code> or by checking <code class="bg-gray-200 px-1 rounded">/users</code> directory size to avoid hitting quota limits.</p>#}
+                            <p><strong>🔗 Useful Aliases:</strong> Create aliases in your <code class="bg-gray-200 px-1 rounded">~/.bashrc</code> for frequently used commands, e.g.: <code class="bg-gray-200 px-1 rounded">alias sq='squeue -u $USER'</code></p>
+{#                            <p><strong>📝 Output Redirection:</strong> Redirect stdout and stderr to files: <code class="bg-gray-200 px-1 rounded">sbatch script.sh > logs.txt 2>&1</code></p>#}
+{#                            <p><strong>🏃 Background Jobs:</strong> Run commands in the background with <code class="bg-gray-200 px-1 rounded">&amp;</code> and use <code class="bg-gray-200 px-1 rounded">jobs</code>, <code class="bg-gray-200 px-1 rounded">fg</code>, <code class="bg-gray-200 px-1 rounded">bg</code> to manage them.</p>#}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="text-center pt-8 border-t border-gray-200 mt-8">
+                <p class="text-gray-500 text-sm">🌐 Domain: {{ caddy.domain }}</p>
+                <p class="text-gray-500 text-sm mt-2">For support or questions, contact your cluster administrator</p>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Highlight code blocks on page load and when tabs change
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        // Re-highlight when tab content changes
+        document.addEventListener('alpine:init', () => {
+            document.addEventListener('click', function() {
+                setTimeout(() => {
+                    hljs.highlightAll();
+                }, 10);
+            });
+        });
+    </script>
 </body>
 </html>
