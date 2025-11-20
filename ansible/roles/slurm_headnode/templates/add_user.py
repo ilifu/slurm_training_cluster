@@ -104,6 +104,17 @@ def get_next_uid(ldap_connection: Connection, min_allowed: int = 10000, max_allo
     return uid
 
 
+def user_exists(connection: Connection, username: str) -> bool:
+    """Check if a user already exists in LDAP."""
+    user_dn = LDAP_USER_BASE.format(username=username)
+    connection.search(
+        search_base=user_dn,
+        search_filter='(objectClass=posixAccount)',
+        attributes=ALL_ATTRIBUTES,
+    )
+    return len(connection.entries) > 0
+
+
 def create_user(
         connection: Connection,
         username: str,
@@ -322,6 +333,12 @@ def main():
     if args.make_changes:
         logger.debug(f'Creating user {args.username}')
         connection = get_ldap_connection()
+
+        # Check if user already exists
+        if user_exists(connection, args.username):
+            logger.error(f"User '{args.username}' already exists in LDAP")
+            exit(1)
+
         uid = get_next_uid(connection)
         create_user(
             connection=connection,
@@ -335,10 +352,10 @@ def main():
             home_directory=f'/users/{args.username}',
             user_password=user_password
         )
-        
+
         # Add user to SLURM (with admin privileges if requested)
         add_user_to_slurm(args.username, admin=args.is_admin)
-        
+
         # Add sudo privileges if admin requested
         if args.is_admin:
             add_user_to_sudo(args.username)
