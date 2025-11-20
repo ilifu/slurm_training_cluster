@@ -1,46 +1,4 @@
 # JupyterHub reverse proxy configuration
-# Deployed to /etc/caddy/conf.d/jupyterhub.conf by Caddy role import
-
-{% if jupyterhub.install %}
-{{ caddy.domain }} {
-  # Access logging - all successful requests
-  log {
-    output file /var/log/caddy/jupyterhub-access.log {
-      roll_size 50mb
-      roll_keep 10
-      roll_keep_for 720h
-    }
-    format json
-  }
-
-  # Error logging - failed requests and errors
-  log error {
-    output file /var/log/caddy/jupyterhub-error.log {
-      roll_size 50mb
-      roll_keep 5
-      roll_keep_for 720h
-    }
-    format json
-  }
-
-{#  # Reverse proxy to JupyterHub on /jupyter path#}
-{#  reverse_proxy /jupyter* localhost:{{ jupyterhub.service.port }} {#}
-{#    # Preserve the original Host header for JupyterHub routing#}
-{#    header_up Host {http.request.header.Host}#}
-{#    # Forward the original client IP#}
-{#    header_up X-Real-IP {http.request.remote.host}#}
-{#    header_up X-Forwarded-For {http.request.header.X-Forwarded-For}#}
-{#    # Indicate the original scheme (HTTPS from Caddy perspective)#}
-{#    header_up X-Forwarded-Proto https#}
-{#    # WebSocket upgrade headers (required for JupyterLab WebSocket connections)#}
-{#    header_up Connection "upgrade"#}
-{#    header_up Upgrade "websocket"#}
-{#    # Ensure WebSocket headers are passed back to client#}
-{#    header_down Connection "upgrade"#}
-{#    header_down Upgrade "websocket"#}
-{#  }#}
-    handle /jupyter/* {
-      reverse_proxy localhost:{{ jupyterhub.service.port }}
-    }
-}
-{% endif %}
+# NOTE: This file is deprecated. JupyterHub routing is now handled in caddy_static.conf.j2
+# which serves the static landing page at / and proxies /jupyter/* to JupyterHub.
+# Keeping this file for backwards compatibility, but it should be empty to avoid conflicts.

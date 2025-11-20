@@ -1,15 +1,1 @@
-#SPDX-License-Identifier: MIT-0
----
-# defaults file for jupyterlab
-# JupyterLab installation on compute nodes for direct user access
-
-jupyterlab:
-  install: false
-  version: "4.5.0"
-  jupyter_user: jupyter
-  jupyter_group: jupyter
-
-# Python installation paths
-jupyterlab_python_venv: "/opt/jupyterlab/venv"
-jupyterlab_config_dir: "/etc/jupyterlab"
-jupyterlab_data_dir: "/var/lib/jupyterlab"
+../../defaults/main.yml

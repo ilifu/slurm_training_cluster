@@ -1,2 +1,1 @@
----
-# defaults file for roles/db-server
+../../defaults/main.yml

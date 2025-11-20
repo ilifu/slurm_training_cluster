@@ -1,0 +1,50 @@
+{{ caddy.domain }} {
+	# Serve static files from /var/www/caddy for root path
+	root * /var/www/caddy
+
+	# Reverse proxy JupyterHub at /jupyter path (if installed)
+	{% if jupyterhub.install %}
+	handle /jupyter/* {
+		reverse_proxy localhost:{{ jupyterhub.service.port }}
+
+		# Access logging for JupyterHub requests
+		log {
+			output file /var/log/caddy/jupyterhub-access.log {
+				roll_size 50mb
+				roll_keep 10
+			}
+			format json
+		}
+
+		# Error logging for JupyterHub requests
+		log error {
+			output file /var/log/caddy/jupyterhub-error.log {
+				roll_size 50mb
+				roll_keep 5
+			}
+			format json
+		}
+	}
+	{% endif %}
+
+	# Serve static files for all other paths
+	file_server
+
+	# Access logging for static content
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 50mb
+			roll_keep 5
+		}
+		format json
+	}
+
+	# Error logging
+	log error {
+		output file /var/log/caddy/error.log {
+			roll_size 50mb
+			roll_keep 5
+		}
+		format json
+	}
+}

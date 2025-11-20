@@ -1,2 +1,1 @@
----
-# defaults file for roles/slurm_worker
+../../defaults/main.yml

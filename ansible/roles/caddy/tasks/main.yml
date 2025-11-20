@@ -68,10 +68,37 @@
         group: caddy
         mode: '0755'
 
+    - name: Create static files directory
+      file:
+        path: /var/www/caddy
+        state: directory
+        owner: root
+        group: caddy
+        mode: '0755'
+
+    - name: Deploy landing page
+      copy:
+        src: index.html
+        dest: /var/www/caddy/index.html
+        owner: root
+        group: caddy
+        mode: '0644'
+
     - name: Create main Caddyfile with import directive
       template:
         src: Caddyfile.j2
         dest: /etc/caddy/Caddyfile
+        owner: root
+        group: caddy
+        mode: '0644'
+      notify:
+        - Validate Caddy configuration
+        - Reload Caddy
+
+    - name: Deploy static site Caddy configuration
+      template:
+        src: caddy_static.conf.j2
+        dest: "{{ caddy.config_dir }}/static.conf"
         owner: root
         group: caddy
         mode: '0644'

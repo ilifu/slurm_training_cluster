@@ -1,12 +1,1 @@
-#SPDX-License-Identifier: MIT-0
----
-# defaults file for caddy
-# Reverse proxy service for routing traffic to other services
-
-caddy:
-  install: false
-  domain: "training.ilifu.ac.za"
-  email: "admin@training.ilifu.ac.za"
-  port_http: 80
-  port_https: 443
-  config_dir: /etc/caddy/conf.d
+../../defaults/main.yml

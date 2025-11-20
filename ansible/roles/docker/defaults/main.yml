@@ -1,13 +1,1 @@
-#SPDX-License-Identifier: MIT-0
----
-# defaults file for docker
-# Docker installation and configuration on compute nodes
-
-docker:
-  install: false
-  user_docker: false
-
-# List of users to grant Docker access (empty by default)
-# Override in inventory or group_vars to specify users
-# Example: docker_privileged_users: [user1, user2]
-docker_privileged_users: []
+../../defaults/main.yml
