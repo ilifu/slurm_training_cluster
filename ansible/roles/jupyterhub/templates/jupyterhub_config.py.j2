@@ -3146,16 +3146,24 @@ c.SlurmSpawner.batch_script = """{% raw %}#!/bin/bash
 #SBATCH --mem={{memory}}
 #SBATCH --cpus-per-task={{nprocs}}
 
-trap 'echo SIGTERM received' TERM
+# Track the spawned server PID for proper signal handling
+SPAWNED_PID=
+# Handle SIGTERM by terminating the spawned process cleanly
+trap 'if [ -n "$SPAWNED_PID" ]; then kill -TERM $SPAWNED_PID 2>/dev/null; fi; exit 0' TERM
+
 unset XDG_RUNTIME_DIR
 # Ensure jupyterlab venv is in PATH for jupyterhub-singleuser
 # export PATH="/opt/jupyterlab/venv/bin:$PATH"
 . /opt/jupyterlab/venv/bin/activate
 {{ prologue }}
 echo "Starting jupyterhub-singleuser for user '{{username}}' on host '$(hostname)'"
-{{ cmd }}
-echo "jupyterhub-singleuser ended gracefully"
+{{ cmd }} &
+SPAWNED_PID=$!
+wait $SPAWNED_PID
+exit_code=$?
+echo "jupyterhub-singleuser ended with exit code: $exit_code"
 {{ epilogue }}
+exit $exit_code
 {% endraw %}"""
 
 {% if jupyterhub.spawner_config.prologue %}
