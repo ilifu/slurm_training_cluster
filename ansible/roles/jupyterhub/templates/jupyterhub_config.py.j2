@@ -3190,6 +3190,9 @@ c.JupyterHub.hub_connect_ip = '{{ ansible_hostname }}'  # Hostname resolvable fr
 # Tell JupyterHub it's running behind a reverse proxy at /jupyter path
 c.JupyterHub.bind_url = 'http://:8000/jupyter'
 
+c.JupyterHub.cleanup_proxy = True
+
+c.JupyterHub.cleanup_servers = True
 #
 # User interface configuration
 #
