@@ -68,14 +68,16 @@
 
 - name: Software installation including docker and jupyterlab
   hosts: slurm_compute
-  tags: [software, docker, jupyterlab]
   roles:
     - role: software
       run_once: true
+      tags: software
     - role: docker
       when: docker.install|bool == true
+      tags: docker
     - role: jupyterlab
       when: jupyterhub.install|bool == true
+      tags: jupyterlab
 
 - name: Caddy reverse proxy installation
   hosts: slurm_headnode
