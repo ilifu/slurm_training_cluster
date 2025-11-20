@@ -196,3 +196,15 @@
             bind_dn: "cn=admin,{{ dcs }}"
             bind_pw: "{{ ldap.password }}"
 
+        - name: Ensure docker group exists
+          tags: ldap_groups
+          ldap_entry:
+            dn: "cn=docker,ou=users,{{ dcs }}"
+            objectClass:
+              - posixGroup
+              - top
+            attributes:
+              gidNumber: 987
+            bind_dn: "cn=admin,{{ dcs }}"
+            bind_pw: "{{ ldap.password }}"
+
