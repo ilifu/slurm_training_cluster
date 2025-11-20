@@ -2,6 +2,12 @@
 ---
 # handlers file for caddy
 
+- name: Reload systemd daemon
+  become: yes
+  systemd:
+    daemon_reload: yes
+  listen: "Reload systemd daemon"
+
 - name: Validate Caddy configuration
   become: yes
   command: caddy validate --config /etc/caddy/Caddyfile

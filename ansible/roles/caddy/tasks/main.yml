@@ -52,6 +52,25 @@
   become: yes
   tags: [caddy, config]
   block:
+    - name: Create systemd drop-in directory for Caddy
+      file:
+        path: /etc/systemd/system/caddy.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Deploy Caddy systemd drop-in for log directory management
+      copy:
+        src: caddy.service.d/logging.conf
+        dest: /etc/systemd/system/caddy.service.d/logging.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Reload systemd daemon
+        - Restart Caddy
+
     - name: Create Caddy log directory
       file:
         path: /var/log/caddy

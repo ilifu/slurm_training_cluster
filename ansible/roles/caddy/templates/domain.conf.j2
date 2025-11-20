@@ -4,6 +4,9 @@
 
 	# Reverse proxy JupyterHub at /jupyter path (if installed)
 	{% if jupyterhub.install %}
+	handle /jupyter {
+		reverse_proxy localhost:{{ jupyterhub.service.port }}
+	}
 	handle /jupyter/* {
 		reverse_proxy localhost:{{ jupyterhub.service.port }}
 	}
