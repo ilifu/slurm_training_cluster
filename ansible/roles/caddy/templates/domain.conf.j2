@@ -6,24 +6,6 @@
 	{% if jupyterhub.install %}
 	handle /jupyter/* {
 		reverse_proxy localhost:{{ jupyterhub.service.port }}
-
-		# Access logging for JupyterHub requests
-		log {
-			output file /var/log/caddy/jupyterhub-access.log {
-				roll_size 50mb
-				roll_keep 10
-			}
-			format json
-		}
-
-		# Error logging for JupyterHub requests
-		log error {
-			output file /var/log/caddy/jupyterhub-error.log {
-				roll_size 50mb
-				roll_keep 5
-			}
-			format json
-		}
 	}
 	{% endif %}
 

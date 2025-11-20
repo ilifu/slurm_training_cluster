@@ -95,10 +95,10 @@
         - Validate Caddy configuration
         - Reload Caddy
 
-    - name: Deploy static site Caddy configuration
+    - name: Deploy domain Caddy configuration
       template:
-        src: caddy_static.conf.j2
-        dest: "{{ caddy.config_dir }}/static.conf"
+        src: domain.conf.j2
+        dest: "{{ caddy.config_dir }}/{{ caddy.domain }}.conf"
         owner: root
         group: caddy
         mode: '0644'
