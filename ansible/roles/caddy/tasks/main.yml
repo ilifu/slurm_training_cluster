@@ -96,8 +96,8 @@
         mode: '0755'
 
     - name: Deploy landing page
-      copy:
-        src: index.html
+      template:
+        src: index.html.j2
         dest: /var/www/caddy/index.html
         owner: root
         group: caddy

@@ -3,39 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLURM Training Cluster</title>
+    <title>ilifu SLURM Training Cluster</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-purple-600 to-purple-900 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-blue-300 to-blue-500 min-h-screen flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full p-12">
         <div class="text-center mb-12">
-            <h1 class="text-5xl font-bold text-purple-600 mb-4">SLURM Training Cluster</h1>
+            <h1 class="text-5xl font-bold text-blue-600 mb-4">ilifu SLURM Training Cluster</h1>
             <p class="text-xl text-gray-600">High-Performance Computing Environment for Learning</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-purple-600">
-                <h3 class="text-lg font-semibold text-purple-600 mb-2">📊 SLURM Scheduler</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">📊 SLURM Scheduler</h3>
                 <p class="text-gray-600">Multi-node job scheduling and resource management for distributed computing tasks</p>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-purple-600">
-                <h3 class="text-lg font-semibold text-purple-600 mb-2">🐍 Interactive Computing</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">🐍 Interactive Computing</h3>
                 <p class="text-gray-600">Jupyter notebooks for interactive data analysis and scientific computing</p>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-purple-600">
-                <h3 class="text-lg font-semibold text-purple-600 mb-2">💾 Shared Storage</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">💾 Shared Storage</h3>
                 <p class="text-gray-600">CephFS distributed storage for users, software, and data</p>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-purple-600">
-                <h3 class="text-lg font-semibold text-purple-600 mb-2">🔐 User Management</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">🔐 User Management</h3>
                 <p class="text-gray-600">LDAP-based authentication and centralized user management</p>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-purple-600">
-                <h3 class="text-lg font-semibold text-purple-600 mb-2">🖥️ Compute Nodes</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">🖥️ Compute Nodes</h3>
                 <p class="text-gray-600">Multiple compute nodes with substantial memory for parallel processing</p>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-purple-600">
-                <h3 class="text-lg font-semibold text-purple-600 mb-2">📚 Training Ready</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">📚 Training Ready</h3>
                 <p class="text-gray-600">Pre-configured environment designed for HPC training and education</p>
             </div>
         </div>
@@ -49,7 +49,7 @@
                     <h3 class="text-xl font-semibold text-blue-600 mb-4">🔒 SSH Access</h3>
                     <p class="text-gray-600 mb-4">Connect to the login node using SSH:</p>
                     <code class="block bg-gray-900 text-green-400 p-3 rounded text-sm mb-4 overflow-x-auto">
-                        ssh username@training.ilifu.ac.za
+                        ssh username@{{ caddy.domain }}
                     </code>
                     <p class="text-gray-600 text-sm">Replace <code class="bg-gray-200 px-1 rounded">username</code> with your login credentials</p>
                 </div>
@@ -58,7 +58,7 @@
                 <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
                     <h3 class="text-xl font-semibold text-blue-600 mb-4">🐍 JupyterHub Access</h3>
                     <p class="text-gray-600 mb-4">Access interactive notebooks through the web:</p>
-                    <a href="/jupyter/" class="inline-block bg-purple-600 text-white px-6 py-2 rounded font-semibold hover:bg-purple-700 transition-colors">
+                    <a href="/jupyter/" class="inline-block bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition-colors">
                         Launch JupyterHub
                     </a>
                     <p class="text-gray-600 text-sm mt-4">Same credentials as SSH login</p>
@@ -86,7 +86,7 @@
 
                 <p class="text-gray-700 mt-4 mb-2 text-sm"><strong>Add your public key to the cluster:</strong></p>
                 <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto">
-                    <code>ssh-copy-id -i ~/.ssh/id_ed25519.pub username@training.ilifu.ac.za</code>
+                    <code>ssh-copy-id -i ~/.ssh/id_ed25519.pub username@{{ caddy.domain }}</code>
                 </div>
 
                 <p class="text-gray-700 mt-4 text-sm">After this, you can SSH without entering a password!</p>
@@ -94,7 +94,7 @@
         </div>
 
         <div class="text-center pt-8 border-t border-gray-200">
-            <p class="text-gray-500 text-sm">🌐 Domain: training.ilifu.ac.za</p>
+            <p class="text-gray-500 text-sm">🌐 Domain: {{ caddy.domain }}</p>
             <p class="text-gray-500 text-sm mt-2">For support or questions, contact your cluster administrator</p>
         </div>
     </div>
