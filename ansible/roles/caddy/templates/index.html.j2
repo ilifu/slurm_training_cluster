@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ilifu SLURM Training Cluster</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
@@ -393,133 +394,150 @@ nf-ilifu run workflow.nf -profile main_small
                     <h3 class="text-xl font-semibold text-blue-600 mb-4">What is WDL?</h3>
                     <p class="text-gray-700 mb-4">WDL (Workflow Description Language) is a task-centric language for defining computational workflows. Workflows written in WDL are executed by the Cromwell engine, which handles job scheduling, data management, and execution across different compute systems.</p>
                     <p class="text-gray-700 mb-4"><strong>Getting Started:</strong> Cromwell (the WDL executor) is available on the cluster. Load it with:</p>
-                    <pre class="whitespace-pre-wrap break-words"><code class="language-bash">module add cromwell</code></pre>
+                    <pre class="whitespace-pre-wrap break-words"><code class="language-bash">module load cromwell</code></pre>
                     <p class="text-gray-700 text-sm mt-4">Key features: Task-based workflow definition, portable across backends, excellent for scientific workflows, built-in error handling and retry logic, works seamlessly with containers (Docker/Singularity).</p>
                 </div>
 
-                    <!-- Basic Task -->
-                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📦 Defining Tasks</h3>
-                        <p class="text-gray-700 mb-4">A WDL task defines a unit of work:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">task hello {
-    input {
-        String name
-        String message = "Hello"
-    }
-
-    command {
-        echo "~{message}, ~{name}!"
-    }
-
-    output {
-        String result = read_string(stdout())
-    }
-
-    runtime {
-        docker: "ubuntu:22.04"
-        memory: "1 GB"
-        cpu: 1
-    }
-}</code></pre>
+                <div class="space-y-6">
+                    <!-- Helper Scripts Download -->
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📥 Helper Scripts & Workflow</h3>
+                        <p class="text-gray-700 mb-4">Download these files from the landing page:</p>
+                        <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                            <li><strong><a href="/static/generate_data.py" class="text-blue-600 hover:text-blue-800 underline">generate_data.py</a></strong> - Creates dummy FASTQ files for testing</li>
+                            <li><strong><a href="/static/qa.py" class="text-blue-600 hover:text-blue-800 underline">qa.py</a></strong> - Performs quality assessment and filters sequences</li>
+                            <li><strong><a href="/static/align.py" class="text-blue-600 hover:text-blue-800 underline">align.py</a></strong> - Simulates sequence alignment on filtered data</li>
+                            <li><strong><a href="/static/workflow.wdl" class="text-blue-600 hover:text-blue-800 underline">workflow.wdl</a></strong> - Complete WDL workflow orchestrating all tasks</li>
+                            <li><strong><a href="/static/inputs.json" class="text-blue-600 hover:text-blue-800 underline">inputs.json</a></strong> - Input configuration file for the workflow</li>
+                        </ul>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Download all files
+curl https://{{ caddy.domain }}/static/generate_data.py > generate_data.py
+curl https://{{ caddy.domain }}/static/qa.py > qa.py
+curl https://{{ caddy.domain }}/static/align.py > align.py
+curl https://{{ caddy.domain }}/static/workflow.wdl > workflow.wdl
+curl https://{{ caddy.domain }}/static/inputs.json > inputs.json</code></pre>
                     </div>
 
-                    <!-- Workflow Definition -->
+                    <!-- Complete Working Example -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔧 Defining Workflows</h3>
-                        <p class="text-gray-700 mb-4">Workflows orchestrate tasks together:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">workflow hello_world {
-    input {
-        String person
-    }
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🧬 Complete Bioinformatics Pipeline Example</h3>
+                        <p class="text-gray-700 mb-4">A working WDL workflow that demonstrates task-based parallelization and containerization. Download it as <code class="bg-gray-200 px-1 rounded">workflow.wdl</code> (see Helper Scripts section above):</p>
 
-    call hello { input: name = person }
+                        <!-- Collapsible Code Block -->
+                        <div class="mb-4">
+                            <button @click="showWorkflowCode = !showWorkflowCode" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700 transition-colors text-sm mb-4">
+                                <span x-show="!showWorkflowCode">▶ Show Code</span>
+                                <span x-show="showWorkflowCode">▼ Hide Code</span>
+                            </button>
 
-    output {
-        String greeting = hello.result
-    }
-}
+                            <div x-show="showWorkflowCode" class="rounded-lg p-4 overflow-x-auto">
+                                <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">{{ lookup('file', '../files/static/workflow.wdl') }}</code></pre>
+                            </div>
+                        </div>
 
-# Alternative: with multiple tasks
-workflow data_pipeline {
-    input {
-        File input_file
-    }
+                        <div class="mt-6 space-y-4">
+                            <p class="text-gray-700 font-semibold">Understanding the Workflow:</p>
 
-    call process_step1 { input: data = input_file }
-    call process_step2 { input: data = process_step1.output }
+                            <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                <p class="text-gray-700 text-sm"><strong>Task: generate_data</strong> - Creates dummy FASTQ files locally. Uses Python container. Takes num_samples and output_dir as inputs and outputs an array of FASTQ files using glob pattern.</p>
+                            </div>
 
-    output {
-        File final_result = process_step2.output
-    }
-}</code></pre>
+                            <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                <p class="text-gray-700 text-sm"><strong>Task: quality_assessment</strong> - Runs inside a Python Docker container. Filters sequences based on quality scores. The <code class="bg-gray-200 px-1 rounded">String output_filename</code> line dynamically creates output names based on input filename.</p>
+                            </div>
+
+                            <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                <p class="text-gray-700 text-sm"><strong>Task: alignment</strong> - Also containerized. Takes an array of filtered FASTQ files and produces one alignment results file. Uses <code class="bg-gray-200 px-1 rounded">${sep=' ' filtered_fastqs}</code> to join multiple files with spaces.</p>
+                            </div>
+
+                            <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                <p class="text-gray-700 text-sm"><strong>Workflow: bioinformatics_pipeline</strong> - Orchestrates the pipeline:
+                                <ul class="list-disc ml-4 mt-2">
+                                    <li><code class="bg-gray-200 px-1 rounded">scatter (fastq in generate_data.fastq_files)</code> - Parallelizes quality assessment: creates one quality_assessment task for each FASTQ file</li>
+                                    <li><code class="bg-gray-200 px-1 rounded">quality_assessment.filtered_fastq</code> - In scatter context, this becomes an array of filtered files</li>
+                                    <li><code class="bg-gray-200 px-1 rounded">call alignment { input: filtered_fastqs = quality_assessment.filtered_fastq }</code> - Waits for all scatter jobs to complete, then passes all results to alignment</li>
+                                    <li><code class="bg-gray-200 px-1 rounded">output { ... }</code> - Declares workflow outputs that users can reference</li>
+                                </ul>
+                                </p>
+                            </div>
+
+                            <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                <p class="text-gray-700 text-sm"><strong>Runtime Specifications</strong> - Each task specifies compute resources and containerization:
+                                <ul class="list-disc ml-4 mt-2">
+                                    <li><code class="bg-gray-200 px-1 rounded">docker: "python:3.13-slim"</code> - Runs in Docker container (automatically converted to Singularity on the cluster)</li>
+                                    <li><code class="bg-gray-200 px-1 rounded">cpus, requested_memory_mb_per_core, runtime_minutes, queue</code> - Resources passed to SLURM</li>
+                                    <li>The Cromwell SLURM configuration automatically converts Docker images to Singularity and submits jobs with the specified resources</li>
+                                </ul>
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Input JSON -->
+                    <!-- Containerization Options -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📄 Input Files</h3>
-                        <p class="text-gray-700 mb-4">Create input JSON files (e.g., <code class="bg-gray-200 px-1 rounded">inputs.json</code>):</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-json">{
-    "hello_world.person": "Alice",
-    "hello_world.hello.message": "Hi"
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🐳 Containerization Options</h3>
+                        <p class="text-gray-700 mb-4">WDL workflows on this cluster support two approaches to containerization:</p>
+
+                        <div class="bg-blue-50 p-4 rounded mb-4">
+                            <p class="text-gray-700 font-semibold mb-2">Option 1: Docker Images (Recommended)</p>
+                            <p class="text-gray-700 text-sm mb-3">Use standard Docker image references. Cromwell automatically pulls and converts them to Singularity for cluster execution.</p>
+                            <pre class="whitespace-pre-wrap break-words text-sm"><code class="language-wdl">runtime {
+    docker: "python:3.13-slim"
+    cpus: 2
+    requested_memory_mb_per_core: 1024
+    runtime_minutes: 30
 }</code></pre>
-                        <p class="text-gray-700 text-sm mt-4">Run with: <code class="bg-gray-200 px-1 rounded">cromwell run workflow.wdl -i inputs.json</code></p>
+                            <p class="text-gray-700 text-sm mt-2"><strong>Advantages:</strong> Portable across platforms, matches WDL standard practices, access to Docker Hub ecosystem</p>
+                        </div>
+
+                        <div class="bg-blue-50 p-4 rounded">
+                            <p class="text-gray-700 font-semibold mb-2">Option 2: Pre-built Singularity Images</p>
+                            <p class="text-gray-700 text-sm mb-3">Use existing .sif Singularity image files directly. No conversion needed, runs natively on the cluster.</p>
+                            <pre class="whitespace-pre-wrap break-words text-sm"><code class="language-wdl">runtime {
+    singularity: "/path/to/myimage.sif"
+    cpus: 2
+    requested_memory_mb_per_core: 1024
+    runtime_minutes: 30
+}</code></pre>
+                            <p class="text-gray-700 text-sm mt-2"><strong>Advantages:</strong> Faster execution (no conversion), useful for cluster-specific optimized images, fine-grained control</p>
+                        </div>
                     </div>
 
-                    <!-- Runtime Specification -->
+                    <!-- How to Run -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Runtime Configuration</h3>
-                        <p class="text-gray-700 mb-4">Configure compute resources for tasks:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-wdl">task compute_intensive {
-    input {
-        File data
-    }
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🚀 How to Run</h3>
+                        <p class="text-gray-700 mb-4">Complete step-by-step instructions:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># 1. Download scripts from the landing page (see section above)
 
-    command {
-        python analysis.py ~{data}
-    }
+# 2. Load Cromwell module
+module load cromwell
 
-    output {
-        File results = "results.txt"
-    }
+# 3. Run the workflow with Cromwell
+cromwell run workflow.wdl -i inputs.json
 
-    runtime {
-        docker: "python:3.9"
-        memory: "32 GB"
-        cpu: 8
-        disks: "local-disk 100 HDD"
-        time: 120  # in minutes
-    }
-}</code></pre>
+# 4. The workflow will:
+#    - Generate 3 dummy FASTQ files
+#    - Run quality assessment in parallel on each file (via scatter)
+#    - Combine filtered results and perform alignment
+#    - Output results to cromwell-executions/ directory
+
+# 5. Monitor SLURM jobs launched by Cromwell:
+watch squeue</code></pre>
+                        <p class="text-gray-700 text-sm mt-4"><strong>Note:</strong> Cromwell uses the SLURM configuration from <code class="bg-gray-200 px-1 rounded">/software/common/cromwell/91/slurm.conf</code> automatically. It submits scatter jobs to SLURM and waits for them to complete before continuing.</p>
                     </div>
 
-                    <!-- Working with SLURM -->
+                    <!-- Pipeline Features -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🎯 Running on SLURM</h3>
-                        <p class="text-gray-700 mb-4">Use Cromwell backend configuration for SLURM:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-conf">include required(classpath("application"))
-
-backend {
-    default = slurm
-
-    providers {
-        slurm {
-            actor-factory = "cromwell.backend.impl.sfs.config.ConfigBackendLifecycleActorFactory"
-            config {
-                runtime-attributes = """
-                    Int cpu = 1
-                    Int memory_mb = 1024
-                    String queue = "training"
-                    String walltime = "01:00:00"
-                """
-
-                submit = "sbatch --job-name=${job_name} --cpus-per-task=${cpu} --mem=${memory_mb}M --time=${walltime} --partition=${queue} ${script}"
-                kill = "scancel ${job_id}"
-                check-alive = "squeue -j ${job_id}"
-                job-id-regex = "Submitted batch job (\\d+)"
-            }
-        }
-    }
-}</code></pre>
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">✨ Key Features Demonstrated</h3>
+                        <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                            <li><strong>Task-Based Design:</strong> Each step is a discrete, reusable task with clear inputs/outputs</li>
+                            <li><strong>Scatter/Gather:</strong> Uses WDL scatter for parallel execution, then gathers results</li>
+                            <li><strong>Containerization:</strong> All tasks use Docker containers (converted to Singularity on cluster)</li>
+                            <li><strong>Strong Typing:</strong> Input/output types are explicit (Array[File], File, String, Int)</li>
+                            <li><strong>SLURM Integration:</strong> Resource specs automatically submitted to SLURM scheduler</li>
+                            <li><strong>Input Configuration:</strong> Uses inputs.json for reproducible, parameterized workflows</li>
+                            <li><strong>Reusable Scripts:</strong> Same Python helper scripts as the NextFlow example</li>
+                        </ul>
                     </div>
                 </div>
 
