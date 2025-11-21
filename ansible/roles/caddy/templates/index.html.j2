@@ -288,110 +288,114 @@ nf-ilifu run workflow.nf -profile main_small</code></pre>
                 </div>
 
                 <div class="space-y-6">
-                    <!-- Basic Workflow -->
+                    <!-- Helper Scripts Download -->
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📥 Helper Scripts</h3>
+                        <p class="text-gray-700 mb-4">Download these Python helper scripts from the landing page:</p>
+                        <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                            <li><strong>generate_data.py</strong> - Creates dummy FASTQ files for testing</li>
+                            <li><strong>qa.py</strong> - Performs quality assessment and filters sequences</li>
+                            <li><strong>align.py</strong> - Simulates sequence alignment on filtered data</li>
+                        </ul>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Download the helper scripts
+curl http://{{ caddy.domain }}/static/generate_data.py > generate_data.py
+curl http://{{ caddy.domain }}/static/qa.py > qa.py
+curl http://{{ caddy.domain }}/static/align.py > align.py</code></pre>
+                    </div>
+
+                    <!-- Complete Working Example -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📋 Basic Workflow Structure</h3>
-                        <p class="text-gray-700 mb-4">A simple NextFlow workflow for data processing:</p>
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🧬 Complete Bioinformatics Pipeline Example</h3>
+                        <p class="text-gray-700 mb-4">A working NextFlow pipeline that demonstrates parallel processing and containerization. Save this as <code class="bg-gray-200 px-1 rounded">workflow.nf</code>:</p>
                         <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">#!/usr/bin/env nextflow
 
-params.input = "data/*.txt"
-params.outdir = "results"
+params.output = "results"
+params.samples = 3
 
-process PROCESS_DATA {
-    input:
-    path data_file
-
+process GENERATE_DATA {
+    executor 'local'
     output:
-    path "*.processed"
+    path "${params.output}/sample_*.fastq"
 
     script:
     """
-    cat $data_file | wc -l > ${data_file.baseName}.processed
+    python generate_data.py ${params.output} ${params.samples}
+    """
+}
+
+process QUALITY_ASSESSMENT {
+    container 'python:3.13-slim'
+    input:
+    path fastq_file
+
+    output:
+    path "${fastq_file.baseName}.filtered.fastq"
+
+    script:
+    """
+    python qa.py ${fastq_file} ${fastq_file.baseName}.filtered.fastq
+    """
+}
+
+process ALIGNMENT {
+    container 'python:3.13-slim'
+    input:
+    path filtered_fastqs
+
+    output:
+    path "alignment_results.txt"
+
+    script:
+    """
+    python align.py alignment_results.txt ${filtered_fastqs}
     """
 }
 
 workflow {
-    data_files = Channel.fromPath(params.input)
-    PROCESS_DATA(data_files)
+    // Generate dummy data locally
+    data_files = GENERATE_DATA()
+
+    // Run quality assessment in parallel on each file
+    filtered_files = QUALITY_ASSESSMENT(data_files.flatten())
+
+    // Align all filtered sequences together
+    results = ALIGNMENT(filtered_files.collect())
+
+    // Print results location
+    results.subscribe { println "Alignment complete: \${it}" }
 }</code></pre>
                     </div>
 
-                    <!-- Workflow-Specific Configuration -->
+                    <!-- How to Run -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Workflow-Specific Configuration</h3>
-                        <p class="text-gray-700 mb-4">The cluster configuration (SLURM, Singularity, profiles) is automatically loaded by the <code class="bg-gray-200 px-1 rounded">nf-ilifu</code> wrapper. For workflow-specific settings, create a <code class="bg-gray-200 px-1 rounded">nextflow.config</code> in your project directory:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">// Project-specific parameters
-params {
-    projectName = "my_project"
-    input = "data/*.fq"
-    outDir = "results"
-}
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🚀 How to Run</h3>
+                        <p class="text-gray-700 mb-4">Complete step-by-step instructions:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># 1. Download scripts from the landing page (see section above)
 
-// Override specific process settings if needed
-process {
-    withName: 'HEAVY_PROCESS' {
-        cpus = 16
-        memory = 128.GB
-    }
-}</code></pre>
-                        <p class="text-gray-700 text-sm mt-4">The cluster profiles (standard, main_small, main_medium, main_large) are always available and will be merged with your local config. Just use <code class="bg-gray-200 px-1 rounded">-profile main_medium</code> when running your workflow.</p>
+# 2. Save the workflow code above as workflow.nf
+
+# 3. Load NextFlow module and run the pipeline
+module add nextflow
+nf-ilifu run workflow.nf -profile main_small
+
+# 4. The pipeline will:
+#    - Generate 3 dummy FASTQ files locally
+#    - Run quality assessment in parallel on each file
+#    - Combine filtered results and perform alignment
+#    - Output results to alignment_results.txt</code></pre>
                     </div>
 
-                    <!-- Running Workflows -->
+                    <!-- Pipeline Features -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🚀 Running Workflows</h3>
-                        <p class="text-gray-700 mb-4">Execute NextFlow workflows with SLURM:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Run with default parameters
-nextflow run workflow.nf
-
-# Run with custom parameters
-nextflow run workflow.nf --input "mydata/*.fq" --outdir "my_results"
-
-# Resume a failed workflow
-nextflow run workflow.nf -resume
-
-# Run with specific profile
-nextflow run workflow.nf -profile slurm
-
-# Use SLURM resources
-nextflow run workflow.nf -profile slurm --queue training --memory 16g</code></pre>
-                    </div>
-
-                    <!-- Multiple Processes -->
-                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🔗 Chaining Processes</h3>
-                        <p class="text-gray-700 mb-4">Create pipelines by connecting multiple processes:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">process ALIGN {
-    input:
-    path reads
-
-    output:
-    path "*.bam"
-
-    script:
-    """
-    bwa mem reference.fa $reads | samtools view -b > aligned.bam
-    """
-}
-
-process SORT {
-    input:
-    path bam_file
-
-    output:
-    path "*.sorted.bam"
-
-    script:
-    """
-    samtools sort $bam_file -o ${bam_file.baseName}.sorted.bam
-    """
-}
-
-workflow {
-    reads = Channel.fromPath("reads/*.fq")
-    bams = ALIGN(reads)
-    SORT(bams)
-}</code></pre>
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">✨ Key Features Demonstrated</h3>
+                        <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                            <li><strong>Mixed Execution:</strong> Data generation runs locally (no overhead), analysis runs on SLURM</li>
+                            <li><strong>Containerization:</strong> Quality assessment and alignment use Python Docker container via Singularity</li>
+                            <li><strong>Parallelization:</strong> QA process runs independently on each file simultaneously</li>
+                            <li><strong>Dependencies:</strong> Alignment automatically waits for all QA processes to complete</li>
+                            <li><strong>Data Flow:</strong> Shows how channel operators (.flatten() and .collect()) manage data between processes</li>
+                            <li><strong>Real Scripts:</strong> Uses actual Python scripts that you can examine and modify</li>
+                        </ul>
                     </div>
                 </div>
                 </div>
