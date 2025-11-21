@@ -394,20 +394,6 @@ workflow {
 }</code></pre>
                     </div>
                 </div>
-
-                <!-- NextFlow Sub-tab Bottom Navigation -->
-                <div class="flex flex-wrap gap-2 my-6 pb-2 border-b-2 border-gray-200">
-                    <button @click="workflowTab = 'nextflow'"
-                        :class="workflowTab === 'nextflow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
-                        class="px-4 py-2 rounded font-semibold transition-colors text-sm">
-                        NextFlow
-                    </button>
-                    <button @click="workflowTab = 'wdl'"
-                        :class="workflowTab === 'wdl' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
-                        class="px-4 py-2 rounded font-semibold transition-colors text-sm">
-                        WDL
-                    </button>
-                </div>
                 </div>
 
                 <!-- WDL Sub-tab -->
@@ -544,6 +530,20 @@ backend {
     }
 }</code></pre>
                     </div>
+                </div>
+
+                <!-- Workflow Sub-tabs Bottom Navigation -->
+                <div class="flex flex-wrap gap-2 mt-6 pb-2 border-t-2 border-gray-200 pt-4">
+                    <button @click="workflowTab = 'nextflow'"
+                        :class="workflowTab === 'nextflow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                        class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                        NextFlow
+                    </button>
+                    <button @click="workflowTab = 'wdl'"
+                        :class="workflowTab === 'wdl' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                        class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                        WDL
+                    </button>
                 </div>
             </div>
 
