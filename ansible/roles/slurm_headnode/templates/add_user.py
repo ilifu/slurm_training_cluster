@@ -173,29 +173,34 @@ def create_user_directories(username: str):
     try:
         # Get the training group ID
         training_gid = getgrnam('training').gr_gid
-
-        # Create /scratch/USERNAME
-        scratch_dir = f'/scratch/{username}'
-        makedirs(scratch_dir, mode=0o700, exist_ok=True)
-
         # Get user UID
         user_uid = getpwnam(username).pw_uid
 
-        # Set ownership to username:training
-        chown(scratch_dir, user_uid, training_gid)
-        # Set permissions to u=rwx,go=
-        chmod(scratch_dir, 0o700)
+        # Create /scratch/USERNAME with sudo
+        scratch_dir = f'/scratch/{username}'
+        mkdir_cmd = ['sudo', 'mkdir', '-p', scratch_dir]
+        subprocess.run(mkdir_cmd, capture_output=True, text=True, check=True)
+
+        # Set ownership and permissions on /scratch/USERNAME with sudo
+        chown_cmd = ['sudo', 'chown', f'{user_uid}:{training_gid}', scratch_dir]
+        subprocess.run(chown_cmd, capture_output=True, text=True, check=True)
+
+        chmod_cmd = ['sudo', 'chmod', '700', scratch_dir]
+        subprocess.run(chmod_cmd, capture_output=True, text=True, check=True)
 
         logger.info(f'Created {scratch_dir} with ownership {username}:training and permissions u=rwx,go=')
 
-        # Create /data/USERNAME
+        # Create /data/USERNAME with sudo
         data_dir = f'/data/{username}'
-        makedirs(data_dir, mode=0o700, exist_ok=True)
+        mkdir_cmd = ['sudo', 'mkdir', '-p', data_dir]
+        subprocess.run(mkdir_cmd, capture_output=True, text=True, check=True)
 
-        # Set ownership to username:training
-        chown(data_dir, user_uid, training_gid)
-        # Set permissions to u=rwx,go=
-        chmod(data_dir, 0o700)
+        # Set ownership and permissions on /data/USERNAME with sudo
+        chown_cmd = ['sudo', 'chown', f'{user_uid}:{training_gid}', data_dir]
+        subprocess.run(chown_cmd, capture_output=True, text=True, check=True)
+
+        chmod_cmd = ['sudo', 'chmod', '700', data_dir]
+        subprocess.run(chmod_cmd, capture_output=True, text=True, check=True)
 
         logger.info(f'Created {data_dir} with ownership {username}:training and permissions u=rwx,go=')
 
