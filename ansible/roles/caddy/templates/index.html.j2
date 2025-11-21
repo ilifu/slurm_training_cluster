@@ -274,9 +274,9 @@ python analysis.py --input data_${SLURM_ARRAY_TASK_ID}.txt --output results_${SL
                 <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
                     <h3 class="text-xl font-semibold text-blue-600 mb-4">What is NextFlow?</h3>
                     <p class="text-gray-700 mb-4">NextFlow is a workflow orchestration platform built on Groovy that simplifies writing and executing data-intensive computational pipelines. It's particularly powerful for managing complex workflows across multiple data files and processes.</p>
-                    <p class="text-gray-700 mb-4"><strong>Getting Started:</strong> First load the NextFlow module, then use the <code class="bg-gray-200 px-1 rounded">nx-ilifu</code> wrapper which automatically loads the cluster's centralized configuration:</p>
+                    <p class="text-gray-700 mb-4"><strong>Getting Started:</strong> First load the NextFlow module, then use the <code class="bg-gray-200 px-1 rounded">nf-ilifu</code> wrapper which automatically loads the cluster's centralized configuration:</p>
                     <pre class="whitespace-pre-wrap break-words"><code class="language-bash">module add nextflow
-nx-ilifu run workflow.nf -profile main_small</code></pre>
+nf-ilifu run workflow.nf -profile main_small</code></pre>
                     <p class="text-gray-700 text-sm mt-4"><strong>Available Profiles:</strong></p>
                     <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
                         <li><strong>standard</strong> - Local execution (good for testing)</li>
@@ -319,7 +319,7 @@ workflow {
                     <!-- Workflow-Specific Configuration -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
                         <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Workflow-Specific Configuration</h3>
-                        <p class="text-gray-700 mb-4">The cluster configuration (SLURM, Singularity, profiles) is automatically loaded by the <code class="bg-gray-200 px-1 rounded">nx-ilifu</code> wrapper. For workflow-specific settings, create a <code class="bg-gray-200 px-1 rounded">nextflow.config</code> in your project directory:</p>
+                        <p class="text-gray-700 mb-4">The cluster configuration (SLURM, Singularity, profiles) is automatically loaded by the <code class="bg-gray-200 px-1 rounded">nf-ilifu</code> wrapper. For workflow-specific settings, create a <code class="bg-gray-200 px-1 rounded">nextflow.config</code> in your project directory:</p>
                         <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">// Project-specific parameters
 params {
     projectName = "my_project"
