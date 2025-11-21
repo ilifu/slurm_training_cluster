@@ -3,16 +3,15 @@ version 1.0
 task generate_data {
     input {
         Int num_samples = 3
-        String output_dir = "results"
         File generate_script
     }
 
     command {
-        python ${generate_script} ${output_dir} ${num_samples}
+        python ${generate_script} . ${num_samples}
     }
 
     output {
-        Array[File] fastq_files = glob("${output_dir}/sample_*.fastq")
+        Array[File] fastq_files = glob("sample_*.fastq")
     }
 
     runtime {
@@ -75,7 +74,6 @@ task alignment {
 workflow bioinformatics_pipeline {
     input {
         Int num_samples = 3
-        String output_dir = "results"
         File generate_script = "generate_data.py"
         File qa_script = "qa.py"
         File align_script = "align.py"
@@ -84,7 +82,6 @@ workflow bioinformatics_pipeline {
     call generate_data {
         input:
             num_samples = num_samples,
-            output_dir = output_dir,
             generate_script = generate_script
     }
 

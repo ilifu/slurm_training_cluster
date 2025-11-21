@@ -1,6 +1,5 @@
 {
   "bioinformatics_pipeline.num_samples": 3,
-  "bioinformatics_pipeline.output_dir": "results",
   "bioinformatics_pipeline.generate_script": "generate_data.py",
   "bioinformatics_pipeline.qa_script": "qa.py",
   "bioinformatics_pipeline.align_script": "align.py"
