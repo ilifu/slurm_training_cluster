@@ -12,12 +12,13 @@
 <body class="bg-gradient-to-br from-blue-300 to-blue-500 min-h-screen flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-2xl max-w-6xl w-full p-8">
         <div class="text-center mb-8">
-            <h1 class="text-5xl font-bold text-blue-600 mb-4">ilifu SLURM Training Cluster</h1>
+            <img src="/static/ilifu-dark-blue-with-light-blue-dots.svg" alt="ilifu logo" class="h-16 mx-auto mb-4">
+            <h1 class="text-5xl font-bold text-blue-600 mb-4">SLURM Training Cluster</h1>
             <p class="text-xl text-gray-600">High-Performance Computing Environment for Learning</p>
         </div>
 
         <!-- Tab Navigation -->
-        <div x-data="{ activeTab: 'overview' }" class="w-full">
+        <div x-data="{ activeTab: 'access', workflowTab: 'nextflow' }" class="w-full">
             <!-- Tab Buttons -->
             <div class="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-200 pb-4 justify-center">
                 <button @click="activeTab = 'overview'"
@@ -35,15 +36,10 @@
                     class="px-4 py-2 rounded font-semibold transition-colors">
                     SLURM Job Management
                 </button>
-                <button @click="activeTab = 'nextflow'"
-                    :class="activeTab === 'nextflow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                <button @click="activeTab = 'workflows'"
+                    :class="activeTab === 'workflows' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
                     class="px-4 py-2 rounded font-semibold transition-colors">
-                    NextFlow
-                </button>
-                <button @click="activeTab = 'wdl'"
-                    :class="activeTab === 'wdl' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
-                    class="px-4 py-2 rounded font-semibold transition-colors">
-                    WDL Scripts
+                    Workflows
                 </button>
                 <button @click="activeTab = 'containers'"
                     :class="activeTab === 'containers' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
@@ -241,9 +237,55 @@ python analysis.py --input data_${SLURM_ARRAY_TASK_ID}.txt --output results_${SL
                 </div>
             </div>
 
-            <!-- NextFlow Tab -->
-            <div x-show="activeTab === 'nextflow'" class="space-y-6">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">NextFlow Workflows</h2>
+            <!-- Workflows Tab -->
+            <div x-show="activeTab === 'workflows'" class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Workflow Languages</h2>
+
+                <!-- Workflows Introduction -->
+                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">What are Workflow Languages?</h3>
+                    <p class="text-gray-700 mb-4">Workflow languages provide abstractions for building complex multi-step computational pipelines. They go beyond simple SLURM job submission by offering:</p>
+                    <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc mb-4">
+                        <li><strong>Task Composition:</strong> Chain multiple computational steps together</li>
+                        <li><strong>Dependency Management:</strong> Automatically handle job dependencies and data flow</li>
+                        <li><strong>Scalability:</strong> Run on single machine or large clusters transparently</li>
+                        <li><strong>Reproducibility:</strong> Define entire pipelines in code for version control</li>
+                        <li><strong>Resource Optimization:</strong> Efficiently allocate compute resources across tasks</li>
+                    </ul>
+                    <p class="text-gray-700 text-sm"><strong>Two Popular Options:</strong> NextFlow (Groovy-based, data-centric) and WDL (XML-based, task-centric). Choose based on your workflow style and community needs.</p>
+                </div>
+
+                <!-- Workflow Sub-tabs -->
+                <div class="flex flex-wrap gap-2 mb-6 pb-2 border-b-2 border-gray-200">
+                    <button @click="workflowTab = 'nextflow'"
+                        :class="workflowTab === 'nextflow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                        class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                        NextFlow
+                    </button>
+                    <button @click="workflowTab = 'wdl'"
+                        :class="workflowTab === 'wdl' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                        class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                        WDL
+                    </button>
+                </div>
+
+                <!-- NextFlow Sub-tab -->
+                <div x-show="workflowTab === 'nextflow'" class="space-y-6">
+                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">What is NextFlow?</h3>
+                    <p class="text-gray-700 mb-4">NextFlow is a workflow orchestration platform built on Groovy that simplifies writing and executing data-intensive computational pipelines. It's particularly powerful for managing complex workflows across multiple data files and processes.</p>
+                    <p class="text-gray-700 mb-4"><strong>Getting Started:</strong> First load the NextFlow module, then use the <code class="bg-gray-200 px-1 rounded">nx-ilifu</code> wrapper which automatically loads the cluster's centralized configuration:</p>
+                    <pre class="whitespace-pre-wrap break-words"><code class="language-bash">module add nextflow
+nx-ilifu run workflow.nf -profile main_small</code></pre>
+                    <p class="text-gray-700 text-sm mt-4"><strong>Available Profiles:</strong></p>
+                    <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                        <li><strong>standard</strong> - Local execution (good for testing)</li>
+                        <li><strong>main_small</strong> - SLURM: 1 CPU, 4GB RAM (quick jobs)</li>
+                        <li><strong>main_medium</strong> - SLURM: 8 CPUs, 64GB RAM (typical jobs)</li>
+                        <li><strong>main_large</strong> - SLURM: 32 CPUs, 232GB RAM (large/parallel jobs)</li>
+                    </ul>
+                    <p class="text-gray-700 text-sm mt-4">All SLURM profiles use the training partition and have Singularity enabled for containerized workflows.</p>
+                </div>
 
                 <div class="space-y-6">
                     <!-- Basic Workflow -->
@@ -274,33 +316,25 @@ workflow {
 }</code></pre>
                     </div>
 
-                    <!-- Nextflow Configuration -->
+                    <!-- Workflow-Specific Configuration -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Configure for SLURM</h3>
-                        <p class="text-gray-700 mb-4">Create a <code class="bg-gray-200 px-1 rounded">nextflow.config</code> to use SLURM:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">process {
-    executor = 'slurm'
-    queue = 'training'
-    memory = '8 GB'
-    cpus = 2
-    time = '1h'
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">⚙️ Workflow-Specific Configuration</h3>
+                        <p class="text-gray-700 mb-4">The cluster configuration (SLURM, Singularity, profiles) is automatically loaded by the <code class="bg-gray-200 px-1 rounded">nx-ilifu</code> wrapper. For workflow-specific settings, create a <code class="bg-gray-200 px-1 rounded">nextflow.config</code> in your project directory:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">// Project-specific parameters
+params {
+    projectName = "my_project"
+    input = "data/*.fq"
+    outDir = "results"
 }
 
-executor {
-    queueSize = 10
-    pollInterval = '30 sec'
-}
-
-profiles {
-    slurm {
-        process.executor = 'slurm'
-        process.queue = 'training'
-    }
-
-    local {
-        process.executor = 'local'
+// Override specific process settings if needed
+process {
+    withName: 'HEAVY_PROCESS' {
+        cpus = 16
+        memory = 128.GB
     }
 }</code></pre>
+                        <p class="text-gray-700 text-sm mt-4">The cluster profiles (standard, main_small, main_medium, main_large) are always available and will be merged with your local config. Just use <code class="bg-gray-200 px-1 rounded">-profile main_medium</code> when running your workflow.</p>
                     </div>
 
                     <!-- Running Workflows -->
@@ -360,13 +394,18 @@ workflow {
 }</code></pre>
                     </div>
                 </div>
-            </div>
+                </div>
 
-            <!-- WDL Tab -->
-            <div x-show="activeTab === 'wdl'" class="space-y-6">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">WDL (Workflow Description Language)</h2>
+                <!-- WDL Sub-tab -->
+                <div x-show="workflowTab === 'wdl'" class="space-y-6">
+                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">What is WDL?</h3>
+                    <p class="text-gray-700 mb-4">WDL (Workflow Description Language) is a task-centric language for defining computational workflows. Workflows written in WDL are executed by the Cromwell engine, which handles job scheduling, data management, and execution across different compute systems.</p>
+                    <p class="text-gray-700 mb-4"><strong>Getting Started:</strong> Cromwell (the WDL executor) is available on the cluster. Load it with:</p>
+                    <pre class="whitespace-pre-wrap break-words"><code class="language-bash">module add cromwell</code></pre>
+                    <p class="text-gray-700 text-sm mt-4">Key features: Task-based workflow definition, portable across backends, excellent for scientific workflows, built-in error handling and retry logic, works seamlessly with containers (Docker/Singularity).</p>
+                </div>
 
-                <div class="space-y-6">
                     <!-- Basic Task -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
                         <h3 class="text-xl font-semibold text-blue-600 mb-4">📦 Defining Tasks</h3>

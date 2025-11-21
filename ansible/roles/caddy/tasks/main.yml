@@ -103,6 +103,15 @@
         group: caddy
         mode: '0644'
 
+    - name: Deploy static files directory
+      copy:
+        src: static/
+        dest: /var/www/caddy/static/
+        owner: root
+        group: caddy
+        mode: '0644'
+        directory_mode: '0755'
+
     - name: Create main Caddyfile with import directive
       template:
         src: Caddyfile.j2
