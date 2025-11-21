@@ -19,7 +19,7 @@ task generate_data {
         docker: "python:3.13-slim"
         cpus: 1
         requested_memory_mb_per_core: 1024
-        runtime_minutes: 5
+        runtime_minutes: 1
         queue: "training"
     }
 }
@@ -44,7 +44,7 @@ task quality_assessment {
         docker: "python:3.13-slim"
         cpus: 1
         requested_memory_mb_per_core: 1024
-        runtime_minutes: 10
+        runtime_minutes: 1
         queue: "training"
     }
 }
@@ -67,7 +67,7 @@ task alignment {
         docker: "python:3.13-slim"
         cpus: 2
         requested_memory_mb_per_core: 1024
-        runtime_minutes: 15
+        runtime_minutes: 1
         queue: "training"
     }
 }
