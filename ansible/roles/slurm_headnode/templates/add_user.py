@@ -1,9 +1,10 @@
 #!/home/ubuntu/bin/.venv/bin/python3
 from argparse import ArgumentParser
 from getpass import getpass
+from grp import getgrnam
 from logging import getLogger
-from os import environ, path, system
-from pwd import getpwall
+from os import chmod, chown, environ, makedirs, path, system
+from pwd import getpwall, getpwnam
 import secrets
 import subprocess
 
@@ -167,6 +168,50 @@ def add_user_to_sudo(username: str):
         return False
 
 
+def create_user_directories(username: str):
+    """Create user directories in /scratch and /data with proper ownership and permissions."""
+    try:
+        # Get the training group ID
+        training_gid = getgrnam('training').gr_gid
+
+        # Create /scratch/USERNAME
+        scratch_dir = f'/scratch/{username}'
+        makedirs(scratch_dir, mode=0o700, exist_ok=True)
+
+        # Get user UID
+        user_uid = getpwnam(username).pw_uid
+
+        # Set ownership to username:training
+        chown(scratch_dir, user_uid, training_gid)
+        # Set permissions to u=rwx,go=
+        chmod(scratch_dir, 0o700)
+
+        logger.info(f'Created {scratch_dir} with ownership {username}:training and permissions u=rwx,go=')
+
+        # Create /data/USERNAME
+        data_dir = f'/data/{username}'
+        makedirs(data_dir, mode=0o700, exist_ok=True)
+
+        # Set ownership to username:training
+        chown(data_dir, user_uid, training_gid)
+        # Set permissions to u=rwx,go=
+        chmod(data_dir, 0o700)
+
+        logger.info(f'Created {data_dir} with ownership {username}:training and permissions u=rwx,go=')
+
+        return True
+
+    except KeyError as e:
+        logger.error(f'Failed to create directories for {username}: {e} (user or group not found)')
+        return False
+    except subprocess.CalledProcessError as e:
+        logger.error(f'Failed to create directories for {username}: {e.stderr}')
+        return False
+    except Exception as e:
+        logger.error(f'Unexpected error creating directories for {username}: {str(e)}')
+        return False
+
+
 def add_user_to_slurm(username: str, account: str = SLURM_DEFAULT_ACCOUNT, admin: bool = False):
     """Add user to SLURM accounting system."""
     try:
@@ -261,8 +306,11 @@ def create_bulk_users(connection: Connection, user_count: int, make_changes: boo
                 home_directory=f'/users/{username}',
                 user_password=password
             )
+
             # Add user to SLURM
             add_user_to_slurm(username)
+            # Create user directories in /scratch and /data
+            create_user_directories(username)
         else:
             logger.warning(f'Would create user {username} with random password (specify --make-changes to create)')
 
@@ -355,6 +403,9 @@ def main():
 
         # Add user to SLURM (with admin privileges if requested)
         add_user_to_slurm(args.username, admin=args.is_admin)
+
+        # Create user directories in /scratch and /data
+        create_user_directories(args.username)
 
         # Add sudo privileges if admin requested
         if args.is_admin:
