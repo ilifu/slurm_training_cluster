@@ -3,8 +3,8 @@ from argparse import ArgumentParser
 from getpass import getpass
 from grp import getgrnam
 from logging import getLogger
-from os import chmod, chown, environ, makedirs, path, system
-from pwd import getpwall, getpwnam
+from os import environ
+from pwd import getpwnam
 import secrets
 import subprocess
 
