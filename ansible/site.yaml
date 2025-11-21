@@ -39,6 +39,7 @@
 
 - name: Slurm common installation
   hosts: slurm
+  tags: [slurm_common]
   roles:
     - slurm_common
 
