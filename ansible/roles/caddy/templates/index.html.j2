@@ -290,17 +290,19 @@ nf-ilifu run workflow.nf -profile main_small</code></pre>
                 <div class="space-y-6">
                     <!-- Helper Scripts Download -->
                     <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600 mb-6">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📥 Helper Scripts</h3>
-                        <p class="text-gray-700 mb-4">Download these Python helper scripts from the landing page:</p>
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">📥 Helper Scripts & Workflow</h3>
+                        <p class="text-gray-700 mb-4">Download these files from the landing page:</p>
                         <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
-                            <li><strong>generate_data.py</strong> - Creates dummy FASTQ files for testing</li>
-                            <li><strong>qa.py</strong> - Performs quality assessment and filters sequences</li>
-                            <li><strong>align.py</strong> - Simulates sequence alignment on filtered data</li>
+                            <li><strong><a href="/static/generate_data.py" class="text-blue-600 hover:text-blue-800 underline">generate_data.py</a></strong> - Creates dummy FASTQ files for testing</li>
+                            <li><strong><a href="/static/qa.py" class="text-blue-600 hover:text-blue-800 underline">qa.py</a></strong> - Performs quality assessment and filters sequences</li>
+                            <li><strong><a href="/static/align.py" class="text-blue-600 hover:text-blue-800 underline">align.py</a></strong> - Simulates sequence alignment on filtered data</li>
+                            <li><strong><a href="/static/workflow.nf" class="text-blue-600 hover:text-blue-800 underline">workflow.nf</a></strong> - Complete NextFlow pipeline orchestrating all processes</li>
                         </ul>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Download the helper scripts
-curl http://{{ caddy.domain }}/static/generate_data.py > generate_data.py
-curl http://{{ caddy.domain }}/static/qa.py > qa.py
-curl http://{{ caddy.domain }}/static/align.py > align.py</code></pre>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Download all files
+curl https://{{ caddy.domain }}/static/generate_data.py > generate_data.py
+curl https://{{ caddy.domain }}/static/qa.py > qa.py
+curl https://{{ caddy.domain }}/static/align.py > align.py
+curl https://{{ caddy.domain }}/static/workflow.nf > workflow.nf</code></pre>
                     </div>
 
                     <!-- Complete Working Example -->
