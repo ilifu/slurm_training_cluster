@@ -42,3 +42,12 @@
             opts: "name={{ access_to }},secretfile={{ secret_file_location }},noatime,_netdev"
             state: mounted
 
+        - name: Set world-writable permissions on scratch filesystem
+          file:
+            path: "{{ mount_point }}"
+            state: directory
+            mode: '1777'
+            owner: root
+            group: root
+          when: mount_name == "scratch"
+

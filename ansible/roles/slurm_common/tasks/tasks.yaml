@@ -137,6 +137,7 @@
   tags:
     - never
     - build
+    - singularity
   command: /usr/local/bin/singularity --version
   register: current_singularity_version
   ignore_errors: yes
@@ -189,6 +190,19 @@
       become: yes
       environment:
         MAKEFLAGS: "-j{{ ansible_processor_vcpus }}"
+
+- name: Configure Singularity bind paths
+  tags:
+    - singularity
+    - build
+  become: yes
+  lineinfile:
+    path: /usr/local/etc/singularity/singularity.conf
+    regexp: '^\s*bind path\s*=\s*{{ item.mount_point }}'
+    line: '    bind path = {{ item.mount_point }}'
+    state: present
+  loop: "{{ ceph_mounts }}"
+  when: ceph_mounts is defined
 
 - name: Install PMIx
   become: no
@@ -533,6 +547,20 @@
       loop:
         - /etc/zsh/zshenv
         - /etc/profile.d/slurm.sh
+
+    - name: Ensure tmpdir profile file exists
+      file:
+        path: /etc/profile.d/tmpdir.sh
+        owner: root
+        group: root
+        mode: "ug=rw,o=r"
+        state: touch
+
+    - name: Set TMPDIR environment variable in profile
+      lineinfile:
+        path: /etc/profile.d/tmpdir.sh
+        line: "export TMPDIR=/scratch/${USER}"
+        state: present
 
 
 # - name: Copy Slurm Config

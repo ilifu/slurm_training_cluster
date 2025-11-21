@@ -224,6 +224,12 @@ variable "data_share_size" {
     default = 5120
 }
 
+variable "scratch_share_size" {
+    type = number
+    description = "Size of the scratch CephFS share in GB"
+    default = 100
+}
+
 variable "password_login_enabled" {
     type = bool
     description = "Enable password authentication on the login node (default: false for security)"

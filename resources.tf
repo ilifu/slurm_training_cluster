@@ -51,6 +51,13 @@ resource "local_file" "ansible_inventory_yml" {
           access : openstack_sharedfilesystem_share_access_v2.data_share_access_rw.access_key,
           access_to : openstack_sharedfilesystem_share_access_v2.data_share_access_rw.access_to
         }
+        scratch : {
+          name : "scratch"
+          mount_point : "/scratch"
+          export_locations : openstack_sharedfilesystem_share_v2.scratch_share.export_locations,
+          access : openstack_sharedfilesystem_share_access_v2.scratch_share_access_rw.access_key,
+          access_to : openstack_sharedfilesystem_share_access_v2.scratch_share_access_rw.access_to
+        }
       }
     }
   )

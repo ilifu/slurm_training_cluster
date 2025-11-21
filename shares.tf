@@ -48,3 +48,20 @@ resource "openstack_sharedfilesystem_share_access_v2" "data_share_access_rw" {
   access_to    = "slurm_users_rw"
   access_level = "rw"
 }
+
+resource "openstack_sharedfilesystem_share_v2" "scratch_share" {
+  name             = "${ var.image_name_prefix }_scratch"
+  description      = "shared fs for temporary job scratch space"
+  share_proto      = "CEPHFS"
+  share_type       = "cephfs"
+  size             = var.scratch_share_size
+  availability_zone = "nova"
+#  share_network_id = "${openstack_sharedfilesystem_sharenetwork_v2.cephfs_sharenetwork.id}"
+}
+
+resource "openstack_sharedfilesystem_share_access_v2" "scratch_share_access_rw" {
+  share_id     = openstack_sharedfilesystem_share_v2.scratch_share.id
+  access_type  = "cephx"
+  access_to    = "slurm_users_rw"
+  access_level = "rw"
+}
