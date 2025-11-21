@@ -6,12 +6,16 @@ task generate_data {
         File generate_script
     }
 
-    command {
-        python ${generate_script} . ${num_samples}
-    }
+    command <<<
+        python ~{generate_script} . ~{num_samples}
+        # Create manifest of generated files
+        for i in $(seq 1 ~{num_samples}); do
+            echo "sample_${i}.fastq"
+        done > manifest.txt
+    >>>
 
     output {
-        Array[File] fastq_files = glob("sample_*.fastq")
+        Array[File] fastq_files = read_lines("manifest.txt")
     }
 
     runtime {
@@ -31,9 +35,9 @@ task quality_assessment {
 
     String output_filename = basename(input_fastq, ".fastq") + ".filtered.fastq"
 
-    command {
-        python ${qa_script} ${input_fastq} ${output_filename}
-    }
+    command <<<
+        python ~{qa_script} ~{input_fastq} ~{output_filename}
+    >>>
 
     output {
         File filtered_fastq = output_filename
@@ -54,9 +58,9 @@ task alignment {
         File align_script
     }
 
-    command {
-        python ${align_script} alignment_results.txt ${sep=' ' filtered_fastqs}
-    }
+    command <<<
+        python ~{align_script} alignment_results.txt ~{sep=' ' filtered_fastqs}
+    >>>
 
     output {
         File results = "alignment_results.txt"
