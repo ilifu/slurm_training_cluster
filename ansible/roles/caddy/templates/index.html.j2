@@ -343,13 +343,12 @@ curl https://{{ caddy.domain }}/static/workflow.nf > workflow.nf</code></pre>
                             </div>
 
                             <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
-                                <p class="text-gray-700 text-sm"><strong>Workflow Block (lines 45-54):</strong> Orchestrates the pipeline:
+                                <p class="text-gray-700 text-sm"><strong>Workflow Block (lines 45-54):</strong> Orchestrates the pipeline:</p>
                                 <ul class="list-disc ml-4 mt-2">
                                     <li><code class="bg-gray-200 px-1 rounded">data_files.flatten()</code> - Takes the glob pattern output and creates a channel with individual files</li>
                                     <li><code class="bg-gray-200 px-1 rounded">filtered_files.collect()</code> - Waits for all parallel QA jobs to finish, then combines all results into one channel for ALIGNMENT</li>
                                     <li><code class="bg-gray-200 px-1 rounded">results.subscribe</code> - Prints a message when the alignment completes</li>
                                 </ul>
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -451,24 +450,22 @@ curl https://{{ caddy.domain }}/static/inputs.json > inputs.json</code></pre>
                             </div>
 
                             <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
-                                <p class="text-gray-700 text-sm"><strong>Workflow: bioinformatics_pipeline</strong> - Orchestrates the pipeline:
+                                <p class="text-gray-700 text-sm"><strong>Workflow: bioinformatics_pipeline</strong> - Orchestrates the pipeline:</p>
                                 <ul class="list-disc ml-4 mt-2">
                                     <li><code class="bg-gray-200 px-1 rounded">scatter (fastq in generate_data.fastq_files)</code> - Parallelizes quality assessment: creates one quality_assessment task for each FASTQ file</li>
                                     <li><code class="bg-gray-200 px-1 rounded">quality_assessment.filtered_fastq</code> - In scatter context, this becomes an array of filtered files</li>
                                     <li><code class="bg-gray-200 px-1 rounded">call alignment { input: filtered_fastqs = quality_assessment.filtered_fastq }</code> - Waits for all scatter jobs to complete, then passes all results to alignment</li>
                                     <li><code class="bg-gray-200 px-1 rounded">output { ... }</code> - Declares workflow outputs that users can reference</li>
                                 </ul>
-                                </p>
                             </div>
 
                             <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
-                                <p class="text-gray-700 text-sm"><strong>Runtime Specifications</strong> - Each task specifies compute resources and containerization:
+                                <p class="text-gray-700 text-sm"><strong>Runtime Specifications</strong> - Each task specifies compute resources and containerization:</p>
                                 <ul class="list-disc ml-4 mt-2">
                                     <li><code class="bg-gray-200 px-1 rounded">docker: "python:3.13-slim"</code> - Runs in Docker container (automatically converted to Singularity on the cluster)</li>
                                     <li><code class="bg-gray-200 px-1 rounded">cpus, requested_memory_mb_per_core, runtime_minutes, queue</code> - Resources passed to SLURM</li>
                                     <li>The Cromwell SLURM configuration automatically converts Docker images to Singularity and submits jobs with the specified resources</li>
                                 </ul>
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -539,6 +536,7 @@ watch squeue</code></pre>
                             <li><strong>Reusable Scripts:</strong> Same Python helper scripts as the NextFlow example</li>
                         </ul>
                     </div>
+                </div>
                 </div>
 
                 <!-- Workflow Sub-tabs Bottom Navigation -->
