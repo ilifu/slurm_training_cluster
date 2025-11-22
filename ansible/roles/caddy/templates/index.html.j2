@@ -319,7 +319,7 @@ curl https://{{ caddy.domain }}/static/workflow.nf > workflow.nf</code></pre>
                             </button>
 
                             <div x-show="showWorkflowCode" class="rounded-lg p-4 overflow-x-auto">
-                                <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">{{ lookup('file', '../files/static/workflow.nf') }}</code></pre>
+                                <pre class="whitespace-pre-wrap break-words"><code class="language-groovy">{{ lookup('file', '../files/static/workflow.nf') | e }}</code></pre>
                             </div>
                         </div>
 
