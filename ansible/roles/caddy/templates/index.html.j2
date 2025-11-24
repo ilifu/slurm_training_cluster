@@ -133,6 +133,93 @@
 
                     <p class="text-gray-700 mt-4 text-sm">After this, you can SSH without entering a password!</p>
                 </div>
+
+                <!-- Terminal Multiplexing with tmux -->
+                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">📺 Terminal Multiplexing with tmux</h3>
+                    <p class="text-gray-700 mb-4">tmux allows you to manage multiple terminal sessions within a single SSH connection. This is essential for running long-running jobs that survive connection drops and managing multiple workflows simultaneously:</p>
+
+                    <div class="bg-gray-900 text-green-400 p-4 rounded mb-4">
+                        <p class="text-sm mb-2 font-semibold">Basic tmux commands:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Create a new tmux session
+tmux new-session -s mywork
+
+# Attach to an existing session
+tmux attach -t mywork
+
+# List all active sessions
+tmux list-sessions
+
+# Detach from current session
+# Press: Ctrl+b, then d</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 mb-4"><strong>Key Keyboard Shortcuts (inside a tmux session):</strong></p>
+                    <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                        <li><strong>Create Window:</strong> <code class="bg-gray-200 px-1 rounded">Ctrl+b c</code> | <strong>Next/Previous:</strong> <code class="bg-gray-200 px-1 rounded">Ctrl+b n/p</code></li>
+                        <li><strong>Split Panes:</strong> <code class="bg-gray-200 px-1 rounded">Ctrl+b %</code> (vertical) or <code class="bg-gray-200 px-1 rounded">Ctrl+b "</code> (horizontal)</li>
+                        <li><strong>Navigate Panes:</strong> <code class="bg-gray-200 px-1 rounded">Ctrl+b</code> + arrow keys</li>
+                        <li><strong>Detach:</strong> <code class="bg-gray-200 px-1 rounded">Ctrl+b d</code> (session keeps running!)</li>
+                    </ul>
+
+                    <p class="text-gray-700 text-sm mt-4"><strong>Why use tmux?</strong> Your SSH connection can drop (laptop sleep, network issues), but your tmux session stays alive on the cluster. Detach, close your laptop, and reconnect later to see the same terminal state!</p>
+                </div>
+
+                <!-- Interactive Jobs with srun -->
+                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">⚡ Interactive Jobs with srun</h3>
+                    <p class="text-gray-700 mb-4">While <code class="bg-gray-200 px-1 rounded">sbatch</code> is for non-interactive batch jobs, <code class="bg-gray-200 px-1 rounded">srun --pty /bin/bash</code> gives you an interactive shell directly on a compute node. Perfect for testing, debugging, and exploratory work:</p>
+
+                    <div class="bg-gray-900 text-green-400 p-4 rounded mb-4">
+                        <p class="text-sm mb-2 font-semibold">Start an interactive job:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">srun --pty /bin/bash
+
+# You'll now be on a compute node with an interactive shell
+# Default resources: 14 days, 2 GiB RAM, 1 core (more than enough for most work!)
+# Exit when done: type 'exit' or Ctrl+D</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 mb-4"><strong>Need More Resources?</strong> Optionally specify what you need:</p>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto mb-4">
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Interactive job with more CPU cores and memory
+srun --ntasks=1 --cpus-per-task=8 --mem=32G --pty /bin/bash
+
+# Or with a specific time limit and partition
+srun --partition=training --time=04:00:00 --cpus-per-task=4 --pty /bin/bash</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 text-sm mt-4"><strong>The Perfect Workflow: tmux + Interactive Jobs</strong></p>
+                    <p class="text-gray-700 text-sm mb-2">Combine tmux with srun for uninterruptible interactive work:</p>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto">
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># 1. SSH and create a tmux session
+ssh username@{{ caddy.domain }}
+tmux new-session -s work
+
+# 2. Start your interactive compute job
+srun --pty /bin/bash
+
+# 3. You're now on a compute node! Run your analysis, tests, etc.
+# 4. Need to step away? Detach: Ctrl+b d
+#    Your job keeps running in the background!
+# 5. Reconnect later: tmux attach -t work</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 text-sm mt-4"><strong>Common Uses for Interactive Jobs:</strong></p>
+                    <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                        <li>Testing workflows before running full batch jobs</li>
+                        <li>Interactive Python/R exploration with real compute resources</li>
+                        <li>Debugging scripts and troubleshooting</li>
+                        <li>Running container shells: <code class="bg-gray-200 px-1 rounded">srun --pty singularity shell myimage.sif</code></li>
+                        <li>Training sessions where students directly interact with the cluster</li>
+                    </ul>
+
+                    <p class="text-gray-700 text-sm mt-4"><strong>Pro Tips:</strong></p>
+                    <ul class="text-gray-700 text-sm space-y-2 ml-4 list-disc">
+                        <li>Check your job status from another terminal: <code class="bg-gray-200 px-1 rounded">squeue -u $USER</code></li>
+                        <li>Always use srun for real compute work, never run heavy jobs on the login node</li>
+                        <li>Combine with tmux to survive network disconnections and manage multiple workflows</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- SLURM Job Management Tab -->
