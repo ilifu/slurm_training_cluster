@@ -642,7 +642,7 @@ watch squeue</code></pre>
             </div>
 
             <!-- Containers Tab -->
-            <div x-show="activeTab === 'containers'" class="space-y-6">
+            <div x-show="activeTab === 'containers'" x-data="{ containerTab: 'singularity' }" class="space-y-6">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Container Technologies</h2>
 
                 <div class="space-y-6">
@@ -659,6 +659,22 @@ watch squeue</code></pre>
                         </ul>
                     </div>
 
+                    <!-- Container Sub-tabs -->
+                    <div class="flex flex-wrap gap-2 mb-6 pb-2 border-b-2 border-gray-200">
+                        <button @click="containerTab = 'docker'"
+                            :class="containerTab === 'docker' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                            class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                            Docker
+                        </button>
+                        <button @click="containerTab = 'singularity'"
+                            :class="containerTab === 'singularity' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                            class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                            Singularity / Apptainer
+                        </button>
+                    </div>
+
+                    <!-- Docker Sub-tab -->
+                    <div x-show="containerTab === 'docker'" class="space-y-6">
                     <!-- Docker Section -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
                         <h3 class="text-xl font-semibold text-blue-600 mb-4">🐳 Docker</h3>
@@ -702,7 +718,10 @@ docker run -v /path/to/data:/data myanalysis:latest python3 analysis.py</code></
                             <li><strong>Privilege Escalation:</strong> Root access requirement violates many HPC security policies</li>
                         </ul>
                     </div>
+                    </div>
 
+                    <!-- Singularity Sub-tab -->
+                    <div x-show="containerTab === 'singularity'" class="space-y-6">
                     <!-- Singularity Section -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
                         <h3 class="text-xl font-semibold text-blue-600 mb-4">🚀 Singularity / Apptainer</h3>
@@ -754,6 +773,91 @@ sbatch --job-name=container_job \
                         </ul>
                     </div>
 
+                    <!-- Anaconda/Mamba Environment Example -->
+                    <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">🐍 Advanced Example: Anaconda with Custom Mamba Environment</h3>
+                        <p class="text-gray-700 mb-4">For scientific computing, Anaconda with mamba provides powerful package management and environment isolation. This example creates a container with a custom conda environment that's automatically activated:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">Bootstrap: docker
+From: continuumio/miniconda3:latest
+
+%environment
+    export CONDA_DIR=/opt/conda
+    export PATH=$CONDA_DIR/bin:$PATH
+    source activate myenv
+
+%post
+    # Install mamba for faster package management
+    conda install -y -c conda-forge mamba
+
+    # Create custom environment with scientific packages
+    mamba create -n myenv -y \
+        python=3.10 \
+        numpy \
+        scipy \
+        pandas \
+        scikit-learn \
+        jupyter \
+        matplotlib
+
+    # Clean up conda cache to reduce image size
+    conda clean --all -y
+
+%runscript
+    # Activate the environment and run arguments
+    source activate myenv
+    exec python "$@"</code></pre>
+
+                        <p class="text-gray-700 mb-4 mt-4">Build and run:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Build the image
+singularity build analysis.sif analysis.def
+
+# Run Python scripts with the conda environment auto-activated
+singularity run analysis.sif script.py --input data.csv
+
+# Run interactive Python
+singularity exec analysis.sif python
+
+# Run Jupyter inside the container
+singularity exec analysis.sif jupyter notebook --ip=0.0.0.0 --no-browser
+
+# Use with SLURM for batch processing
+sbatch --job-name=analysis \
+  --wrap="singularity exec analysis.sif python process_data.py"</code></pre>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Why Use This Pattern?</strong></p>
+                        <ul class="text-gray-700 text-sm space-y-1 ml-4 list-disc">
+                            <li><strong>Environment Isolation:</strong> Conda environment is isolated from system Python, no conflicts</li>
+                            <li><strong>Fast Package Management:</strong> Mamba resolves dependencies much faster than pip</li>
+                            <li><strong>Reproducibility:</strong> Lock specific package versions for consistent results</li>
+                            <li><strong>Auto-activation:</strong> Environment activates automatically when container runs</li>
+                            <li><strong>Scientific Ecosystem:</strong> Access to conda-forge with specialized scientific packages</li>
+                            <li><strong>Interactive & Batch:</strong> Works for both interactive exploration and batch jobs</li>
+                        </ul>
+
+                        <p class="text-gray-700 text-sm mt-4"><strong>Pro Tip:</strong> Export your local conda environment and use it to build reproducible containers:</p>
+                        <pre class="whitespace-pre-wrap break-words text-sm"><code class="language-bash"># Export your environment (on your local machine)
+conda env export -n myenv > environment.yml
+
+# Then reference it in the Singularity definition:
+# %post
+#     mamba env create -f environment.yml</code></pre>
+                    </div>
+                    </div>
+
+                    <!-- Container Sub-tabs Bottom Navigation -->
+                    <div class="flex flex-wrap gap-2 mt-6 pb-2 border-t-2 border-gray-200 pt-4">
+                        <button @click="containerTab = 'docker'"
+                            :class="containerTab === 'docker' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                            class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                            Docker
+                        </button>
+                        <button @click="containerTab = 'singularity'"
+                            :class="containerTab === 'singularity' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                            class="px-4 py-2 rounded font-semibold transition-colors text-sm">
+                            Singularity / Apptainer
+                        </button>
+                    </div>
+
                     <!-- Practical Guidance -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
                         <h3 class="text-xl font-semibold text-blue-600 mb-4">🎯 When to Use Which?</h3>
@@ -787,7 +891,17 @@ singularity build myimage.sif docker://continuumio/anaconda3:latest
                     <!-- Running on the Cluster -->
                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-600">
                         <h3 class="text-xl font-semibold text-blue-600 mb-4">🖥️ Running Containers with SLURM</h3>
-                        <p class="text-gray-700 mb-4">Submit a container job to the cluster:</p>
+                        <p class="text-gray-700 mb-4"><strong>Docker on Your Local Machine:</strong></p>
+                        <p class="text-gray-700 text-sm mb-2">Docker is not available on the cluster (security policies), but you can build and test images locally:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">#!/bin/bash
+# Build your Docker image locally
+docker build -t myanalysis:latest .
+
+# Test it locally
+docker run -v $(pwd):/data myanalysis:latest python3 /data/analysis.py</code></pre>
+
+                        <p class="text-gray-700 mb-4 mt-4"><strong>Submit a Container Job with Singularity:</strong></p>
+                        <p class="text-gray-700 text-sm mb-2">Convert your Docker image to Singularity and run on the cluster:</p>
                         <pre class="whitespace-pre-wrap break-words"><code class="language-bash">#!/bin/bash
 #SBATCH --job-name=container_analysis
 #SBATCH --cpus-per-task=4
