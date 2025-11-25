@@ -1,0 +1,52 @@
+#!/bin/bash
+
+usage() {
+cat << EOF
+Usage: sinteractive [-htc]
+
+Launch an interactive job on the training partition. Resources are shared between all
+jobs running in the partition.
+
+Basic options:
+  -h, --help                Show this help message
+  -t, --time=				The time limit of the job (default 3 hours, e.g
+  							--time=03:00:00, max 14 days)
+  -c, --cpus-per-task=      Number of cpus per task (default 1 cpu)
+
+Advanced options:
+	Refer to the documentation for the 'srun' command for advanced options.
+
+Example:
+	To start an interactive session with four cpus and X11 support:
+	sinteractive -x11 -c 4
+
+EOF
+}
+
+for arg in "$@"; do
+	if [ ${arg} == "--help" ] || [ ${arg} == "-h" ]
+	 then
+	 	usage 	; exit 	;
+	fi
+done
+
+args=("$@")
+
+for ((i=0; i<"${#args[@]}"; ++i)); do
+	if [ ${args[i]:0:5} == --mem ] || [ ${args[i]} == "-m" ]
+	then
+	 	echo "Warning: memory is not tracked in the training partition, the -m (--mem) parameter will be ignored.";
+	 	if [[ ${args[i+1]} == -* ]]
+	 	then
+	 		unset args[i];
+	 		break;
+	 	else
+	 		unset args[i]; unset args[i+1];
+	 		break;
+	 	fi
+	fi
+done
+
+echo "Starting interactive Slurm session."
+
+srun -p training ${args[@]} $CORES --pty bash -i

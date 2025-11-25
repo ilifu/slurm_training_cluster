@@ -117,3 +117,14 @@
       - ldap3
       - sshpubkeys
     virtualenv: ~/bin/.venv
+
+- name: Deploy sinteractive script for interactive SLURM jobs
+  tags:
+    - slurm_tools
+  become: yes
+  copy:
+    src: sinteractive
+    dest: /usr/local/bin/sinteractive
+    owner: root
+    group: root
+    mode: "ugo=rx"
