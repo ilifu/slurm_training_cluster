@@ -170,22 +170,39 @@ tmux list-sessions
                     <h3 class="text-xl font-semibold text-blue-600 mb-4">⚡ Interactive Jobs with srun</h3>
                     <p class="text-gray-700 mb-4">While <code class="bg-gray-200 px-1 rounded">sbatch</code> is for non-interactive batch jobs, <code class="bg-gray-200 px-1 rounded">srun --pty /bin/bash</code> gives you an interactive shell directly on a compute node. Perfect for testing, debugging, and exploratory work:</p>
 
-                    <div class="bg-gray-900 text-green-400 p-4 rounded mb-4">
-                        <p class="text-sm mb-2 font-semibold">Start an interactive job:</p>
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash">srun --pty /bin/bash
+                    <div class="bg-green-50 p-4 rounded mb-4 border-l-4 border-green-600">
+                        <p class="text-gray-700 mb-2"><strong>🚀 Quick Start: Use the sinteractive Script</strong></p>
+                        <p class="text-gray-700 text-sm mb-3">We provide a convenient <code class="bg-gray-200 px-1 rounded">sinteractive</code> wrapper script that simplifies launching interactive jobs:</p>
+                        <pre class="whitespace-pre-wrap break-words text-sm"><code class="language-bash">sinteractive
 
-# You'll now be on a compute node with an interactive shell
+# That's it! You're now on a compute node with an interactive shell.
 # Default resources: 14 days, 2 GiB RAM, 1 core (more than enough for most work!)
 # Exit when done: type 'exit' or Ctrl+D</code></pre>
+                        <p class="text-gray-700 text-sm mt-3"><strong>What it does:</strong> The <code class="bg-gray-200 px-1 rounded">sinteractive</code> script simply runs <code class="bg-gray-200 px-1 rounded">srun -p training --pty bash -i</code> under the hood. It's just a convenience wrapper to save you typing!</p>
                     </div>
 
-                    <p class="text-gray-700 mb-4"><strong>Need More Resources?</strong> Optionally specify what you need:</p>
-                    <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto mb-4">
-                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Interactive job with more CPU cores and memory
-srun --ntasks=1 --cpus-per-task=8 --mem=32G --pty /bin/bash
+                    <div class="bg-gray-900 text-green-400 p-4 rounded mb-4">
+                        <p class="text-sm mb-2 font-semibold">Using sinteractive with options:</p>
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Request 4 CPU cores
+sinteractive -c 4
 
-# Or with a specific time limit and partition
-srun --partition=training --time=04:00:00 --cpus-per-task=4 --pty /bin/bash</code></pre>
+# Request 4 CPUs with 2-hour time limit
+sinteractive -c 4 -t 02:00:00
+
+# Enable X11 forwarding (if your SSH supports it)
+sinteractive -x11
+
+# Combine multiple options
+sinteractive -c 8 -t 04:00:00 -x11</code></pre>
+                    </div>
+
+                    <p class="text-gray-700 mb-4 text-sm"><strong>Need More Control?</strong> For advanced options, use <code class="bg-gray-200 px-1 rounded">srun</code> directly (sinteractive is just a thin wrapper):</p>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto mb-4">
+                        <pre class="whitespace-pre-wrap break-words"><code class="language-bash"># Raw srun with advanced options
+srun --partition=training --ntasks=1 --cpus-per-task=8 --mem=32G --time=04:00:00 --pty /bin/bash
+
+# Or just add advanced options to sinteractive
+sinteractive -c 8 --mem=32G</code></pre>
                     </div>
 
                     <p class="text-gray-700 text-sm mt-4"><strong>The Perfect Workflow: tmux + Interactive Jobs</strong></p>
