@@ -2,8 +2,23 @@
 # tasks file for ceph
 
 - name: Ensure ceph software is installed
+  become: yes
   apt:
-    name: ceph-common
+    name:
+      - ceph-common
+      - attr
+    state: latest
+    update_cache: yes
+  tags: ['ceph', 'cephfs', 'build']
+
+- name: Setup ceph configuration file
+  become: yes
+  copy:
+    src: ceph.conf
+    dest: "/etc/ceph/ceph.conf"
+    owner: root
+    group: root
+    mode: u=rw,go=
   tags: ['ceph', 'cephfs', 'build']
 
 - name: Mount ceph filesystems
