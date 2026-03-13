@@ -63,6 +63,62 @@ resource "local_file" "group_vars_slurm" {
           access: openstack_sharedfilesystem_share_access_v2.data_share_access_rw.access_key,
           access_to: openstack_sharedfilesystem_share_access_v2.data_share_access_rw.access_to
         }
+        cbio: {
+          name: "cbio"
+          mount_point: "/cbio"
+          export_locations: openstack_sharedfilesystem_share_v2.cbio_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.cbio_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.cbio_share_access_rw.access_to
+        }
+        ilifu: {
+          name: "ilifu"
+          mount_point: "/ilifu"
+          export_locations: openstack_sharedfilesystem_share_v2.ilifu_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.ilifu_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.ilifu_share_access_rw.access_to
+        }
+        idia: {
+          name: "idia"
+          mount_point: "/idia"
+          export_locations: openstack_sharedfilesystem_share_v2.idia_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.idia_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.idia_share_access_rw.access_to
+        }
+        cchem: {
+          name: "cchem"
+          mount_point: "/cchem"
+          export_locations: openstack_sharedfilesystem_share_v2.cchem_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.cchem_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.cchem_share_access_rw.access_to
+        }
+        carta_fast: {
+          name: "carta_fast"
+          mount_point: "/carta_fast"
+          export_locations: openstack_sharedfilesystem_share_v2.carta_fast_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.carta_fast_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.carta_fast_share_access_rw.access_to
+        }
+        carta_share: {
+          name: "carta_share"
+          mount_point: "/carta_share"
+          export_locations: openstack_sharedfilesystem_share_v2.carta_share_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.carta_share_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.carta_share_share_access_rw.access_to
+        }
+        public: {
+          name: "public"
+          mount_point: "/public"
+          export_locations: openstack_sharedfilesystem_share_v2.public_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.public_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.public_share_access_rw.access_to
+        }
+        scratch3: {
+          name: "scratch3"
+          mount_point: "/scratch3"
+          export_locations: openstack_sharedfilesystem_share_v2.scratch3_share.export_locations,
+          access: openstack_sharedfilesystem_share_access_v2.scratch3_share_access_rw.access_key,
+          access_to: openstack_sharedfilesystem_share_access_v2.scratch3_share_access_rw.access_to
+        }
       }
     }
   )

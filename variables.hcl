@@ -239,6 +239,54 @@ variable "data_share_size" {
     default = 5120
 }
 
+variable "cbio_share_size" {
+    type = number
+    description = "Size of the cbio CephFS share in GB"
+    default = 2
+}
+
+variable "ilifu_share_size" {
+    type = number
+    description = "Size of the ilifu CephFS share in GB"
+    default = 2
+}
+
+variable "idia_share_size" {
+    type = number
+    description = "Size of the idia CephFS share in GB"
+    default = 2
+}
+
+variable "cchem_share_size" {
+    type = number
+    description = "Size of the cchem CephFS share in GB"
+    default = 2
+}
+
+variable "carta_fast_share_size" {
+    type = number
+    description = "Size of the carta_fast CephFS share in GB"
+    default = 2
+}
+
+variable "carta_share_share_size" {
+    type = number
+    description = "Size of the carta_share CephFS share in GB"
+    default = 2
+}
+
+variable "public_share_size" {
+    type = number
+    description = "Size of the public CephFS share in GB"
+    default = 2
+}
+
+variable "scratch3_share_size" {
+    type = number
+    description = "Size of the scratch3 CephFS share in GB"
+    default = 2
+}
+
 variable "password_login_enabled" {
     type = bool
     description = "Enable password authentication on the login node (default: false for security)"
