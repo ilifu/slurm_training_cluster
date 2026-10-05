@@ -4,12 +4,18 @@
     regexp: ".*AllowAgentForwarding.*"
     line: "AllowAgentForwarding yes"
 
+# NOTE: sshd uses the first value it reads, and sshd_config includes sshd_config.d/*.conf
+# at the top, so the cloud image's 60-cloudimg-settings.conf overrides the main file.
+# The 10- prefix sorts first so this setting wins.
 - name: Configure password authentication based on variable
   tags: password_login
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: "^#?PasswordAuthentication.*"
-    line: "PasswordAuthentication {{ 'yes' if password_login_enabled else 'no' }}"
+  copy:
+    dest: /etc/ssh/sshd_config.d/10-password-login.conf
+    content: "PasswordAuthentication {{ 'yes' if password_login_enabled else 'no' }}\n"
+    owner: root
+    group: root
+    mode: '0644'
+    validate: /usr/sbin/sshd -t -f %s
   notify: restart sshd
 
 - name: Update MOTD
