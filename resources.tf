@@ -6,12 +6,15 @@ resource "openstack_compute_keypair_v2" "cluster_ssh_key" {
 resource "local_file" "ansible_inventory" {
   content = templatefile("templates/inventory.ini.tpl",
     {
-      compute_nodes = [for node in openstack_compute_instance_v2.compute_nodes.*: node ]
-      database_node = openstack_compute_instance_v2.database_node
-      login_node = openstack_compute_instance_v2.login_node
-      controller_node = openstack_compute_instance_v2.controller_node
-      ldap_node = openstack_compute_instance_v2.ldap_node
-      floating_ip = openstack_networking_floatingip_v2.slurm_float_ip
+      # Pass scalars, not whole resource objects: objects carry deprecation marks
+      # (network[*].floating_ip, volume) that make templatefile() fail its
+      # consistency check on Terraform >= 1.16.
+      compute_nodes = [for node in openstack_compute_instance_v2.compute_nodes : { name = node.name, ip = node.access_ip_v4 }]
+      database_ip = openstack_compute_instance_v2.database_node.access_ip_v4
+      login_ip = openstack_compute_instance_v2.login_node.access_ip_v4
+      controller_ip = openstack_compute_instance_v2.controller_node.access_ip_v4
+      ldap_ip = openstack_compute_instance_v2.ldap_node.access_ip_v4
+      floating_ip_address = openstack_networking_floatingip_v2.slurm_float_ip.address
       ssh_key_location = var.ssh_key_location
       password_login_enabled = var.password_login_enabled
     }
